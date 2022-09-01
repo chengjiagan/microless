@@ -1,0 +1,20 @@
+{
+  "posts": [
+    {
+      "creator": {
+        "userId": "000000000000000000000000",
+        "username": "user_0"
+      },
+      "text": "text_0",
+      "timestamp": "2022-08-31T05:04:26Z"
+    },
+    {
+      "creator": {
+        "userId": "000000000000000000000000",
+        "username": "user_0"
+      },
+      "text": "text_1",
+      "timestamp": "2022-08-31T05:08:25Z"
+    }
+  ]
+}

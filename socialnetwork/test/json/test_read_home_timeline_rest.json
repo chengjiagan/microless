@@ -1,0 +1,28 @@
+{
+    "posts": [
+      {
+        "creator": {
+          "userId": "000000000000000000000001",
+          "username": "user_0"
+        },
+        "media": [],
+        "postType": "POST",
+        "text": "text_0",
+        "timestamp": "2022-08-31T07:05:50Z",
+        "urls": [],
+        "userMentions": []
+      },
+      {
+        "creator": {
+          "userId": "000000000000000000000001",
+          "username": "user_0"
+        },
+        "media": [],
+        "postType": "POST",
+        "text": "text_2",
+        "timestamp": "2022-08-31T05:08:25Z",
+        "urls": [],
+        "userMentions": []
+      }
+    ]
+  }

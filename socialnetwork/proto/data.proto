@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package microless.socialnetwork;
+option go_package = "microless/socialnetwork/proto";
+
+import "google/protobuf/timestamp.proto";
+
+enum PostType {
+    POST = 0;
+    REPOST = 1;
+    REPLY = 2;
+    DM = 3;
+}
+
+message Media {
+    int64 media_id = 1;
+    string media_type = 2;
+}
+
+message Url {
+    string shortened_url = 1;
+    string expanded_url = 2;
+}
+
+message UserMention {
+    string user_id = 1;
+    string username = 2;
+}
+
+message Creator {
+    string user_id = 1;
+    string username = 2;
+}
+
+message Post {
+    Creator creator = 1;
+    string text = 2;
+    repeated UserMention user_mentions = 3;
+    repeated Media media = 4;
+    repeated Url urls = 5;
+    google.protobuf.Timestamp timestamp = 6;
+    PostType post_type = 7;
+}

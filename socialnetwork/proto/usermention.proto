@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package microless.socialnetwork.usermention;
+option go_package = "microless/socialnetwork/proto/usermention";
+
+import "proto/data.proto";
+
+message ComposeUserMentionsRequest {
+    repeated string usernames = 1;
+}
+
+message ComposeUserMentionsRespond {
+    repeated UserMention user_mentions = 1;
+}
+
+service UserMentionService {
+    rpc ComposeUserMentions (ComposeUserMentionsRequest) returns (ComposeUserMentionsRespond);
+}

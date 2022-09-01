@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package microless.socialnetwork.urlshorten;
+option go_package = "microless/socialnetwork/proto/urlshorten";
+
+import "proto/data.proto";
+
+message ComposeUrlsRequest {
+    repeated string urls = 1;
+}
+
+message ComposeUrlsRespond {
+    repeated Url urls = 2;
+}
+
+message GetExtendedUrlsRequest {
+    repeated string shortened_urls = 1;
+}
+
+message GetExtendedUrlsRespond {
+    repeated string urls = 2;
+}
+
+service UrlShortenService {
+    rpc ComposeUrls (ComposeUrlsRequest) returns (ComposeUrlsRespond);
+    rpc GetExtendedUrls (GetExtendedUrlsRequest) returns (GetExtendedUrlsRespond);
+}

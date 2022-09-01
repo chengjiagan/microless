@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package microless.socialnetwork.hometimeline;
+option go_package = "microless/socialnetwork/proto/hometimeline";
+
+import "proto/data.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+message ReadHomeTimelineRequest {
+    string user_id = 1;
+    int32 start = 2;
+    int32 stop = 3;
+}
+
+message ReadHomeTimelineRespond {
+    repeated Post posts = 1;
+}
+
+message WriteHomeTimelineRequest {
+    string user_id = 1;
+    string post_id = 2;
+    google.protobuf.Timestamp timestamp = 3;
+    repeated string user_mentions_id = 4;
+}
+
+service HomeTimelineService {
+    rpc ReadHomeTimeline (ReadHomeTimelineRequest) returns (ReadHomeTimelineRespond) {
+        option (google.api.http) = {
+            get: "/api/v1/hometimeline/{user_id}"
+        };
+    }
+    rpc WriteHomeTimeline (WriteHomeTimelineRequest) returns (google.protobuf.Empty);
+}

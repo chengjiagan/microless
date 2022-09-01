@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package microless.socialnetwork.poststorage;
+option go_package = "microless/socialnetwork/proto/poststorage";
+
+import "proto/data.proto";
+import "google/protobuf/timestamp.proto";
+
+message StorePostRequest {
+    Post post = 1;
+}
+
+message StorePostRespond {
+    string post_id = 1;
+    google.protobuf.Timestamp timestamp = 2;
+}
+
+message ReadPostsRequest {
+    repeated string post_ids = 1;
+}
+
+message ReadPostsRespond {
+    repeated Post posts = 1;
+}
+
+service PostStorageService {
+    rpc StorePost (StorePostRequest) returns (StorePostRespond);
+    rpc ReadPosts (ReadPostsRequest) returns (ReadPostsRespond);
+}

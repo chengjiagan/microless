@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package microless.socialnetwork.text;
+option go_package = "microless/socialnetwork/proto/text";
+
+import "proto/data.proto";
+
+message ComposeTextRequest {
+    string text = 1;
+}
+
+message ComposeTextRespond {
+    string text = 1;
+    repeated UserMention user_mention = 2;
+    repeated Url urls = 3;
+}
+
+service TextService {
+    rpc ComposeText (ComposeTextRequest) returns (ComposeTextRespond);
+}

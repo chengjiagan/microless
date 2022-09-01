@@ -1,0 +1,36 @@
+{
+  "creator": {
+    "userId": "000000000000000000000000",
+    "username": "user_0"
+  },
+  "text": "HelloWorld",
+  "userMentions": [
+    {
+      "userId": "000000000000000000000001",
+      "username": "user_1"
+    },
+    {
+      "userId": "000000000000000000000002",
+      "username": "user_2"
+    }
+  ],
+  "media": [
+    {
+      "mediaType": "photo"
+    },
+    {
+      "mediaId": "1",
+      "mediaType": "photo"
+    }
+  ],
+  "urls": [
+    {
+      "shortenedUrl": "shortened_url_0",
+      "expandedUrl": "expanded_url_0"
+    },
+    {
+      "shortenedUrl": "shortened_url_1",
+      "expandedUrl": "expanded_url_1"
+    }
+  ]
+}

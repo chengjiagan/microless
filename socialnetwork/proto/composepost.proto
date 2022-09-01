@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package microless.socialnetwork.composepost;
+option go_package = "microless/socialnetwork/proto/composepost";
+
+import "proto/data.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+message ComposePostRequest {
+    string username = 1;
+    string user_id = 2;
+    string text = 3;
+    repeated int64 media_ids = 4;
+    repeated string media_types = 5;
+    PostType post_type = 6;
+}
+
+service ComposePostService {
+    rpc ComposePost (ComposePostRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/api/v1/composepost"
+            body: "*"
+        };
+    }
+}

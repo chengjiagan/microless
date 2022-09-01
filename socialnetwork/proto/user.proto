@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package microless.socialnetwork.user;
+option go_package = "microless/socialnetwork/proto/user";
+
+import "proto/data.proto";
+import "google/api/annotations.proto";
+
+message RegisterUserRequest {
+    string first_name = 1;
+    string last_name = 2;
+    string username = 3;
+    string password = 4;
+}
+
+message RegisterUserRespond {
+    string user_id = 1;
+}
+
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginRespond {
+    string token = 1;
+}
+
+message ComposeCreatorWithUserIdRequest {
+    string user_id = 1;
+    string username = 2;
+}
+
+message ComposeCreatorWithUserIdRespond {
+    Creator creator = 1;
+}
+
+message ComposeCreatorWithUsernameRequest {
+    string username = 1;
+}
+
+message ComposeCreatorWithUsernameRespond {
+    Creator creator = 1;
+}
+
+message GetUserIdRequest {
+    string username = 1;
+}
+
+message GetUserIdRespond {
+    string user_id = 1;
+}
+
+service UserService {
+    rpc RegisterUser (RegisterUserRequest) returns (RegisterUserRespond) {
+        option (google.api.http) = {
+            post: "/api/v1/user/register"
+            body: "*"
+        };
+    }
+    rpc Login (LoginRequest) returns (LoginRespond) {
+        option (google.api.http) = {
+            post: "/api/v1/user/login"
+            body: "*"
+        };
+    }
+    rpc ComposeCreatorWithUserId (ComposeCreatorWithUserIdRequest) returns (ComposeCreatorWithUserIdRespond);
+    rpc ComposeCreatorWithUsername (ComposeCreatorWithUsernameRequest) returns (ComposeCreatorWithUsernameRespond);
+    rpc GetUserId (GetUserIdRequest) returns (GetUserIdRespond);
+}

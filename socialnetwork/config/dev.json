@@ -1,0 +1,39 @@
+{
+    "grpc": ":8080",
+    "rest": ":8081",
+    "jaeger": "jaeger:14268",
+    "mongodb": {
+        "url": "mongodb://mongodb:27017",
+        "database": "socialnetwork-dev"
+    },
+    "memcached": {
+        "poststorage": "post-storage-memcached:11211",
+        "user": "user-memcached:11211",
+        "urlshorten": "url-shorten-memcached:11211"
+    },
+    "redis": {
+        "usertimeline": "redis://redis:6379/0",
+        "socialgraph": "redis://redis:6379/1",
+        "hometimeline": "redis://redis:6379/2"
+    },
+    "service": {
+        "poststorage": "post-storage:8080",
+        "usertimeline": "user-timeline:8080",
+        "user": "user:8080",
+        "socialgraph": "social-graph:8080",
+        "hometimeline": "home-timeline:8080",
+        "media": "media:8080",
+        "urlshorten": "url-shorten:8080",
+        "usermention": "user-mention:8080",
+        "text": "text:8080",
+        "composepost": "compose-post:8080"
+    },
+    "service-rest": {
+        "usertimeline": "user-timeline-rest:8081",
+        "user": "user-rest:8081",
+        "socialgraph": "social-graph-rest:8081",
+        "hometimeline": "home-timeline-rest:8081",
+        "composepost": "compose-post-rest:8081"
+    },
+    "secret": "secret"
+}

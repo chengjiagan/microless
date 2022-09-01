@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package microless.socialnetwork.media;
+option go_package = "microless/socialnetwork/proto/media";
+
+import "proto/data.proto";
+
+message ComposeMediaRequest {
+    repeated string media_types = 1;
+    repeated int64 media_ids = 2;
+}
+
+message ComposeMediaRespond {
+    repeated Media media = 1;
+}
+
+service MediaService {
+    rpc ComposeMedia (ComposeMediaRequest) returns (ComposeMediaRespond);
+}

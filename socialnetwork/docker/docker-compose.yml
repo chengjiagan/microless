@@ -1,0 +1,141 @@
+version: '3.2'
+
+services:
+  post-storage-memcached:
+    image: memcached:1.6
+  user-memcached:
+    image: memcached:1.6
+  url-shorten-memcached:
+    image: memcached:1.6
+
+  redis:
+    image: redis:6.2
+
+  mongodb:
+    image: mongo:5.0
+    volumes:
+      - mongo-data:/data/db
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.37
+
+  post-storage:
+    image: microless/poststorage:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - post-storage-memcached
+      - mongodb
+
+  user-timeline:
+    image: microless/usertimeline:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - redis
+      - mongodb
+      - post-storage
+
+  user-timeline-rest:
+    image: microless/usertimeline-rest:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - user-timeline
+
+  user:
+    image: microless/user:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - user-memcached
+      - mongodb
+
+  user-rest:
+    image: microless/user-rest:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - user
+
+  social-graph:
+    image: microless/socialgraph:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - redis
+      - mongodb
+      - user
+
+  social-graph-rest:
+    image: microless/socialgraph-rest:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - social-graph
+
+  home-timeline:
+    image: microless/hometimeline:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - redis
+      - post-storage
+      - social-graph
+
+  home-timeline-rest:
+    image: microless/hometimeline-rest:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - home-timeline
+
+  media:
+    image: microless/media:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+
+  url-shorten:
+    image: microless/urlshorten:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - url-shorten-memcached
+      - mongodb
+
+  user-mention:
+    image: microless/usermention:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - user
+
+  text:
+    image: microless/text:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - url-shorten
+      - user-mention
+
+  compose-post:
+    image: microless/composepost:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - post-storage
+      - user-timeline
+      - user
+      - media
+      - text
+      - home-timeline
+
+  compose-post-rest:
+    image: microless/composepost-rest:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - compose-post
+
+volumes:
+  mongo-data:

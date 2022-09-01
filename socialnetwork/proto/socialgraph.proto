@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package microless.socialnetwork.socialgraph;
+option go_package = "microless/socialnetwork/proto/socialgraph";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+message GetFollowersRequest {
+    string user_id = 1;
+}
+
+message GetFollowersRespond {
+    repeated string followers_id = 1;
+}
+
+message GetFolloweesRequest {
+    string user_id = 1;
+}
+
+message GetFolloweesRespond {
+    repeated string followees_id = 1;
+}
+
+message FollowRequest {
+    string user_id = 1;
+    string followee_id = 2;
+}
+
+message UnfollowRequest {
+    string user_id = 1;
+    string followee_id = 2;
+}
+
+message FollowWithUsernameRequest {
+    string user_username = 1;
+    string followee_username = 2;
+}
+
+message UnfollowWithUsernameRequest {
+    string user_username = 1;
+    string followee_username = 2;
+}
+
+message InsertUserRequest {
+    string user_id = 1;
+}
+
+service SocialGraphService {
+    rpc GetFollowers (GetFollowersRequest) returns (GetFollowersRespond) {
+        option (google.api.http) = {
+            get: "/api/v1/socialgraph/followers/{user_id}"
+        };
+    }
+    rpc GetFollowees (GetFolloweesRequest) returns (GetFolloweesRespond) {
+        option (google.api.http) = {
+            get: "/api/v1/socialgraph/followees/{user_id}"
+        };
+    }
+    rpc Follow (FollowRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/api/v1/socialgraph/follow"
+            body: "*"
+        };
+    }
+    rpc Unfollow (UnfollowRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/api/v1/socialgraph/unfollow"
+            body: "*"
+        };
+    }
+    rpc FollowWithUsername (FollowWithUsernameRequest) returns (google.protobuf.Empty);
+    rpc UnfollowWithUsername (UnfollowWithUsernameRequest) returns (google.protobuf.Empty);
+    rpc InsertUser (InsertUserRequest) returns (google.protobuf.Empty);
+}
