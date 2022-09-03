@@ -76,6 +76,12 @@ class TestComposePost(utils.TestSocialNetwork):
             self.assertEqual(expect, actual)
 
     def test_compose_post_rest(self) -> None:
+        self.compose_post_rest(self.rest['composepost'])
+
+    def test_compose_post_nginx(self) -> None:
+        self.compose_post_rest(self.nginx)
+
+    def compose_post_rest(self, addr: str) -> None:
         user_id_0 = '000000000000000000000000'
         user_id_1 = '000000000000000000000001'
         user_id_2 = '000000000000000000000002'
@@ -95,7 +101,7 @@ class TestComposePost(utils.TestSocialNetwork):
             'post_ids': []
         })
 
-        url = 'http://' + self.rest['composepost'] + '/api/v1/composepost'
+        url = 'http://' + addr + '/api/v1/composepost'
         req = {
             'username': 'username_0',
             'text': utils.get_text('json/test_compose_post_text.txt'),

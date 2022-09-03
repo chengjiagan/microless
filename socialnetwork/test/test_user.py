@@ -54,7 +54,13 @@ class TestUser(utils.TestSocialNetwork):
         self.assertEqual(expect, actual)
 
     def test_register_user_rest(self) -> None:
-        url = 'http://' + self.rest['user'] + '/api/v1/user/register'
+        self.register_user_rest(self.rest['user'])
+
+    def test_register_user_nginx(self) -> None:
+        self.register_user_rest(self.nginx)
+
+    def register_user_rest(self, addr: str) -> None:
+        url = 'http://' + addr + '/api/v1/user/register'
         req = {
             'firstName': 'first',
             'lastName': 'last',
@@ -130,6 +136,12 @@ class TestUser(utils.TestSocialNetwork):
             int(datetime.utcnow().timestamp()), int(actual['timestamp']))
 
     def test_login_rest(self) -> None:
+        self.login_rest(self.rest['user'])
+
+    def test_login_nginx(self) -> None:
+        self.login_rest(self.nginx)
+
+    def login_rest(self, addr: str) -> None:
         salt = '11111111'
         username = 'user_0'
         passwd = 'password'
@@ -145,7 +157,7 @@ class TestUser(utils.TestSocialNetwork):
         }
         self.user_db.insert_one(user)
 
-        url = 'http://' + self.rest['user'] + '/api/v1/user/login'
+        url = 'http://' + addr + '/api/v1/user/login'
         req = {
             'username': username,
             'password': passwd

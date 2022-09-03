@@ -4,7 +4,7 @@
     "jaeger": "jaeger:14268",
     "mongodb": {
         "url": "mongodb://mongodb:27017",
-        "database": "socialnetwork-dev"
+        "database": "socialnetwork"
     },
     "memcached": {
         "poststorage": "post-storage-memcached:11211",
@@ -36,5 +36,5 @@
         "composepost": "compose-post-rest:8081"
     },
     "nginx": "nginx:8081",
-    "secret": "secret"
+    "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
 }

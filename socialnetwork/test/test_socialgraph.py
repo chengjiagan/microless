@@ -173,6 +173,12 @@ class TestSocialGraph(utils.TestSocialNetwork):
         self.assertEqual(expect, actual)
 
     def test_get_followers_rest(self) -> None:
+        self.get_followers_rest(self.rest['socialgraph'])
+
+    def test_get_followers_nginx(self) -> None:
+        self.get_followers_rest(self.nginx)
+
+    def get_followers_rest(self, addr: str) -> None:
         user_id_0 = '000000000000000000000000'
         user_id_1 = '000000000000000000000001'
         user_id_2 = '000000000000000000000002'
@@ -182,7 +188,7 @@ class TestSocialGraph(utils.TestSocialNetwork):
             'followees': [ObjectId(user_id_1), ObjectId(user_id_2)],
         })
 
-        url = 'http://' + self.rest['socialgraph'] + '/api/v1/socialgraph/followers/' + user_id_0
+        url = 'http://' + addr + '/api/v1/socialgraph/followers/' + user_id_0
         resp = requests.get(url)
 
         actual = resp.json()
@@ -190,6 +196,12 @@ class TestSocialGraph(utils.TestSocialNetwork):
         self.assertEqual(expect, actual)
 
     def test_get_followees_rest(self) -> None:
+        self.get_followees_rest(self.rest['socialgraph'])
+    
+    def test_get_followees_nginx(self) -> None:
+        self.get_followees_rest(self.nginx)
+
+    def get_followees_rest(self, addr: str) -> None:
         user_id_0 = '000000000000000000000000'
         user_id_1 = '000000000000000000000001'
         user_id_2 = '000000000000000000000002'
@@ -199,7 +211,7 @@ class TestSocialGraph(utils.TestSocialNetwork):
             'followees': [ObjectId(user_id_1), ObjectId(user_id_2)],
         })
 
-        url = 'http://' + self.rest['socialgraph'] + '/api/v1/socialgraph/followees/' + user_id_0
+        url = 'http://' + addr + '/api/v1/socialgraph/followees/' + user_id_0
         resp = requests.get(url)
 
         actual = resp.json()

@@ -13,6 +13,7 @@ from pymemcache.client.base import Client
 
 
 class TestSocialNetwork(unittest.TestCase):
+    config_file = '../config/dev.json'
     # mongodb collection
     post_db: Collection
     timeline_db: Collection
@@ -24,26 +25,18 @@ class TestSocialNetwork(unittest.TestCase):
     # config
     secret: str
     rest: Dict[str, str]
+    nginx: str
 
     def setUp(self, service: str, StubType: Type) -> None:
-        config = get_config()
+        config = self.get_config()
 
         # connect mongodb
-        self.post_db = mongo_connect_and_clean(config['mongodb'], 'post')
-        self.timeline_db = mongo_connect_and_clean(
-            config['mongodb'], 'user-timeline')
-        self.user_db = mongo_connect_and_clean(config['mongodb'], 'user')
-        self.socialgraph_db = mongo_connect_and_clean(
-            config['mongodb'], 'social-graph')
-        self.url_db = mongo_connect_and_clean(config['mongodb'], 'url-shorten')
+        self.post_db = mongo_connect(config['mongodb'], 'post')
+        self.timeline_db = mongo_connect(config['mongodb'], 'user-timeline')
+        self.user_db = mongo_connect(config['mongodb'], 'user')
+        self.socialgraph_db = mongo_connect(config['mongodb'], 'social-graph')
+        self.url_db = mongo_connect(config['mongodb'], 'url-shorten')
 
-        # clean memcached
-        for addr in config['memcached'].values():
-            memcached_clean(addr)
-
-        # clean redis
-        for addr in config['redis'].values():
-            redis_clean(addr)
         # hometimelint uses redis as main database
         self.timeline_redis = redis.Redis.from_url(
             config['redis']['hometimeline'], decode_responses=True)
@@ -54,21 +47,33 @@ class TestSocialNetwork(unittest.TestCase):
 
         self.secret = config['secret']
         self.rest = config['service-rest']
+        self.nginx = config['nginx']
+
+        self.clean()
+
+    def clean(self):
+        config = self.get_config()
+        # clean mongodb
+        self.post_db.delete_many({})
+        self.timeline_db.delete_many({})
+        self.user_db.delete_many({})
+        self.socialgraph_db.delete_many({})
+        self.url_db.delete_many({})
+        # clean memcached
+        for addr in config['memcached'].values():
+            memcached_clean(addr)
+        # clean redis
+        for addr in config['redis'].values():
+            redis_clean(addr)
+
+    def get_config(self) -> Dict[str, Any]:
+        with open(self.config_file, 'r') as f:
+            return json.load(f)
 
 
-# path for config file
-config_file = '../config/dev.json'
-
-
-def get_config() -> Dict[str, Any]:
-    with open(config_file, 'r') as f:
-        return json.load(f)
-
-
-def mongo_connect_and_clean(config: Dict[str, str], collection: str) -> Collection:
+def mongo_connect(config: Dict[str, str], collection: str) -> Collection:
     client = pymongo.MongoClient(config['url'])
     col = client[config['database']][collection]
-    col.delete_many({})
     return col
 
 
@@ -95,6 +100,8 @@ def get_json(filename: str) -> Any:
 
 
 T = TypeVar('T')
+
+
 def get_proto(filename: str, ProtoType: Type[T]) -> T:
     proto = ProtoType()
     with open(filename, 'r') as f:

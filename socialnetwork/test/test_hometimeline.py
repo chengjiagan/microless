@@ -58,6 +58,12 @@ class TestHomeTimeline(utils.TestSocialNetwork):
         self.assertEqual(expect, actual)
 
     def test_read_home_timeline_rest(self) -> None:
+        self.read_home_timeline_rest(self.rest['hometimeline'])
+
+    def test_read_home_timeline_nginx(self) -> None:
+        self.read_home_timeline_rest(self.nginx)
+
+    def read_home_timeline_rest(self, addr: str) -> None:
         user_id = '000000000000000000000001'
         posts = utils.get_bson('json/test_read_home_timeline_posts.json')
         self.post_db.insert_many(posts)
@@ -66,8 +72,7 @@ class TestHomeTimeline(utils.TestSocialNetwork):
             timestamp = p['_id'].generation_time.timestamp()
             self.timeline_redis.zadd(user_id, {post_id: timestamp})
 
-        url = 'http://' + self.rest['hometimeline'] + \
-            '/api/v1/hometimeline/' + user_id
+        url = 'http://' + addr + '/api/v1/hometimeline/' + user_id
         req = {
             'start': 0,
             'stop': 2

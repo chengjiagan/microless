@@ -1,4 +1,5 @@
-version: '3.2'
+# docker compose for development
+version: '3'
 
 services:
   post-storage-memcached:
@@ -19,8 +20,13 @@ services:
   jaeger:
     image: jaegertracing/all-in-one:1.37
 
+  nginx:
+    image: nginx:1.23
+    volumes:
+      - ../config/nginx-compose.conf:/etc/nginx/conf.d/microless.conf:ro
+
   post-storage:
-    image: microless/poststorage:latest
+    image: microless/poststorage-grpc:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -28,7 +34,7 @@ services:
       - mongodb
 
   user-timeline:
-    image: microless/usertimeline:latest
+    image: microless/usertimeline-grpc:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -44,7 +50,7 @@ services:
       - user-timeline
 
   user:
-    image: microless/user:latest
+    image: microless/user-grpc:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -59,7 +65,7 @@ services:
       - user
 
   social-graph:
-    image: microless/socialgraph:latest
+    image: microless/socialgraph-grpc:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -75,7 +81,7 @@ services:
       - social-graph
 
   home-timeline:
-    image: microless/hometimeline:latest
+    image: microless/hometimeline-grpc:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -91,12 +97,12 @@ services:
       - home-timeline
 
   media:
-    image: microless/media:latest
+    image: microless/media-grpc:latest
     volumes:
       - ../config/dev.json:/config.json:ro
 
   url-shorten:
-    image: microless/urlshorten:latest
+    image: microless/urlshorten-grpc:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -104,14 +110,14 @@ services:
       - mongodb
 
   user-mention:
-    image: microless/usermention:latest
+    image: microless/usermention-grpc:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
       - user
 
   text:
-    image: microless/text:latest
+    image: microless/text-grpc:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -119,7 +125,7 @@ services:
       - user-mention
 
   compose-post:
-    image: microless/composepost:latest
+    image: microless/composepost-grpc:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -137,5 +143,24 @@ services:
     depends_on:
       - compose-post
 
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    depends_on:
+      - mongodb
+
+  redis-commander:
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    environment:
+    - REDIS_HOSTS=usertimeline:redis:6379:0,socialgraph:redis:6379:1,hometimeline:redis:6379:2
+
 volumes:
   mongo-data:
+
+networks:
+  default:
+    name: microless
+    external: true

@@ -80,6 +80,12 @@ class TestUserTimeline(utils.TestSocialNetwork):
         self.assertEqual(expect, resp)
 
     def test_read_user_timeline_rest(self) -> None:
+        self.read_user_timeline_rest(self.rest['usertimeline'])
+
+    def test_read_user_timeline_ngnix(self) -> None:
+        self.read_user_timeline_rest(self.nginx)
+
+    def read_user_timeline_rest(self, addr: str) -> None:
         user_id = '000000000000000000000001'
         self.post_db.insert_many(utils.get_bson(
             'json/test_read_user_timeline_posts.json'))
@@ -92,8 +98,7 @@ class TestUserTimeline(utils.TestSocialNetwork):
             ]
         })
 
-        url = 'http://' + self.rest['usertimeline'] + \
-            '/api/v1/usertimeline/' + user_id
+        url = 'http://' + addr + '/api/v1/usertimeline/' + user_id
         req = {
             'start': 0,
             'stop': 2

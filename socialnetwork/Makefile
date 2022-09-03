@@ -70,26 +70,28 @@ proto-test: proto-test-data $(foreach s, $(SERVICES), proto-test-$(s))
 DOCKER_DIR = docker
 # name for build image
 BUILD_IMAGE = microless/build
+# tag for image
+VERSION = 0.1.0
 
 docker: $(foreach s, $(SERVICES), docker-$(s)) $(foreach s, $(REST_SERVICES), docker-rest-$(s))
 
 docker-build: docker/Dockerfile.build
 	docker build \
 		--build-arg SERVICES="$(SERVICES)" \
-		-t $(BUILD_IMAGE) -f $< src
+		-t $(BUILD_IMAGE):$(VERSION) -f $< src
 
 docker-%: docker/Dockerfile.grpc docker-build src/%/
 	docker build \
-		--build-arg BUILD_IMAGE=$(BUILD_IMAGE) \
+		--build-arg BUILD_IMAGE=$(BUILD_IMAGE):$(VERSION) \
 		--build-arg SERVICE=$* \
-		-t microless/$*-grpc -f $< .
+		-t microless/$*-grpc:$(VERSION) -f $< .
 
 docker-rest-%: docker/Dockerfile.rest docker-build src/%/
 	docker build \
-		--build-arg BUILD_IMAGE=$(BUILD_IMAGE) \
+		--build-arg BUILD_IMAGE=$(BUILD_IMAGE):$(VERSION) \
 		--build-arg SERVICE=$* \
-		-t microless/$*-rest -f $< .
+		-t microless/$*-rest:$(VERSION) -f $< .
 
 .PHONY init:
 	cd src && go mod download && cd ..
-	cd test && pipenv install --dev && cd ..
+	cd test && pipenv install --dev --system && cd ..
