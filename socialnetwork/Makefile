@@ -71,7 +71,7 @@ DOCKER_DIR = docker
 # name for build image
 BUILD_IMAGE = microless/build
 # tag for image
-VERSION = 0.1.0
+VERSION = 0.1.1
 
 docker: $(foreach s, $(SERVICES), docker-$(s)) $(foreach s, $(REST_SERVICES), docker-rest-$(s))
 

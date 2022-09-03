@@ -35,7 +35,7 @@ func main() {
 
 	// setup opentelemetry
 	logger.Info("connect to jaeger")
-	tp, err := utils.NewTracerProvider("SocialGraphRest", config.Jaeger)
+	tp, err := utils.NewTracerProvider(ctx, "SocialGraphRest", config.Otel)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
