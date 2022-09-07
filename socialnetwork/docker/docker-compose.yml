@@ -19,10 +19,7 @@ services:
 
   jaeger:
     image: jaegertracing/all-in-one:1.37
-  otel-collector:
-    image: otel/opentelemetry-collector:0.59.0
-    volumes:
-      - ../config/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    command: ["--collector.otlp.enabled=true"]
 
   nginx:
     image: nginx:1.23
@@ -42,7 +39,7 @@ services:
     depends_on:
       - post-storage-memcached
       - mongodb
-      - otel-collector
+      - jaeger
 
   user-timeline:
     image: microless/usertimeline-grpc:latest
@@ -52,7 +49,7 @@ services:
       - redis
       - mongodb
       - post-storage
-      - otel-collector
+      - jaeger
 
   user-timeline-rest:
     image: microless/usertimeline-rest:latest
@@ -60,7 +57,7 @@ services:
       - ../config/dev.json:/config.json:ro
     depends_on:
       - user-timeline
-      - otel-collector
+      - jaeger
 
   user:
     image: microless/user-grpc:latest
@@ -69,7 +66,7 @@ services:
     depends_on:
       - user-memcached
       - mongodb
-      - otel-collector
+      - jaeger
 
   user-rest:
     image: microless/user-rest:latest
@@ -77,7 +74,7 @@ services:
       - ../config/dev.json:/config.json:ro
     depends_on:
       - user
-      - otel-collector
+      - jaeger
 
   social-graph:
     image: microless/socialgraph-grpc:latest
@@ -87,7 +84,7 @@ services:
       - redis
       - mongodb
       - user
-      - otel-collector
+      - jaeger
 
   social-graph-rest:
     image: microless/socialgraph-rest:latest
@@ -95,7 +92,7 @@ services:
       - ../config/dev.json:/config.json:ro
     depends_on:
       - social-graph
-      - otel-collector
+      - jaeger
 
   home-timeline:
     image: microless/hometimeline-grpc:latest
@@ -105,7 +102,7 @@ services:
       - redis
       - post-storage
       - social-graph
-      - otel-collector
+      - jaeger
 
   home-timeline-rest:
     image: microless/hometimeline-rest:latest
@@ -113,14 +110,14 @@ services:
       - ../config/dev.json:/config.json:ro
     depends_on:
       - home-timeline
-      - otel-collector
+      - jaeger
 
   media:
     image: microless/media-grpc:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
-      - otel-collector
+      - jaeger
 
   url-shorten:
     image: microless/urlshorten-grpc:latest
@@ -129,7 +126,7 @@ services:
     depends_on:
       - url-shorten-memcached
       - mongodb
-      - otel-collector
+      - jaeger
 
   user-mention:
     image: microless/usermention-grpc:latest
@@ -137,7 +134,7 @@ services:
       - ../config/dev.json:/config.json:ro
     depends_on:
       - user
-      - otel-collector
+      - jaeger
 
   text:
     image: microless/text-grpc:latest
@@ -146,7 +143,7 @@ services:
     depends_on:
       - url-shorten
       - user-mention
-      - otel-collector
+      - jaeger
 
   compose-post:
     image: microless/composepost-grpc:latest
@@ -159,7 +156,7 @@ services:
       - media
       - text
       - home-timeline
-      - otel-collector
+      - jaeger
 
   compose-post-rest:
     image: microless/composepost-rest:latest
@@ -167,7 +164,7 @@ services:
       - ../config/dev.json:/config.json:ro
     depends_on:
       - compose-post
-      - otel-collector
+      - jaeger
 
   mongo-express:
     image: mongo-express:latest

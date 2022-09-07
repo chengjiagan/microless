@@ -18,10 +18,7 @@ services:
 
   jaeger:
     image: jaegertracing/all-in-one:1.37
-  otel-collector:
-    image: otel/opentelemetry-collector:0.59.0
-    volumes:
-      - ../config/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    command: ["--collector.otlp.enabled=true"]
 
   nginx:
     image: nginx:1.23

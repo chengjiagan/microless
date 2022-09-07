@@ -1,7 +1,7 @@
 {
     "grpc": ":8080",
     "rest": ":8081",
-    "otel": "otel-collector:4317",
+    "otel": "jaeger:4317",
     "mongodb": {
         "url": "mongodb://mongodb:27017",
         "database": "socialnetwork-dev"
