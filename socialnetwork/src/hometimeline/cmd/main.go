@@ -5,7 +5,9 @@ import (
 	"flag"
 	"log"
 	"net"
+	"net/http"
 	"os"
+	"sync"
 
 	server "microless/socialnetwork/hometimeline/internal/hometimelineserver"
 
@@ -13,6 +15,7 @@ import (
 
 	pb "microless/socialnetwork/proto/hometimeline"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"go.uber.org/zap"
 )
 
@@ -78,9 +81,48 @@ func main() {
 	grpcServer := utils.NewGRPCServer()
 	pb.RegisterHomeTimelineServiceServer(grpcServer, server)
 
-	logger.Info("start server")
-	err = grpcServer.Serve(lis)
+	ctx, cancel = context.WithCancel(ctx)
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+
+	// start grpc server
+	go func() {
+		defer cancel()
+		defer wg.Done()
+		logger.Info("start grpc server")
+		err = utils.RunGRPCServer(ctx, grpcServer, lis)
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
+	}()
+
+	// connect to server
+	conn, err := utils.NewConn(config.Grpc)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
+
+	// Register gRPC server endpoint
+	mux := runtime.NewServeMux()
+	err = pb.RegisterHomeTimelineServiceHandler(ctx, mux, conn)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+	restServer := &http.Server{
+		Addr:    config.Rest,
+		Handler: mux,
+	}
+
+	// start rest server
+	go func() {
+		defer cancel()
+		defer wg.Done()
+		logger.Info("start rest server")
+		err = utils.RunRestServer(ctx, restServer)
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
+	}()
+
+	wg.Wait()
 }

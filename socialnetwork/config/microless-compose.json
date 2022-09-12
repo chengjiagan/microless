@@ -28,13 +28,5 @@
         "text": "text:8080",
         "composepost": "compose-post:8080"
     },
-    "service-rest": {
-        "usertimeline": "user-timeline-rest:8081",
-        "user": "user-rest:8081",
-        "socialgraph": "social-graph-rest:8081",
-        "hometimeline": "home-timeline-rest:8081",
-        "composepost": "compose-post-rest:8081"
-    },
-    "nginx": "nginx:8081",
     "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
 }

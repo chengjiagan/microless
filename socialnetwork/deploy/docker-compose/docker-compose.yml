@@ -25,14 +25,14 @@ services:
     volumes:
       - ../config/nginx-compose.conf:/etc/nginx/conf.d/microless.conf:ro
     depends_on:
-      - compose-post-rest
-      - home-timeline-rest
-      - social-graph-rest
-      - user-rest
-      - user-timeline-rest
+      - compose-post
+      - home-timeline
+      - social-graph
+      - user
+      - user-timeline
 
   post-storage:
-    image: microless/poststorage-grpc:0.1.1
+    image: microless/poststorage:0.1.2
     volumes:
       - ../config/microless-compose.json:/config.json:ro
     depends_on:
@@ -41,7 +41,7 @@ services:
       - otel-collector
 
   user-timeline:
-    image: microless/usertimeline-grpc:0.1.1
+    image: microless/usertimeline:0.1.2
     volumes:
       - ../config/microless-compose.json:/config.json:ro
     depends_on:
@@ -50,16 +50,8 @@ services:
       - post-storage
       - otel-collector
 
-  user-timeline-rest:
-    image: microless/usertimeline-rest:0.1.1
-    volumes:
-      - ../config/microless-compose.json:/config.json:ro
-    depends_on:
-      - user-timeline
-      - otel-collector
-
   user:
-    image: microless/user-grpc:0.1.1
+    image: microless/user:0.1.2
     volumes:
       - ../config/microless-compose.json:/config.json:ro
     depends_on:
@@ -67,16 +59,8 @@ services:
       - mongodb
       - otel-collector
 
-  user-rest:
-    image: microless/user-rest:0.1.1
-    volumes:
-      - ../config/microless-compose.json:/config.json:ro
-    depends_on:
-      - user
-      - otel-collector
-
   social-graph:
-    image: microless/socialgraph-grpc:0.1.1
+    image: microless/socialgraph:0.1.2
     volumes:
       - ../config/microless-compose.json:/config.json:ro
     depends_on:
@@ -85,16 +69,8 @@ services:
       - user
       - otel-collector
 
-  social-graph-rest:
-    image: microless/socialgraph-rest:0.1.1
-    volumes:
-      - ../config/microless-compose.json:/config.json:ro
-    depends_on:
-      - social-graph
-      - otel-collector
-
   home-timeline:
-    image: microless/hometimeline-grpc:0.1.1
+    image: microless/hometimeline:0.1.2
     volumes:
       - ../config/microless-compose.json:/config.json:ro
     depends_on:
@@ -103,23 +79,15 @@ services:
       - social-graph
       - otel-collector
 
-  home-timeline-rest:
-    image: microless/hometimeline-rest:0.1.1
-    volumes:
-      - ../config/microless-compose.json:/config.json:ro
-    depends_on:
-      - home-timeline
-      - otel-collector
-
   media:
-    image: microless/media-grpc:0.1.1
+    image: microless/media:0.1.2
     volumes:
       - ../config/microless-compose.json:/config.json:ro
     depends_on:
       - otel-collector
 
   url-shorten:
-    image: microless/urlshorten-grpc:0.1.1
+    image: microless/urlshorten:0.1.2
     volumes:
       - ../config/microless-compose.json:/config.json:ro
     depends_on:
@@ -128,7 +96,7 @@ services:
       - otel-collector
 
   user-mention:
-    image: microless/usermention-grpc:0.1.1
+    image: microless/usermention:0.1.2
     volumes:
       - ../config/microless-compose.json:/config.json:ro
     depends_on:
@@ -136,7 +104,7 @@ services:
       - otel-collector
 
   text:
-    image: microless/text-grpc:0.1.1
+    image: microless/text:0.1.2
     volumes:
       - ../config/microless-compose.json:/config.json:ro
     depends_on:
@@ -145,7 +113,7 @@ services:
       - otel-collector
 
   compose-post:
-    image: microless/composepost-grpc:0.1.1
+    image: microless/composepost:0.1.2
     volumes:
       - ../config/microless-compose.json:/config.json:ro
     depends_on:
@@ -155,14 +123,6 @@ services:
       - media
       - text
       - home-timeline
-      - otel-collector
-
-  compose-post-rest:
-    image: microless/composepost-rest:0.1.1
-    volumes:
-      - ../config/microless-compose.json:/config.json:ro
-    depends_on:
-      - compose-post
       - otel-collector
 
 volumes:

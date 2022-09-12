@@ -10,13 +10,6 @@ SERVICES = \
 	usermention \
 	text \
 	composepost
-# services with restful interface
-REST_SERVICES = \
-	usertimeline \
-	user \
-	socialgraph \
-	hometimeline \
-	composepost
 
 # directory where protobuf definitions stay
 PROTO_DIR = proto
@@ -71,7 +64,7 @@ DOCKER_DIR = docker
 # name for build image
 BUILD_IMAGE = microless/build
 # tag for image
-VERSION = 0.1.1
+VERSION = 0.1.2
 
 docker: $(foreach s, $(SERVICES), docker-$(s)) $(foreach s, $(REST_SERVICES), docker-rest-$(s))
 
@@ -80,17 +73,11 @@ docker-build: docker/Dockerfile.build
 		--build-arg SERVICES="$(SERVICES)" \
 		-t $(BUILD_IMAGE):$(VERSION) -f $< src
 
-docker-%: docker/Dockerfile.grpc docker-build src/%/
+docker-%: docker/Dockerfile.service docker-build src/%/
 	docker build \
 		--build-arg BUILD_IMAGE=$(BUILD_IMAGE):$(VERSION) \
 		--build-arg SERVICE=$* \
-		-t microless/$*-grpc:$(VERSION) -f $< .
-
-docker-rest-%: docker/Dockerfile.rest docker-build src/%/
-	docker build \
-		--build-arg BUILD_IMAGE=$(BUILD_IMAGE):$(VERSION) \
-		--build-arg SERVICE=$* \
-		-t microless/$*-rest:$(VERSION) -f $< .
+		-t microless/$*:$(VERSION) -f $< .
 
 .PHONY init:
 	cd src && go mod download && cd ..

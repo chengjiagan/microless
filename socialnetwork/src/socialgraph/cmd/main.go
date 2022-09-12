@@ -5,14 +5,17 @@ import (
 	"flag"
 	"log"
 	"net"
+	"net/http"
 	"os"
+	"sync"
 
-	server "microless/socialnetwork/usertimeline/internal/usertimelineserver"
+	server "microless/socialnetwork/socialgraph/internal/socialgraphserver"
 
 	"microless/socialnetwork/utils"
 
-	pb "microless/socialnetwork/proto/usertimeline"
+	pb "microless/socialnetwork/proto/socialgraph"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"go.uber.org/zap"
 )
 
@@ -41,7 +44,7 @@ func main() {
 
 	// setup opentelemetry
 	logger.Info("connect to jaeger")
-	tp, err := utils.NewTracerProvider(ctx, "UserTimeline", config.Otel)
+	tp, err := utils.NewTracerProvider(ctx, "SocialGraph", config.Otel)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
@@ -54,7 +57,7 @@ func main() {
 
 	// setup redis
 	logger.Info("connect to redis")
-	rdb, err := utils.NewRedisClient(config.Redis.UserTimeline)
+	rdb, err := utils.NewRedisClient(config.Redis.SocialGraph)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
@@ -75,7 +78,7 @@ func main() {
 			logger.Fatal(err.Error())
 		}
 	}()
-	col := mongodb.Database(config.MongoDB.Database).Collection("user-timeline")
+	col := mongodb.Database(config.MongoDB.Database).Collection("social-graph")
 	if err := utils.CreateIndex(ctx, col, "user_id"); err != nil {
 		logger.Fatal(err.Error())
 	}
@@ -92,11 +95,50 @@ func main() {
 		logger.Fatal(err.Error())
 	}
 	grpcServer := utils.NewGRPCServer()
-	pb.RegisterUserTimelineServiceServer(grpcServer, server)
+	pb.RegisterSocialGraphServiceServer(grpcServer, server)
 
-	logger.Info("start server")
-	err = grpcServer.Serve(lis)
+	ctx, cancel = context.WithCancel(ctx)
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+
+	// start grpc server
+	go func() {
+		defer cancel()
+		defer wg.Done()
+		logger.Info("start grpc server")
+		err = utils.RunGRPCServer(ctx, grpcServer, lis)
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
+	}()
+
+	// connect to server
+	conn, err := utils.NewConn(config.Grpc)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
+
+	// Register gRPC server endpoint
+	mux := runtime.NewServeMux()
+	err = pb.RegisterSocialGraphServiceHandler(ctx, mux, conn)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+	restServer := &http.Server{
+		Addr:    config.Rest,
+		Handler: mux,
+	}
+
+	// start rest server
+	go func() {
+		defer cancel()
+		defer wg.Done()
+		logger.Info("start rest server")
+		err = utils.RunRestServer(ctx, restServer)
+		if err != nil {
+			logger.Fatal(err.Error())
+		}
+	}()
+
+	wg.Wait()
 }
