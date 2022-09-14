@@ -1,0 +1,79 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-timeline
+  labels:
+    microless: social-network
+    app.kubernetes.io/name: user-timeline
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: usertimeline-service
+    app.kubernetes.io/part-of: social-network
+  namespace: social-network
+spec:
+  ports:
+  - port: 8080
+    name: grpc
+    targetPort: grpc
+  - port: 8081
+    name: rest
+    targetPort: rest
+  selector:
+    microless: social-network
+    app.kubernetes.io/name: user-timeline
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: usertimeline
+    app.kubernetes.io/part-of: social-network
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-timeline
+  labels:
+    microless: social-network
+    app.kubernetes.io/name: user-timeline
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: usertimeline-deployment
+    app.kubernetes.io/part-of: social-network
+  namespace: social-network
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      microless: social-network
+      app.kubernetes.io/name: user-timeline
+      app.kubernetes.io/instance: k8s-deploy
+      app.kubernetes.io/component: usertimeline
+      app.kubernetes.io/part-of: social-network
+  template:
+    metadata:
+      labels:
+        microless: social-network
+        app.kubernetes.io/name: user-timeline
+        app.kubernetes.io/instance: k8s-deploy
+        app.kubernetes.io/component: usertimeline
+        app.kubernetes.io/part-of: social-network
+      name: user-timeline
+    spec:
+      containers:
+      - name: usertimeline
+        image: microless/usertimeline:0.1.2
+        ports:
+        - name: grpc
+          containerPort: 8080
+        - name: rest
+          containerPort: 8081
+        env:
+        - name: SERVICE_CONFIG
+          value: "/config/config.json"
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: config
+            items:
+            - key: config.json
+              path: config.json

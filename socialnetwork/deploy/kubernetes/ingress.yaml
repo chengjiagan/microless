@@ -1,0 +1,51 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    microless: social-network
+    app.kubernetes.io/name: service-gateway
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: service-ingress
+    app.kubernetes.io/part-of: social-network
+  name: ingress
+  namespace: social-network
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /api/v1/composepost
+        pathType: Prefix
+        backend:
+          service:
+            name: compose-post
+            port:
+              number: 8081
+      - path: /api/v1/hometimeline
+        pathType: Prefix
+        backend:
+          service:
+            name: home-timeline
+            port:
+              number: 8081
+      - path: /api/v1/socialgraph
+        pathType: Prefix
+        backend:
+          service:
+            name: social-graph
+            port:
+              number: 8081
+      - path: /api/v1/user
+        pathType: Prefix
+        backend:
+          service:
+            name: user
+            port:
+              number: 8081
+      - path: /api/v1/usertimeline
+        pathType: Prefix
+        backend:
+          service:
+            name: user-timeline
+            port:
+              number: 8081

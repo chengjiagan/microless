@@ -2,8 +2,8 @@ import json
 import pymongo
 import unittest
 import grpc
-import bson
 import redis
+import os
 from typing import Any, Dict, List, Type, TypeVar
 from bson import json_util
 from pymongo.collection import Collection
@@ -13,7 +13,7 @@ from pymemcache.client.base import Client
 
 
 class TestSocialNetwork(unittest.TestCase):
-    config_file = '../config/dev.json'
+    config_file = os.environ.get('SERVICE_CONFIG') or '../config/dev.json'
     # mongodb collection
     post_db: Collection
     timeline_db: Collection

@@ -1,0 +1,112 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    microless: social-network
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: jaeger-ingress
+    app.kubernetes.io/part-of: social-network
+  name: jaeger
+  namespace: social-network-backend
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /jaeger
+        pathType: Prefix
+        backend:
+          service:
+            name: jaeger
+            port:
+              number: 16686
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    microless: social-network
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: jaeger-service
+    app.kubernetes.io/part-of: social-network
+  name: jaeger
+  namespace: social-network-backend
+spec:
+  ports:
+  - name: otel-grpc
+    port: 4317
+    targetPort: otel-grpc
+  - name: zipkin
+    port: 9411
+    targetPort: zipkin
+  - name: query
+    port: 16686
+    targetPort: query
+  selector:
+    microless: social-network
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: jaeger
+    app.kubernetes.io/part-of: social-network
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    microless: social-network
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: jaeger-deployment
+    app.kubernetes.io/part-of: social-network
+  name: jaeger
+  namespace: social-network-backend
+spec:
+  selector:
+    matchLabels:
+      microless: social-network
+      app.kubernetes.io/name: jaeger
+      app.kubernetes.io/instance: k8s-deploy
+      app.kubernetes.io/component: jaeger
+      app.kubernetes.io/part-of: social-network
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        microless: social-network
+        app.kubernetes.io/name: jaeger
+        app.kubernetes.io/instance: k8s-deploy
+        app.kubernetes.io/component: jaeger
+        app.kubernetes.io/part-of: social-network
+      namespace: social-network-backend
+      name: jaeger
+    spec:
+      containers:
+      - name: jaeger
+        image: jaegertracing/all-in-one:1.37
+        args:
+        - --query.base-path=/jaeger
+        - --collector.otlp.enabled=true
+        - --collector.zipkin.host-port=:9411
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /
+            port: 14269
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 14269
+          initialDelaySeconds: 1
+        ports:
+        - name: otel-grpc
+          containerPort: 4317
+        - name: zipkin
+          containerPort: 9411
+        - name: query
+          containerPort: 16686

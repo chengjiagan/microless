@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: social-network
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: social-network-backend
