@@ -2,35 +2,35 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: url-shorten
+  name: gateway
   labels:
     microless: social-network
-    app.kubernetes.io/name: url-shorten
+    app.kubernetes.io/name: restful-gateway
     app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: url-shorten-service
+    app.kubernetes.io/component: restful-gateway-service
     app.kubernetes.io/part-of: social-network
   namespace: social-network
 spec:
   ports:
-  - port: 8080
-    name: grpc
-    targetPort: grpc
+  - port: 8081
+    name: http
+    targetPort: http
   selector:
     microless: social-network
-    app.kubernetes.io/name: url-shorten
+    app.kubernetes.io/name: restful-gateway
     app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: url-shorten
+    app.kubernetes.io/component: restful-gateway
     app.kubernetes.io/part-of: social-network
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: url-shorten
+  name: gateway
   labels:
     microless: social-network
-    app.kubernetes.io/name: url-shorten
+    app.kubernetes.io/name: restful-gateway
     app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: url-shorten-deployment
+    app.kubernetes.io/component: restful-gateway-deployment
     app.kubernetes.io/part-of: social-network
   namespace: social-network
 spec:
@@ -38,26 +38,26 @@ spec:
   selector:
     matchLabels:
       microless: social-network
-      app.kubernetes.io/name: url-shorten
+      app.kubernetes.io/name: restful-gateway
       app.kubernetes.io/instance: k8s-deploy
-      app.kubernetes.io/component: url-shorten
+      app.kubernetes.io/component: restful-gateway
       app.kubernetes.io/part-of: social-network
   template:
     metadata:
       labels:
         microless: social-network
-        app.kubernetes.io/name: url-shorten
+        app.kubernetes.io/name: restful-gateway
         app.kubernetes.io/instance: k8s-deploy
-        app.kubernetes.io/component: url-shorten
+        app.kubernetes.io/component: restful-gateway
         app.kubernetes.io/part-of: social-network
-      name: url-shorten
+      name: gateway
     spec:
       containers:
       - name: server
-        image: microless/urlshorten:0.1.3
+        image: microless/gateway:0.1.3
         ports:
-        - name: grpc
-          containerPort: 8080
+        - name: http
+          containerPort: 8081
         env:
         - name: SERVICE_CONFIG
           value: "/config/config.json"

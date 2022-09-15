@@ -14,38 +14,10 @@ spec:
   rules:
   - http:
       paths:
-      - path: /api/v1/composepost
+      - path: /api/v1
         pathType: Prefix
         backend:
           service:
-            name: compose-post
-            port:
-              number: 8081
-      - path: /api/v1/hometimeline
-        pathType: Prefix
-        backend:
-          service:
-            name: home-timeline
-            port:
-              number: 8081
-      - path: /api/v1/socialgraph
-        pathType: Prefix
-        backend:
-          service:
-            name: social-graph
-            port:
-              number: 8081
-      - path: /api/v1/user
-        pathType: Prefix
-        backend:
-          service:
-            name: user
-            port:
-              number: 8081
-      - path: /api/v1/usertimeline
-        pathType: Prefix
-        backend:
-          service:
-            name: user-timeline
+            name: gateway
             port:
               number: 8081

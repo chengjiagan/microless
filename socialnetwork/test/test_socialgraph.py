@@ -173,10 +173,7 @@ class TestSocialGraph(utils.TestSocialNetwork):
         self.assertEqual(expect, actual)
 
     def test_get_followers_rest(self) -> None:
-        self.get_followers_rest(self.rest['socialgraph'])
-
-    def test_get_followers_nginx(self) -> None:
-        self.get_followers_rest(self.nginx)
+        self.get_followers_rest(self.gateway)
 
     def get_followers_rest(self, addr: str) -> None:
         user_id_0 = '000000000000000000000000'
@@ -196,10 +193,7 @@ class TestSocialGraph(utils.TestSocialNetwork):
         self.assertEqual(expect, actual)
 
     def test_get_followees_rest(self) -> None:
-        self.get_followees_rest(self.rest['socialgraph'])
-    
-    def test_get_followees_nginx(self) -> None:
-        self.get_followees_rest(self.nginx)
+        self.get_followees_rest(self.gateway)
 
     def get_followees_rest(self, addr: str) -> None:
         user_id_0 = '000000000000000000000000'

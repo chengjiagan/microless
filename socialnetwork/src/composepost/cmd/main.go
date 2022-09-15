@@ -5,15 +5,12 @@ import (
 	"flag"
 	"log"
 	"net"
-	"net/http"
 	"os"
-	"sync"
 
 	server "microless/socialnetwork/composepost/internal/composepostserver"
 	pb "microless/socialnetwork/proto/composepost"
 	"microless/socialnetwork/utils"
 
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"go.uber.org/zap"
 )
 
@@ -62,48 +59,9 @@ func main() {
 	grpcServer := utils.NewGRPCServer()
 	pb.RegisterComposePostServiceServer(grpcServer, server)
 
-	ctx, cancel = context.WithCancel(ctx)
-	wg := new(sync.WaitGroup)
-	wg.Add(2)
-
-	// start grpc server
-	go func() {
-		defer cancel()
-		defer wg.Done()
-		logger.Info("start grpc server")
-		err = utils.RunGRPCServer(ctx, grpcServer, lis)
-		if err != nil {
-			logger.Fatal(err.Error())
-		}
-	}()
-
-	// connect to server
-	conn, err := utils.NewConn(config.Grpc)
+	logger.Info("start grpc server")
+	err = grpcServer.Serve(lis)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
-
-	// Register gRPC server endpoint
-	mux := runtime.NewServeMux()
-	err = pb.RegisterComposePostServiceHandler(ctx, mux, conn)
-	if err != nil {
-		logger.Fatal(err.Error())
-	}
-	restServer := &http.Server{
-		Addr:    config.Rest,
-		Handler: mux,
-	}
-
-	// start rest server
-	go func() {
-		defer cancel()
-		defer wg.Done()
-		logger.Info("start rest server")
-		err = utils.RunRestServer(ctx, restServer)
-		if err != nil {
-			logger.Fatal(err.Error())
-		}
-	}()
-
-	wg.Wait()
 }

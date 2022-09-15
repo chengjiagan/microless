@@ -76,10 +76,7 @@ class TestComposePost(utils.TestSocialNetwork):
             self.assertEqual(expect, actual)
 
     def test_compose_post_rest(self) -> None:
-        self.compose_post_rest(self.rest['composepost'])
-
-    def test_compose_post_nginx(self) -> None:
-        self.compose_post_rest(self.nginx)
+        self.compose_post_rest(self.gateway)
 
     def compose_post_rest(self, addr: str) -> None:
         user_id_0 = '000000000000000000000000'

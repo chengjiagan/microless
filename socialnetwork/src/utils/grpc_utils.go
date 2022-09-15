@@ -1,10 +1,6 @@
 package utils
 
 import (
-	"context"
-	"net"
-	"net/http"
-
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -29,22 +25,4 @@ func NewGRPCServer() *grpc.Server {
 		grpc.UnaryInterceptor(otelgrpc.UnaryServerInterceptor()),
 		grpc.StreamInterceptor(otelgrpc.StreamServerInterceptor()),
 	)
-}
-
-func RunGRPCServer(ctx context.Context, server *grpc.Server, lis net.Listener) error {
-	go func() {
-		<-ctx.Done()
-		server.GracefulStop()
-	}()
-
-	return server.Serve(lis)
-}
-
-func RunRestServer(ctx context.Context, server *http.Server) error {
-	go func() {
-		<-ctx.Done()
-		server.Shutdown(ctx)
-	}()
-
-	return server.ListenAndServe()
 }

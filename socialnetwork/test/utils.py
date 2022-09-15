@@ -24,8 +24,7 @@ class TestSocialNetwork(unittest.TestCase):
     timeline_redis: redis.Redis
     # config
     secret: str
-    rest: Dict[str, str]
-    nginx: str
+    gateway: str
 
     def setUp(self, service: str, StubType: Type) -> None:
         config = self.get_config()
@@ -46,8 +45,7 @@ class TestSocialNetwork(unittest.TestCase):
         self.stub = StubType(chan)
 
         self.secret = config['secret']
-        self.rest = config['service-rest']
-        self.nginx = config['nginx']
+        self.gateway = config['gateway']
 
         self.clean()
 

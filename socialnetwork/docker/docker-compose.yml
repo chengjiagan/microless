@@ -21,10 +21,10 @@ services:
     image: jaegertracing/all-in-one:1.37
     command: ["--collector.otlp.enabled=true"]
 
-  nginx:
-    image: nginx:1.23
+  gateway:
+    image: microless/gateway:latest
     volumes:
-      - ../config/nginx-compose.conf:/etc/nginx/conf.d/microless.conf:ro
+      - ../config/dev.json:/config.json:ro
     depends_on:
       - compose-post
       - home-timeline

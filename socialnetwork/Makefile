@@ -64,14 +64,18 @@ DOCKER_DIR = docker
 # name for build image
 BUILD_IMAGE = microless/build
 # tag for image
-VERSION = 0.1.2
+VERSION = 0.1.3
 
-docker: $(foreach s, $(SERVICES), docker-$(s)) $(foreach s, $(REST_SERVICES), docker-rest-$(s))
+docker: $(foreach s, $(SERVICES), docker-$(s)) $(foreach s, $(REST_SERVICES), docker-rest-$(s)) docker-gateway
 
 docker-build: docker/Dockerfile.build
 	docker build \
 		--build-arg SERVICES="$(SERVICES)" \
 		-t $(BUILD_IMAGE):$(VERSION) -f $< src
+
+docker-gateway: docker/Dockerfile.gateway src/gateway/
+	docker build \
+		-t microless/gateway:$(VERSION) -f $< src
 
 docker-%: docker/Dockerfile.service docker-build src/%/
 	docker build \

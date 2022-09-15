@@ -37,3 +37,6 @@ kubectl create -f service/url-shorten-service.yaml
 kubectl create -f service/user-mention-service.yaml
 kubectl create -f service/text-service.yaml
 kubectl create -f service/compose-post-service.yaml
+
+# Install restful gateway
+kubectl create -f restful-gateway.yaml

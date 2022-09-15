@@ -80,10 +80,7 @@ class TestUserTimeline(utils.TestSocialNetwork):
         self.assertEqual(expect, resp)
 
     def test_read_user_timeline_rest(self) -> None:
-        self.read_user_timeline_rest(self.rest['usertimeline'])
-
-    def test_read_user_timeline_ngnix(self) -> None:
-        self.read_user_timeline_rest(self.nginx)
+        self.read_user_timeline_rest(self.gateway)
 
     def read_user_timeline_rest(self, addr: str) -> None:
         user_id = '000000000000000000000001'

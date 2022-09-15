@@ -58,10 +58,7 @@ class TestHomeTimeline(utils.TestSocialNetwork):
         self.assertEqual(expect, actual)
 
     def test_read_home_timeline_rest(self) -> None:
-        self.read_home_timeline_rest(self.rest['hometimeline'])
-
-    def test_read_home_timeline_nginx(self) -> None:
-        self.read_home_timeline_rest(self.nginx)
+        self.read_home_timeline_rest(self.gateway)
 
     def read_home_timeline_rest(self, addr: str) -> None:
         user_id = '000000000000000000000001'

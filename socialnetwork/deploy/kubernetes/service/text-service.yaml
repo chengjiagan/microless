@@ -54,7 +54,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: microless/text:0.1.2
+        image: microless/text:0.1.3
         ports:
         - name: grpc
           containerPort: 8080

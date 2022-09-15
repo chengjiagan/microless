@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
 	go.mongodb.org/mongo-driver v1.10.1
 	go.uber.org/zap v1.22.0
 	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde
@@ -24,6 +23,7 @@ require (
 	github.com/go-redis/redis/extra/redisotel v0.3.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3 // indirect
 	github.com/klauspost/compress v1.15.1 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/pkg/errors v0.9.1 // indirect
