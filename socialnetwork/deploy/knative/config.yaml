@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: social-network-kn
+data:
+  config.json: |
+    {
+      "grpc": ":8080",
+      "rest": ":8081",
+      "otel": "jaeger.social-network-backend:4317",
+      "mongodb": {
+        "url": "mongodb://mongodb.social-network-backend:27017",
+        "database": "social-network"
+      },
+      "memcached": {
+        "poststorage": "post-storage-memcached.social-network-backend:11211",
+        "user": "user-memcached.social-network-backend:11211",
+        "urlshorten": "url-shorten-memcached.social-network-backend:11211"
+      },
+      "redis": {
+        "usertimeline": "redis://redis.social-network-backend:6379/0",
+        "socialgraph": "redis://redis.social-network-backend:6379/1",
+        "hometimeline": "redis://redis.social-network-backend:6379/2"
+      },
+      "service": {
+        "poststorage": "post-storage.social-network-kn.svc.cluster.local:80",
+        "usertimeline": "user-timeline.social-network-kn.svc.cluster.local:80",
+        "user": "user.social-network-kn.svc.cluster.local:80",
+        "socialgraph": "social-graph.social-network-kn.svc.cluster.local:80",
+        "hometimeline": "home-timeline.social-network-kn.svc.cluster.local:80",
+        "media": "media.social-network-kn.svc.cluster.local:80",
+        "urlshorten": "url-shorten.social-network-kn.svc.cluster.local:80",
+        "usermention": "user-mention.social-network-kn.svc.cluster.local:80",
+        "text": "text.social-network-kn.svc.cluster.local:80",
+        "composepost": "compose-post.social-network-kn.svc.cluster.local:80"
+      },
+      "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
+    }

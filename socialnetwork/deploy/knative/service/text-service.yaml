@@ -1,0 +1,35 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: text
+  labels:
+    microless: social-network
+    app.kubernetes.io/name: text
+    app.kubernetes.io/instance: kn-deploy
+    app.kubernetes.io/component: text-service
+    app.kubernetes.io/part-of: social-network
+    networking.knative.dev/visibility: cluster-local
+  namespace: social-network-kn
+spec:
+  template:
+    spec:
+      containers:
+      - name: server
+        image: dev.local/microless/text:0.1.3
+        ports:
+        - name: h2c
+          containerPort: 8080
+        env:
+        - name: SERVICE_CONFIG
+          value: "/config/config.json"
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: config
+            items:
+            - key: config.json
+              path: config.json

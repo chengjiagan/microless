@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-serving
+---
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  namespace: knative-serving
+spec:
+  version: 1.7.1
+  ingress:
+    kourier:
+      enabled: true
+  config:
+    tracing:
+      backend: zipkin
+      zipkin-endpoint: "http://jaeger.social-network-backend.svc.cluster.local:9411/api/v2/spans"
+      debug: "true"
+
+    network:
+      ingress-class: "kourier.ingress.networking.knative.dev"
+
+    autoscaler:
+      min-scale: "1"
+
+    domain:
+      svc.cluster.local: |
