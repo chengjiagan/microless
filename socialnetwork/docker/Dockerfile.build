@@ -8,5 +8,8 @@ WORKDIR /go/src
 COPY . .
 # build services, disable cgo
 RUN for s in ${SERVICES}; do \
-        CGO_ENABLED=0 go build -o /go/bin/$s $s/cmd/main.go; \
+	cd $s && \
+	go mod download && \
+        CGO_ENABLED=0 go build -o /go/bin/$s cmd/main.go && \
+	cd ..; \
     done

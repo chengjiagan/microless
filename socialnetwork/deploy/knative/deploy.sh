@@ -12,7 +12,6 @@ helm install ingress-nginx ingress-nginx \
 # Install knative
 kubectl apply -f https://github.com/knative/operator/releases/download/knative-v1.7.0/operator.yaml
 kubectl create -f knative.yaml
-kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.7.1/serving-default-domain.yaml
 
 # Create namespace
 kubectl create -f namespace.yaml

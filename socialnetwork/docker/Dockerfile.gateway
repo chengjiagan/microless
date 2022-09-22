@@ -5,7 +5,9 @@ ARG GOPROXY="https://goproxy.cn"
 WORKDIR /go/src
 COPY . .
 # build restful gateway, disable cgo
-RUN CGO_ENABLED=0 go build -o /go/bin/gateway gateway/cmd/main.go
+RUN cd gateway && \
+    go mod download && \
+    CGO_ENABLED=0 go build -o /go/bin/gateway cmd/main.go
 
 FROM gcr.io/distroless/static-debian11
 # path to the config file
