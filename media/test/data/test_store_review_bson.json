@@ -1,0 +1,10 @@
+{
+    "user_id": {
+        "$oid": "000000000000000000000000"
+    },
+    "movie_id": {
+        "$oid": "000000000000000000000000"
+    },
+    "text": "some random review text",
+    "rating": 4
+}

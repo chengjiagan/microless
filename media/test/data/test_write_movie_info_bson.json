@@ -1,0 +1,36 @@
+{
+    "title": "title0",
+    "casts": [
+        {
+            "cast_id": 0,
+            "character": "character0",
+            "cast_info_id": {
+                "$oid": "000000000000000000000000"
+            }
+        },
+        {
+            "cast_id": 1,
+            "character": "character1",
+            "cast_info_id": {
+                "$oid": "000000000000000000000001"
+            }
+        }
+    ],
+    "plot_id": {
+        "$oid": "000000000000000000000000"
+    },
+    "thumbnail_ids": [
+        "1",
+        "2"
+    ],
+    "photo_ids": [
+        "0",
+        "1"
+    ],
+    "video_ids": [
+        "2",
+        "3"
+    ],
+    "avg_rating": 0,
+    "num_rating": 0
+}

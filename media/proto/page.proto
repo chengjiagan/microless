@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package microless.media.page;
+option go_package = "microless/media/proto/page";
+
+import "proto/data.proto";
+import "google/api/annotations.proto";
+
+message ReadPageRequest {
+    string movie_id = 1;
+    int32 review_start = 2;
+    int32 review_stop = 3;
+}
+
+message ReadPageRespond {
+    MovieInfo movie_info = 1;
+    repeated CastInfo cast_infos = 2;
+    string plot = 3;
+    repeated Review reviews = 4;
+}
+
+service PageService {
+    rpc ReadPage (ReadPageRequest) returns (ReadPageRespond) {
+        option (google.api.http) = {
+            get: "/api/v1/page/{movie_id}"
+        };
+    }
+}

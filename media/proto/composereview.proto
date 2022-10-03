@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package microless.media.composereview;
+option go_package = "microless/media/proto/composereview";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+message ComposeReviewRequest {
+    string movie_id = 1;
+    string user_id = 2;
+    string text = 3;
+    int32 rating = 4;
+}
+
+service ComposeReview {
+    rpc ComposeReview (ComposeReviewRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/api/v1/composereview"
+            body: "*"
+        };
+    }
+}

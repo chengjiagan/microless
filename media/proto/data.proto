@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package microless.media;
+option go_package = "microless/media/proto";
+
+import "google/protobuf/timestamp.proto";
+
+message CastInfo {
+    string cast_info_id = 1;
+    string name = 2;
+    bool gender = 3;
+    string intro = 4;
+}
+
+message Cast {
+    int32 cast_id = 1;
+    string character = 2;
+    string cast_info_id = 3;
+}
+
+message MovieInfo {
+    string movie_id = 1;
+    string title = 2;
+    repeated Cast casts = 3;
+    string plot_id = 4;
+    repeated string thumbnail_ids = 5;
+    repeated string photo_ids = 6;
+    repeated string video_ids = 7;
+    double avg_rating = 8;
+    int32 num_rating = 9;
+}
+
+message Review {
+    string review_id = 1;
+    string user_id = 2;
+    string text = 3;
+    string movie_id = 4;
+    int32 rating = 5;
+    google.protobuf.Timestamp timestamp = 6;
+}

@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package microless.media.movieinfo;
+option go_package = "microless/media/proto/movieinfo";
+
+import "proto/data.proto";
+import "google/protobuf/empty.proto";
+
+message WriteMovieInfoRequest {
+    string title = 1;
+    repeated Cast casts = 2;
+    string plot_id = 3;
+    repeated string thumbnail_ids = 4;
+    repeated string photo_ids = 5;
+    repeated string video_ids = 6;
+    double avg_rating = 7;
+    int32 num_rating = 8;
+}
+
+message WriteMovieInfoRespond {
+    string movie_id = 1;
+}
+
+message ReadMovieInfoRequest {
+    string movie_id = 1;
+}
+
+message UpdateRatingRequest {
+    string movie_id = 1;
+    int32 sum_uncommitted_rating = 2;
+    int32 num_uncommitted_rating = 3;
+}
+
+service MovieInfoService {
+    rpc WriteMovieInfo (WriteMovieInfoRequest) returns (WriteMovieInfoRespond);
+    rpc ReadMovieInfo (ReadMovieInfoRequest) returns (MovieInfo);
+    rpc UpdateRating (UpdateRatingRequest) returns (google.protobuf.Empty);
+}

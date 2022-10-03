@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package microless.media.castinfo;
+option go_package = "microless/media/proto/castinfo";
+
+import "proto/data.proto";
+
+message WriteCastInfoRequest {
+    string name = 1;
+    bool gender = 2;
+    string intro = 3;
+}
+
+message WriteCastInfoRespond {
+    string cast_info_id = 1;
+}
+
+message ReadCastInfoRequest {
+    repeated string cast_ids = 1;
+}
+
+message ReadCastInfoRespond {
+    repeated CastInfo cast_infos = 1;
+}
+
+service CastInfoService {
+    rpc WriteCastInfo (WriteCastInfoRequest) returns (WriteCastInfoRespond);
+    rpc ReadCastInfo (ReadCastInfoRequest) returns (ReadCastInfoRespond);
+}

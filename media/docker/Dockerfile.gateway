@@ -1,0 +1,19 @@
+FROM golang:1.18 as build
+# using go modules proxy in China
+ARG GOPROXY="https://goproxy.cn"
+
+WORKDIR /go/src
+COPY . .
+# build restful gateway, disable cgo
+RUN cd gateway && \
+    go mod download && \
+    CGO_ENABLED=0 go build -o /go/bin/gateway cmd/main.go
+
+FROM gcr.io/distroless/static-debian11
+# path to the config file
+ENV SERVICE_CONFIG="/config.json"
+
+COPY --from=build /go/bin/gateway /server
+
+EXPOSE 8081
+CMD [ "/server" ]

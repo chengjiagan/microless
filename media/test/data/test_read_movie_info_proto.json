@@ -1,0 +1,31 @@
+{
+    "movieId": "000000000000000000000000",
+    "title": "title0",
+    "casts": [
+      {
+        "character": "character0",
+        "castInfoId": "000000000000000000000000",
+        "castId": 0
+      },
+      {
+        "castId": 1,
+        "character": "character1",
+        "castInfoId": "000000000000000000000001"
+      }
+    ],
+    "thumbnailIds": [
+      "1",
+      "2"
+    ],
+    "photoIds": [
+      "0",
+      "1"
+    ],
+    "videoIds": [
+      "2",
+      "3"
+    ],
+    "plotId": "000000000000000000000000",
+    "avgRating": 0.0,
+    "numRating": 0
+  }

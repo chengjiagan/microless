@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package microless.media.rating;
+option go_package = "microless/media/proto/rating";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+
+message UploadRatingRequest {
+    string movie_id = 1;
+    int32 rating = 2;
+}
+
+service RatingService {
+    rpc UploadRating (UploadRatingRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/api/v1/rating"
+            body: "*"
+        };
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "_id": {
+        "$oid": "000000000000000000000000"
+    },
+    "title": "title0",
+    "casts": [],
+    "plot_id": {
+        "$oid": "000000000000000000000000"
+    },
+    "thumbnail_ids": [],
+    "photo_ids": [],
+    "video_ids": [],
+    "avg_rating": 3.2,
+    "num_rating": 10
+}

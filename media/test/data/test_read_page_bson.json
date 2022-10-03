@@ -1,0 +1,121 @@
+{
+    "review": [
+        {
+            "_id": {
+                "$oid": "633942b584c48ef10d77f058"
+            },
+            "user_id": {
+                "$oid": "000000000000000000000000"
+            },
+            "movie_id": {
+                "$oid": "000000000000000000000000"
+            },
+            "text": "text0",
+            "rating": 1
+        },
+        {
+            "_id": {
+                "$oid": "6339457ac051e3a5450fa284"
+            },
+            "user_id": {
+                "$oid": "000000000000000000000001"
+            },
+            "movie_id": {
+                "$oid": "000000000000000000000000"
+            },
+            "text": "text1",
+            "rating": 2
+        },
+        {
+            "_id": {
+                "$oid": "63394592c051e3a5450fa286"
+            },
+            "user_id": {
+                "$oid": "000000000000000000000003"
+            },
+            "movie_id": {
+                "$oid": "000000000000000000000000"
+            },
+            "text": "text2",
+            "rating": 3
+        }
+    ],
+    "movie-review": {
+        "movie_id": {
+            "$oid": "000000000000000000000000"
+        },
+        "review_ids": [
+            {
+                "$oid": "63394592c051e3a5450fa286"
+            },
+            {
+                "$oid": "6339457ac051e3a5450fa284"
+            },
+            {
+                "$oid": "633942b584c48ef10d77f058"
+            }
+        ]
+    },
+    "movie-info": {
+        "_id": {
+            "$oid": "000000000000000000000000"
+        },
+        "title": "title0",
+        "casts": [
+            {
+                "cast_id": 0,
+                "character": "character0",
+                "cast_info_id": {
+                    "$oid": "000000000000000000000000"
+                }
+            },
+            {
+                "cast_id": 1,
+                "character": "character1",
+                "cast_info_id": {
+                    "$oid": "000000000000000000000001"
+                }
+            }
+        ],
+        "plot_id": {
+            "$oid": "000000000000000000000000"
+        },
+        "thumbnail_ids": [],
+        "photo_ids": [],
+        "video_ids": [],
+        "avg_rating": 0,
+        "num_rating": 0
+    },
+    "cast-info": [
+        {
+            "_id": {
+                "$oid": "000000000000000000000000"
+            },
+            "name": "name_0",
+            "gender": true,
+            "intro": "intro_0"
+        },
+        {
+            "_id": {
+                "$oid": "000000000000000000000001"
+            },
+            "name": "name_1",
+            "gender": false,
+            "intro": "intro_1"
+        },
+        {
+            "_id": {
+                "$oid": "000000000000000000000002"
+            },
+            "name": "name_2",
+            "gender": false,
+            "intro": "intro_2"
+        }
+    ],
+    "plot": {
+        "_id": {
+            "$oid": "000000000000000000000000"
+        },
+        "plot": "some random plot string"
+    }
+}

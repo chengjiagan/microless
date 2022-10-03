@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+grpcio = "*"
+pymongo = "*"
+pymemcache = "*"
+redis = "*"
+pyjwt = "*"
+googleapis-common-protos = "*"
+requests = "*"
+
+[dev-packages]
+grpcio-tools = "*"
+autopep8 = "*"
+
+[requires]
+python_version = "3.9"

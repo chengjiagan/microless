@@ -1,0 +1,57 @@
+{
+  "movieInfo": {
+    "movieId": "000000000000000000000000",
+    "title": "title0",
+    "casts": [
+      {
+        "character": "character0",
+        "castInfoId": "000000000000000000000000",
+        "castId": 0
+      },
+      {
+        "castId": 1,
+        "character": "character1",
+        "castInfoId": "000000000000000000000001"
+      }
+    ],
+    "plotId": "000000000000000000000000",
+    "thumbnailIds": [],
+    "photoIds": [],
+    "videoIds": [],
+    "avgRating": 0.0,
+    "numRating": 0
+  },
+  "castInfos": [
+    {
+      "castInfoId": "000000000000000000000000",
+      "name": "name_0",
+      "gender": true,
+      "intro": "intro_0"
+    },
+    {
+      "castInfoId": "000000000000000000000001",
+      "name": "name_1",
+      "intro": "intro_1",
+      "gender": false
+    }
+  ],
+  "plot": "some random plot string",
+  "reviews": [
+    {
+      "reviewId": "6339457ac051e3a5450fa284",
+      "userId": "000000000000000000000001",
+      "text": "text1",
+      "movieId": "000000000000000000000000",
+      "rating": 2,
+      "timestamp": "2022-10-02T08:02:02Z"
+    },
+    {
+      "reviewId": "633942b584c48ef10d77f058",
+      "userId": "000000000000000000000000",
+      "text": "text0",
+      "movieId": "000000000000000000000000",
+      "rating": 1,
+      "timestamp": "2022-10-02T07:50:13Z"
+    }
+  ]
+}

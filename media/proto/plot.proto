@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package microless.media.plot;
+option go_package = "microless/media/proto/plot";
+
+message WritePlotRequest {
+    string plot = 1;
+}
+
+message WritePlotRespond {
+    string plot_id = 1;
+}
+
+message ReadPlotRequest {
+    string plot_id = 1;
+}
+
+message ReadPlotRespond {
+    string plot = 1;
+}
+
+service PlotService {
+    rpc WritePlot (WritePlotRequest) returns (WritePlotRespond);
+    rpc ReadPlot (ReadPlotRequest) returns (ReadPlotRespond);
+}

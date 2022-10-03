@@ -1,0 +1,156 @@
+# docker compose for development
+version: '3'
+
+volumes:
+  mongo-data:
+
+networks:
+  default:
+    name: microless
+    external: true
+
+services:
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    depends_on:
+      - mongodb
+
+  redis-commander:
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    environment:
+    - REDIS_HOSTS=usertimeline:redis:6379:0,socialgraph:redis:6379:1,hometimeline:redis:6379:2
+
+  cast-info-memcached:
+    image: memcached:1.6
+  movie-info-memcached:
+    image: memcached:1.6
+  plot-memcached:
+    image: memcached:1.6
+  review-storage-memcached:
+    image: memcached:1.6
+  user-memcached:
+    image: memcached:1.6
+
+  redis:
+    image: redis:6.2
+
+  mongodb:
+    image: mongo:6.0
+    volumes:
+      - mongo-data:/data/db
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.37
+    command: ["--collector.otlp.enabled=true"]
+
+  gateway:
+    image: microless/media-gateway:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - compose-review
+      - page
+      - rating
+      - user
+      - user-review
+
+  cast-info:
+    image: microless/media-castinfo:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - cast-info-memcached
+      - mongodb
+      - jaeger
+
+  movie-info:
+    image: microless/media-movieinfo:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - movie-review
+      - movie-info-memcached
+      - mongodb
+      - jaeger
+
+  plot:
+    image: microless/media-plot:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - plot-memcached
+      - mongodb
+      - jaeger
+
+  review-storage:
+    image: microless/media-reviewstorage:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - review-storage-memcached
+      - mongodb
+      - jaeger
+
+  movie-review:
+    image: microless/media-moviereview:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - review-storage
+      - redis
+      - mongodb
+      - jaeger
+
+  user-review:
+    image: microless/media-userreview:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - review-storage
+      - redis
+      - mongodb
+      - jaeger
+
+  rating:
+    image: microless/media-rating:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - movie-info
+      - jaeger
+
+  compose-review:
+    image: microless/media-composereview:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - review-storage
+      - user-review
+      - movie-review
+      - rating
+      - jaeger
+
+  user:
+    image: microless/media-user:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - user-review
+      - user-memcached
+      - mongodb
+      - jaeger
+
+  page:
+    image: microless/media-page:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - movie-review
+      - movie-info
+      - cast-info
+      - plot
+      - jaeger

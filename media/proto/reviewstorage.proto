@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package microless.media.reviewstorage;
+option go_package = "microless/media/proto/reviewstorage";
+
+import "proto/data.proto";
+import "google/protobuf/timestamp.proto";
+
+message StoreReviewRequest {
+    string user_id = 1;
+    string movie_id = 2;
+    string text = 3;
+    int32 rating = 4;
+}
+
+message StoreReviewRespond {
+    string review_id = 1;
+    google.protobuf.Timestamp timestamp = 2;
+}
+
+message ReadReviewsRequest {
+    repeated string review_ids = 1;
+}
+
+message ReadReviewsRespond {
+    repeated Review reviews = 1;
+}
+
+service ReviewStorageService {
+    rpc StoreReview (StoreReviewRequest) returns (StoreReviewRespond);
+    rpc ReadReviews (ReadReviewsRequest) returns (ReadReviewsRespond);
+}
