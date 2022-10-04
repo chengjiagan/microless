@@ -73,24 +73,29 @@ DOCKER_PREFIX = microless/media-
 # name for build image
 BUILD_IMAGE = $(DOCKER_PREFIX)build
 # tag for image
-VERSION = latest
+VERSION = 0.1.0
 
-docker: $(foreach s, $(SERVICES), docker-$(s)) docker-gateway
+docker-build: $(foreach s, $(SERVICES), docker-build-$(s)) docker-build-gateway
 
-docker-build: docker/Dockerfile.build
+docker-build-build: docker/Dockerfile.build
 	docker build \
 		--build-arg SERVICES="$(SERVICES)" \
-		-t $(BUILD_IMAGE):$(VERSION) -f $< src
+		-t $(BUILD_IMAGE) -f $< src
 
-docker-gateway: docker/Dockerfile.gateway src/gateway/
+docker-build-gateway: docker/Dockerfile.gateway
 	docker build \
-		-t $(DOCKER_PREFIX)gateway:$(VERSION) -f $< src
+		-t $(DOCKER_PREFIX)gateway -f $< src
 
-docker-%: docker/Dockerfile.service docker-build src/%/
+docker-build-%: docker/Dockerfile.service docker-build-build
 	docker build \
-		--build-arg BUILD_IMAGE=$(BUILD_IMAGE):$(VERSION) \
+		--build-arg BUILD_IMAGE=$(BUILD_IMAGE) \
 		--build-arg SERVICE=$* \
-		-t $(DOCKER_PREFIX)$*:$(VERSION) -f $< .
+		-t $(DOCKER_PREFIX)$* -f $< .
+
+docker-tag: docker-tag-gateway $(foreach s, $(SERVICES), docker-tag-$(s))
+
+docker-tag-%:
+	docker tag $(DOCKER_PREFIX)$* $(DOCKER_PREFIX)$*:$(VERSION)
 
 .PHONY init:
 	cd src && go mod download && cd ..

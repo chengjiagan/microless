@@ -1,0 +1,35 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: cast-info
+  labels:
+    microless: media
+    app.kubernetes.io/name: cast-info
+    app.kubernetes.io/instance: kn-deploy
+    app.kubernetes.io/component: cast-info-service
+    app.kubernetes.io/part-of: media
+    networking.knative.dev/visibility: cluster-local
+  namespace: media-kn
+spec:
+  template:
+    spec:
+      containers:
+      - name: server
+        image: dev.local/microless/media-castinfo:0.1.0
+        ports:
+        - name: h2c
+          containerPort: 8080
+        env:
+        - name: SERVICE_CONFIG
+          value: "/config/config.json"
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: config
+            items:
+            - key: config.json
+              path: config.json

@@ -18,7 +18,7 @@ DB_NAME: Tuple[str] = typing.get_args(DbNameT)
 
 
 class TestMedia(unittest.TestCase):
-    config_file = os.environ.get('SERVICE_CONFIG') or '../config/dev.json'
+    config_file = os.environ.get('TEST_CONFIG') or '../config/dev.json'
     # mongodb collection
     db: Mapping[DbNameT, Collection] = {}
     # config

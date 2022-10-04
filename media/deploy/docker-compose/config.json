@@ -4,7 +4,7 @@
     "otel": "jaeger:4317",
     "mongodb": {
         "url": "mongodb://mongodb:27017",
-        "database": "media-dev"
+        "database": "media"
     },
     "memcached": {
         "castinfo": "cast-info-memcached:11211",
@@ -30,5 +30,5 @@
         "page": "page:8080"
     },
     "gateway": "gateway:8081",
-    "secret": "secret"
+    "secret": "GT%j8S4GzJuha%oTM624rFPMSTfL@m&Q"
 }

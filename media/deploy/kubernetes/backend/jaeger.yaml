@@ -1,0 +1,135 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    microless: media
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: jaeger-ingress
+    app.kubernetes.io/part-of: media
+  name: jaeger
+  namespace: media-backend
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /jaeger
+        pathType: Prefix
+        backend:
+          service:
+            name: jaeger
+            port:
+              number: 16686
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    microless: media
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: jaeger-service
+    app.kubernetes.io/part-of: media
+  name: jaeger
+  namespace: media-backend
+spec:
+  ports:
+  - name: otel-grpc
+    port: 4317
+    targetPort: otel-grpc
+  - name: zipkin
+    port: 9411
+    targetPort: zipkin
+  - name: query
+    port: 16686
+    targetPort: query
+  selector:
+    microless: media
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: jaeger
+    app.kubernetes.io/part-of: media
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    microless: media
+    app.kubernetes.io/name: jaeger
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: jaeger-deployment
+    app.kubernetes.io/part-of: media
+  name: jaeger
+  namespace: media-backend
+spec:
+  replicas: 1
+  serviceName: jaeger
+  selector:
+    matchLabels:
+      microless: media
+      app.kubernetes.io/name: jaeger
+      app.kubernetes.io/instance: k8s-deploy
+      app.kubernetes.io/component: jaeger
+      app.kubernetes.io/part-of: media
+  template:
+    metadata:
+      labels:
+        microless: media
+        app.kubernetes.io/name: jaeger
+        app.kubernetes.io/instance: k8s-deploy
+        app.kubernetes.io/component: jaeger
+        app.kubernetes.io/part-of: media
+      namespace: media-backend
+      name: jaeger
+    spec:
+      containers:
+      - name: jaeger
+        image: jaegertracing/all-in-one:1.37
+        env:
+        - name: SPAN_STORAGE_TYPE
+          value: badger
+        args:
+        - --query.base-path=/jaeger
+        - --collector.otlp.enabled=true
+        - --collector.zipkin.host-port=:9411
+        - --badger.ephemeral=true
+        - --badger.directory-key=/badger/keys
+        - --badger.directory-value=/badger/values
+        volumeMounts:
+        - name: media-jaeger-data
+          mountPath: /badger
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /
+            port: 14269
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 14269
+          initialDelaySeconds: 1
+        ports:
+        - name: otel-grpc
+          containerPort: 4317
+        - name: zipkin
+          containerPort: 9411
+        - name: query
+          containerPort: 16686
+  volumeClaimTemplates:
+  - metadata:
+      name: media-jaeger-data
+      labels:
+        microless: media
+        app.kubernetes.io/name: jaeger
+        app.kubernetes.io/instance: k8s-deploy
+        app.kubernetes.io/component: jaeger-data
+        app.kubernetes.io/part-of: media
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 8Gi

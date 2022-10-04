@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: media-kn
+data:
+  config.json: |
+    {
+      "grpc": ":8080",
+      "rest": ":8081",
+      "otel": "jaeger.media-backend:4317",
+      "mongodb": {
+        "url": "mongodb://mongodb.media-backend:27017",
+        "database": "media"
+      },
+      "memcached": {
+        "castinfo": "cast-info-memcached.media-backend:11211",
+        "movieinfo": "movie-info-memcached.media-backend:11211",
+        "plot": "plot-memcached.media-backend:11211",
+        "reviewstorage": "review-storage-memcached.media-backend:11211",
+        "user": "user-memcached.media-backend:11211"
+      },
+      "redis": {
+        "moviereview": "redis://redis.media-backend:6379/0",
+        "userreview": "redis://redis.media-backend:6379/1"
+      },
+      "service": {
+        "castinfo": "cast-info.media-kn.svc.cluster.local:80",
+        "movieinfo": "movie-info.media-kn.svc.cluster.local:80",
+        "plot": "plot.media-kn.svc.cluster.local:80",
+        "reviewstorage": "review-storage.media-kn.svc.cluster.local:80",
+        "moviereview": "movie-review.media-kn.svc.cluster.local:80",
+        "userreview": "user-review.media-kn.svc.cluster.local:80",
+        "rating": "rating.media-kn.svc.cluster.local:80",
+        "composereview": "compose-review.media-kn.svc.cluster.local:80",
+        "user": "user.media-kn.svc.cluster.local:80",
+        "page": "page.media-kn.svc.cluster.local:80"
+      },
+      "secret": "GT%j8S4GzJuha%oTM624rFPMSTfL@m&Q"
+    }

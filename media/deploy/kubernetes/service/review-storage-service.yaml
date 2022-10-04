@@ -1,0 +1,74 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: review-storage
+  labels:
+    microless: media
+    app.kubernetes.io/name: review-storage
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: review-storage-service
+    app.kubernetes.io/part-of: media
+  namespace: media
+spec:
+  ports:
+  - port: 8080
+    name: grpc
+    targetPort: grpc
+  selector:
+    microless: media
+    app.kubernetes.io/name: review-storage
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: review-storage
+    app.kubernetes.io/part-of: media
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: review-storage
+  labels:
+    microless: media
+    app.kubernetes.io/name: review-storage
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: review-storage-deployment
+    app.kubernetes.io/part-of: media
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      microless: media
+      app.kubernetes.io/name: review-storage
+      app.kubernetes.io/instance: k8s-deploy
+      app.kubernetes.io/component: review-storage
+      app.kubernetes.io/part-of: media
+  template:
+    metadata:
+      labels:
+        microless: media
+        app.kubernetes.io/name: review-storage
+        app.kubernetes.io/instance: k8s-deploy
+        app.kubernetes.io/component: review-storage
+        app.kubernetes.io/part-of: media
+      name: review-storage
+    spec:
+      containers:
+      - name: server
+        image: microless/media-reviewstorage:0.1.0
+        ports:
+        - name: grpc
+          containerPort: 8080
+        env:
+        - name: SERVICE_CONFIG
+          value: "/config/config.json"
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: config
+            items:
+            - key: config.json
+              path: config.json
