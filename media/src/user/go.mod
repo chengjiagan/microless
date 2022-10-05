@@ -2,9 +2,9 @@ module microless/media/user
 
 go 1.18
 
-replace microless/media/proto => ../proto
-
 replace microless/media/utils => ../utils
+
+replace microless/media/proto => ../proto
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d

@@ -2,9 +2,9 @@ module microless/media/gateway
 
 go 1.18
 
-replace microless/media/proto => ../proto
-
 replace microless/media/utils => ../utils
+
+replace microless/media/proto => ../proto
 
 require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
