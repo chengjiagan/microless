@@ -6,7 +6,7 @@ metadata:
   labels:
     microless: social-network
     app.kubernetes.io/name: mongodb
-    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/instance: k8s-backend
     app.kubernetes.io/component: mongodb-service
     app.kubernetes.io/part-of: social-network
   namespace: social-network-backend
@@ -17,7 +17,7 @@ spec:
   selector:
     microless: social-network
     app.kubernetes.io/name: mongodb
-    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/instance: k8s-backend
     app.kubernetes.io/component: mongodb
     app.kubernetes.io/part-of: social-network
 ---
@@ -28,7 +28,7 @@ metadata:
   labels:
     microless: social-network
     app.kubernetes.io/name: mongodb
-    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/instance: k8s-backend
     app.kubernetes.io/component: mongodb-statefulset
     app.kubernetes.io/part-of: social-network
   namespace: social-network-backend
@@ -39,7 +39,7 @@ spec:
     matchLabels:
       microless: social-network
       app.kubernetes.io/name: mongodb
-      app.kubernetes.io/instance: k8s-deploy
+      app.kubernetes.io/instance: k8s-backend
       app.kubernetes.io/component: mongodb
       app.kubernetes.io/part-of: social-network
   template:
@@ -47,7 +47,7 @@ spec:
       labels:
         microless: social-network
         app.kubernetes.io/name: mongodb
-        app.kubernetes.io/instance: k8s-deploy
+        app.kubernetes.io/instance: k8s-backend
         app.kubernetes.io/component: mongodb
         app.kubernetes.io/part-of: social-network
       name: mongodb
@@ -67,7 +67,7 @@ spec:
       labels:
         microless: social-network
         app.kubernetes.io/name: mongodb
-        app.kubernetes.io/instance: k8s-deploy
+        app.kubernetes.io/instance: k8s-backend
         app.kubernetes.io/component: mongodb-data
         app.kubernetes.io/part-of: social-network
     spec:

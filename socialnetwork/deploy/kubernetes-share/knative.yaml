@@ -16,7 +16,7 @@ spec:
   config:
     tracing:
       backend: zipkin
-      zipkin-endpoint: "http://jaeger.social-network-backend.svc.cluster.local:9411/api/v2/spans"
+      zipkin-endpoint: "http://jaeger.jaeger.svc.cluster.local:9411/api/v2/spans"
       debug: "true"
 
     network:

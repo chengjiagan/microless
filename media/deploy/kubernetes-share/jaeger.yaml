@@ -1,15 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jaeger
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   labels:
-    microless: social-network
     app.kubernetes.io/name: jaeger
-    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/instance: jaeger
     app.kubernetes.io/component: jaeger-ingress
-    app.kubernetes.io/part-of: social-network
   name: jaeger
-  namespace: social-network-backend
+  namespace: jaeger
 spec:
   ingressClassName: nginx
   rules:
@@ -27,13 +29,11 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    microless: social-network
     app.kubernetes.io/name: jaeger
-    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/instance: jaeger
     app.kubernetes.io/component: jaeger-service
-    app.kubernetes.io/part-of: social-network
   name: jaeger
-  namespace: social-network-backend
+  namespace: jaeger
 spec:
   ports:
   - name: otel-grpc
@@ -46,42 +46,34 @@ spec:
     port: 16686
     targetPort: query
   selector:
-    microless: social-network
     app.kubernetes.io/name: jaeger
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: jaeger
-    app.kubernetes.io/part-of: social-network
+    app.kubernetes.io/instance: jaeger
+    app.kubernetes.io/component: jaeger-statefulset
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
-    microless: social-network
     app.kubernetes.io/name: jaeger
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: jaeger-deployment
-    app.kubernetes.io/part-of: social-network
+    app.kubernetes.io/instance: jaeger
+    app.kubernetes.io/component: jaeger-statefulset
   name: jaeger
-  namespace: social-network-backend
+  namespace: jaeger
 spec:
   replicas: 1
   serviceName: jaeger
   selector:
     matchLabels:
-      microless: social-network
       app.kubernetes.io/name: jaeger
-      app.kubernetes.io/instance: k8s-deploy
-      app.kubernetes.io/component: jaeger
-      app.kubernetes.io/part-of: social-network
+      app.kubernetes.io/instance: jaeger
+      app.kubernetes.io/component: jaeger-pod
   template:
     metadata:
       labels:
-        microless: social-network
         app.kubernetes.io/name: jaeger
-        app.kubernetes.io/instance: k8s-deploy
-        app.kubernetes.io/component: jaeger
-        app.kubernetes.io/part-of: social-network
-      namespace: social-network-backend
+        app.kubernetes.io/instance: jaeger
+        app.kubernetes.io/component: jaeger-pod
+      namespace: jaeger
       name: jaeger
     spec:
       containers:
@@ -123,11 +115,9 @@ spec:
   - metadata:
       name: jaeger-data
       labels:
-        microless: social-network
         app.kubernetes.io/name: jaeger
-        app.kubernetes.io/instance: k8s-deploy
+        app.kubernetes.io/instance: jaeger
         app.kubernetes.io/component: jaeger-data
-        app.kubernetes.io/part-of: social-network
     spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:

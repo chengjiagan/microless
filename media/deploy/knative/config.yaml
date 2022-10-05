@@ -8,7 +8,7 @@ data:
     {
       "grpc": ":8080",
       "rest": ":8081",
-      "otel": "jaeger.media-backend:4317",
+      "otel": "jaeger.jaeger:4317",
       "mongodb": {
         "url": "mongodb://mongodb.media-backend:27017",
         "database": "media"

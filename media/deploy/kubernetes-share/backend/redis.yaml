@@ -6,7 +6,7 @@ metadata:
   labels:
     microless: media
     app.kubernetes.io/name: redis
-    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/instance: k8s-backend
     app.kubernetes.io/component: redis-service
     app.kubernetes.io/part-of: media
   namespace: media-backend
@@ -17,7 +17,7 @@ spec:
   selector:
     microless: media
     app.kubernetes.io/name: redis
-    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/instance: k8s-backend
     app.kubernetes.io/component: redis
     app.kubernetes.io/part-of: media
 ---
@@ -28,7 +28,7 @@ metadata:
   labels:
     microless: media
     app.kubernetes.io/name: redis
-    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/instance: k8s-backend
     app.kubernetes.io/component: redis-deployment
     app.kubernetes.io/part-of: media
   namespace: media-backend
@@ -38,7 +38,7 @@ spec:
     matchLabels:
       microless: media
       app.kubernetes.io/name: redis
-      app.kubernetes.io/instance: k8s-deploy
+      app.kubernetes.io/instance: k8s-backend
       app.kubernetes.io/component: redis
       app.kubernetes.io/part-of: media
   template:
@@ -46,7 +46,7 @@ spec:
       labels:
         microless: media
         app.kubernetes.io/name: redis
-        app.kubernetes.io/instance: k8s-deploy
+        app.kubernetes.io/instance: k8s-backend
         app.kubernetes.io/component: redis
         app.kubernetes.io/part-of: media
       name: redis

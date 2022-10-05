@@ -13,7 +13,7 @@ data:
     {
       "grpc": ":8080",
       "rest": ":8081",
-      "otel": "jaeger.social-network-backend:4317",
+      "otel": "jaeger.jaeger:4317",
       "mongodb": {
         "url": "mongodb://mongodb.social-network-backend:27017",
         "database": "social-network"
