@@ -48,7 +48,7 @@ spec:
   selector:
     app.kubernetes.io/name: jaeger
     app.kubernetes.io/instance: jaeger
-    app.kubernetes.io/component: jaeger-statefulset
+    app.kubernetes.io/component: jaeger-pod
 ---
 apiVersion: apps/v1
 kind: StatefulSet
