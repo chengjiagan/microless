@@ -1,0 +1,64 @@
+# docker compose for development
+version: '3'
+
+volumes:
+  minio-data:
+
+networks:
+  default:
+    name: microless
+    external: true
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.37
+    command: ["--collector.otlp.enabled=true"]
+    ports:
+      - "16686:16686"
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2022-10-15T19-57-03Z
+    restart: always
+    volumes:
+      - minio-data:/data
+    command: ["server", "/data", "--console-address", ":9090"]
+    ports:
+      - "9090:9090"
+
+  video:
+    image: microless/video-video:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - preview
+      - transcode
+      - split
+      - merge
+
+  preview:
+    image: microless/video-preview:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - minio
+
+  transcode:
+    image: microless/video-transcode:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - minio
+
+  split:
+    image: microless/video-split:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - minio
+
+  merge:
+    image: microless/video-merge:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - minio

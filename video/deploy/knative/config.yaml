@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: video-kn
+data:
+  config.json: |
+    {
+      "rest": ":8080",
+      "minio": {
+          "url": "minio.video-backend:9000",
+          "access_key": "minioadmin",
+          "secret_key": "minioadmin",
+          "secure": false
+      },
+      "service": {
+          "video": "http://video.video-kn.svc.cluster.local:80/",
+          "preview": "http://preview.video-kn.svc.cluster.local:80/",
+          "split": "http://split.video-kn.svc.cluster.local:80/",
+          "transcode": "http://transcode.video-kn.svc.cluster.local:80/",
+          "merge": "http://merge.video-kn.svc.cluster.local:80/"
+      }
+    }

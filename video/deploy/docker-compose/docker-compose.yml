@@ -1,0 +1,64 @@
+# docker compose for development
+version: '3'
+
+volumes:
+  minio-data:
+  jaeger-data:
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.37
+    environment:
+      - SPAN_STORAGE_TYPE=badger
+    command:
+      - --collector.otlp.enabled=true
+      - --badger.ephemeral=true
+      - --badger.directory-key=/badger/keys
+      - --badger.directory-value=/badger/values
+    volumes:
+      - jaeger-data:/badger
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2022-10-15T19-57-03Z
+    restart: always
+    volumes:
+      - minio-data:/data
+    command: ["server", "/data"]
+
+  video:
+    image: microless/video-video:0.1.0
+    volumes:
+      - ./config.json:/config.json:ro
+    depends_on:
+      - preview
+      - transcode
+      - split
+      - merge
+
+  preview:
+    image: microless/video-preview:0.1.0
+    volumes:
+      - ./config.json:/config.json:ro
+    depends_on:
+      - minio
+
+  transcode:
+    image: microless/video-transcode:0.1.0
+    volumes:
+      - ./config.json:/config.json:ro
+    depends_on:
+      - minio
+
+  split:
+    image: microless/video-split:0.1.0
+    volumes:
+      - ./config.json:/config.json:ro
+    depends_on:
+      - minio
+
+  merge:
+    image: microless/video-merge:0.1.0
+    volumes:
+      - ./config.json:/config.json:ro
+    depends_on:
+      - minio
