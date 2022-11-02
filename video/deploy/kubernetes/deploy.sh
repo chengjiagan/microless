@@ -15,5 +15,8 @@ kubectl create -f service/split-service.yaml
 kubectl create -f service/transcode-service.yaml
 kubectl create -f service/merge-service.yaml
 
+# Wait for services
+sleep 30
+
 # Run test
 kubectl create -f test.yaml

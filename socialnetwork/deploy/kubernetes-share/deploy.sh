@@ -16,12 +16,13 @@ kubectl create -f jaeger.yaml
 kubectl apply -f https://github.com/knative/operator/releases/download/knative-v1.7.0/operator.yaml
 kubectl create -f knative.yaml
 
+# Install mongodb
+kubectl create -f mongodb.yaml
+
 # Create namespace
 kubectl create -f backend/namespace.yaml
 # Install redis
 kubectl create -f backend/redis.yaml
-# Install mongodb
-kubectl create -f backend/mongodb.yaml
 # Install memcached
 kubectl create -f backend/post-storage-memcached.yaml
 kubectl create -f backend/user-memcached.yaml

@@ -26,7 +26,7 @@ services:
     command: ["server", "/data"]
 
   video:
-    image: microless/video-video:0.1.0
+    image: waterlemongan/microless-video-video:0.1.0
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -36,28 +36,28 @@ services:
       - merge
 
   preview:
-    image: microless/video-preview:0.1.0
+    image: waterlemongan/microless-video-preview:0.1.0
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
       - minio
 
   transcode:
-    image: microless/video-transcode:0.1.0
+    image: waterlemongan/microless-video-transcode:0.1.0
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
       - minio
 
   split:
-    image: microless/video-split:0.1.0
+    image: waterlemongan/microless-video-split:0.1.0
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
       - minio
 
   merge:
-    image: microless/video-merge:0.1.0
+    image: waterlemongan/microless-video-merge:0.1.0
     volumes:
       - ./config.json:/config.json:ro
     depends_on:

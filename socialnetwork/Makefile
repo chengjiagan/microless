@@ -10,6 +10,13 @@ SERVICES = \
 	usermention \
 	text \
 	composepost
+# services that have http interface
+REST_SERVICES = \
+	socialgraph \
+	user \
+	composepost \
+	usertimeline \
+	hometimeline
 
 # directory where protobuf definitions stay
 PROTO_DIR = proto
@@ -59,29 +66,43 @@ proto: proto-data $(foreach s, $(SERVICES), proto-$(s)) $(foreach s, $(REST_SERV
 proto-test: proto-test-data $(foreach s, $(SERVICES), proto-test-$(s))
 	touch test/proto/__init__.py
 
-# directory where dockerfiles stay
-DOCKER_DIR = docker
+# prefix of image name
+DOCKER_PREFIX = waterlemongan/microless-socialnetwork-
 # name for build image
-BUILD_IMAGE = microless/build
+BUILD_IMAGE = $(DOCKER_PREFIX)build
 # tag for image
-VERSION = 0.1.3
+VERSION = 0.1.0
 
-docker: $(foreach s, $(SERVICES), docker-$(s)) $(foreach s, $(REST_SERVICES), docker-rest-$(s)) docker-gateway
+docker-build: docker-build-gateway docker-build-test $(foreach s, $(SERVICES), docker-build-$(s))
 
-docker-build: docker/Dockerfile.build
+docker-build-build: docker/Dockerfile.build
 	docker build \
 		--build-arg SERVICES="$(SERVICES)" \
-		-t $(BUILD_IMAGE):$(VERSION) -f $< src
+		-t $(BUILD_IMAGE) -f $< src
 
-docker-gateway: docker/Dockerfile.gateway src/gateway/
+docker-build-gateway: docker/Dockerfile.gateway
 	docker build \
-		-t microless/gateway:$(VERSION) -f $< src
+		-t $(DOCKER_PREFIX)gateway -f $< src
 
-docker-%: docker/Dockerfile.service docker-build src/%/
+docker-build-test: test/Dockerfile
 	docker build \
-		--build-arg BUILD_IMAGE=$(BUILD_IMAGE):$(VERSION) \
+		-t $(DOCKER_PREFIX)test -f $< test
+
+docker-build-%: docker/Dockerfile.service docker-build-build
+	docker build \
+		--build-arg BUILD_IMAGE=$(BUILD_IMAGE) \
 		--build-arg SERVICE=$* \
-		-t microless/$*:$(VERSION) -f $< .
+		-t $(DOCKER_PREFIX)$* -f $< .
+
+docker-tag: docker-tag-gateway docker-tag-test $(foreach s, $(SERVICES), docker-tag-$(s))
+
+docker-tag-%:
+	docker tag $(DOCKER_PREFIX)$* $(DOCKER_PREFIX)$*:$(VERSION)
+
+docker-push: docker-push-gateway docker-push-test $(foreach s, $(SERVICES), docker-push-$(s))
+
+docker-push-%:
+	docker push $(DOCKER_PREFIX)$*:$(VERSION)
 
 .PHONY init:
 	cd src && go mod download && cd ..

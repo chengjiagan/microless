@@ -15,7 +15,7 @@ data:
       "rest": ":8081",
       "otel": "jaeger.jaeger:4317",
       "mongodb": {
-        "url": "mongodb://mongodb.media-backend:27017",
+        "url": "mongodb://mongodb.mongodb:27017",
         "database": "media"
       },
       "memcached": {
@@ -55,7 +55,7 @@ spec:
     spec:
       containers:
       - name: test
-        image: microless/media-test:0.1.0
+        image: waterlemongan/microless-media-test:0.1.0
         env:
         - name: TEST_CONFIG
           value: "/config/config.json"

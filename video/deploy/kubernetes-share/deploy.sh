@@ -16,7 +16,5 @@ kubectl create -f jaeger.yaml
 kubectl apply -f https://github.com/knative/operator/releases/download/knative-v1.7.0/operator.yaml
 kubectl create -f knative.yaml
 
-# Create namespace
-kubectl create -f backend/namespace.yaml
 # Install minio
-kubectl create -f backend/minio.yaml
+kubectl create -f minio.yaml

@@ -66,16 +66,14 @@ proto: proto-data $(foreach s, $(SERVICES), proto-$(s)) $(foreach s, $(REST_SERV
 proto-test: proto-test-data $(foreach s, $(SERVICES), proto-test-$(s))
 	touch test/proto/__init__.py
 
-# directory where dockerfiles stay
-DOCKER_DIR = docker
 # prefix of image name
-DOCKER_PREFIX = microless/media-
+DOCKER_PREFIX = waterlemongan/microless-media-
 # name for build image
 BUILD_IMAGE = $(DOCKER_PREFIX)build
 # tag for image
 VERSION = 0.1.0
 
-docker-build: $(foreach s, $(SERVICES), docker-build-$(s)) docker-build-gateway
+docker-build: docker-build-gateway docker-build-test $(foreach s, $(SERVICES), docker-build-$(s))
 
 docker-build-build: docker/Dockerfile.build
 	docker build \
@@ -86,16 +84,25 @@ docker-build-gateway: docker/Dockerfile.gateway
 	docker build \
 		-t $(DOCKER_PREFIX)gateway -f $< src
 
+docker-build-test: test/Dockerfile
+	docker build \
+		-t $(DOCKER_PREFIX)test -f $< test
+
 docker-build-%: docker/Dockerfile.service docker-build-build
 	docker build \
 		--build-arg BUILD_IMAGE=$(BUILD_IMAGE) \
 		--build-arg SERVICE=$* \
 		-t $(DOCKER_PREFIX)$* -f $< .
 
-docker-tag: docker-tag-gateway $(foreach s, $(SERVICES), docker-tag-$(s))
+docker-tag: docker-tag-gateway docker-tag-test $(foreach s, $(SERVICES), docker-tag-$(s))
 
 docker-tag-%:
 	docker tag $(DOCKER_PREFIX)$* $(DOCKER_PREFIX)$*:$(VERSION)
+
+docker-push: docker-push-gateway docker-push-test $(foreach s, $(SERVICES), docker-push-$(s))
+
+docker-push-%:
+	docker push $(DOCKER_PREFIX)$*:$(VERSION)
 
 .PHONY init:
 	cd src && go mod download && cd ..

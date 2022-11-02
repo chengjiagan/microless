@@ -22,7 +22,7 @@ services:
     command: ["--collector.otlp.enabled=true"]
 
   gateway:
-    image: microless/gateway:latest
+    image: waterlemongan/microless-socialnetwork-gateway:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -33,7 +33,7 @@ services:
       - user-timeline
 
   post-storage:
-    image: microless/poststorage:latest
+    image: waterlemongan/microless-socialnetwork-poststorage:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -42,7 +42,7 @@ services:
       - jaeger
 
   user-timeline:
-    image: microless/usertimeline:latest
+    image: waterlemongan/microless-socialnetwork-usertimeline:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -52,7 +52,7 @@ services:
       - jaeger
 
   user:
-    image: microless/user:latest
+    image: waterlemongan/microless-socialnetwork-user:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -61,7 +61,7 @@ services:
       - jaeger
 
   social-graph:
-    image: microless/socialgraph:latest
+    image: waterlemongan/microless-socialnetwork-socialgraph:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -71,7 +71,7 @@ services:
       - jaeger
 
   home-timeline:
-    image: microless/hometimeline:latest
+    image: waterlemongan/microless-socialnetwork-hometimeline:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -81,14 +81,14 @@ services:
       - jaeger
 
   media:
-    image: microless/media:latest
+    image: waterlemongan/microless-socialnetwork-media:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
       - jaeger
 
   url-shorten:
-    image: microless/urlshorten:latest
+    image: waterlemongan/microless-socialnetwork-urlshorten:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -97,7 +97,7 @@ services:
       - jaeger
 
   user-mention:
-    image: microless/usermention:latest
+    image: waterlemongan/microless-socialnetwork-usermention:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -105,7 +105,7 @@ services:
       - jaeger
 
   text:
-    image: microless/text:latest
+    image: waterlemongan/microless-socialnetwork-text:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -114,7 +114,7 @@ services:
       - jaeger
 
   compose-post:
-    image: microless/composepost:latest
+    image: waterlemongan/microless-socialnetwork-composepost:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:

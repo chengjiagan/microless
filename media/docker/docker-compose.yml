@@ -48,7 +48,7 @@ services:
     command: ["--collector.otlp.enabled=true"]
 
   gateway:
-    image: microless/media-gateway:latest
+    image: waterlemongan/microless-media-gateway:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -59,7 +59,7 @@ services:
       - user-review
 
   cast-info:
-    image: microless/media-castinfo:latest
+    image: waterlemongan/microless-media-castinfo:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -68,7 +68,7 @@ services:
       - jaeger
 
   movie-info:
-    image: microless/media-movieinfo:latest
+    image: waterlemongan/microless-media-movieinfo:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -78,7 +78,7 @@ services:
       - jaeger
 
   plot:
-    image: microless/media-plot:latest
+    image: waterlemongan/microless-media-plot:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -87,7 +87,7 @@ services:
       - jaeger
 
   review-storage:
-    image: microless/media-reviewstorage:latest
+    image: waterlemongan/microless-media-reviewstorage:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -96,7 +96,7 @@ services:
       - jaeger
 
   movie-review:
-    image: microless/media-moviereview:latest
+    image: waterlemongan/microless-media-moviereview:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -106,7 +106,7 @@ services:
       - jaeger
 
   user-review:
-    image: microless/media-userreview:latest
+    image: waterlemongan/microless-media-userreview:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -116,7 +116,7 @@ services:
       - jaeger
 
   rating:
-    image: microless/media-rating:latest
+    image: waterlemongan/microless-media-rating:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -124,7 +124,7 @@ services:
       - jaeger
 
   compose-review:
-    image: microless/media-composereview:latest
+    image: waterlemongan/microless-media-composereview:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -135,7 +135,7 @@ services:
       - jaeger
 
   user:
-    image: microless/media-user:latest
+    image: waterlemongan/microless-media-user:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
@@ -145,7 +145,7 @@ services:
       - jaeger
 
   page:
-    image: microless/media-page:latest
+    image: waterlemongan/microless-media-page:latest
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:

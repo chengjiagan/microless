@@ -23,5 +23,8 @@ kubectl create -f service/page-service.yaml
 # Install restful gateway
 kubectl create -f restful-gateway.yaml
 
+# Wait for services
+sleep 30
+
 # Run test
 kubectl create -f test.yaml

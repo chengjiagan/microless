@@ -10,7 +10,7 @@ data:
       "rest": ":8081",
       "otel": "jaeger.jaeger:4317",
       "mongodb": {
-        "url": "mongodb://mongodb.social-network-backend:27017",
+        "url": "mongodb://mongodb.mongodb:27017",
         "database": "social-network"
       },
       "memcached": {

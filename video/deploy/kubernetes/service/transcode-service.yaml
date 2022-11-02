@@ -53,7 +53,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: microless/video-transcode:0.1.0
+        image: waterlemongan/microless-video-transcode:0.1.0
         ports:
         - name: rest
           containerPort: 8080
