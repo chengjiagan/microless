@@ -3,28 +3,6 @@ kind: Namespace
 metadata:
   name: jaeger
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  labels:
-    app.kubernetes.io/name: jaeger
-    app.kubernetes.io/instance: jaeger
-    app.kubernetes.io/component: jaeger-ingress
-  name: jaeger
-  namespace: jaeger
-spec:
-  ingressClassName: nginx
-  rules:
-  - http:
-      paths:
-      - path: /jaeger
-        pathType: Prefix
-        backend:
-          service:
-            name: jaeger
-            port:
-              number: 16686
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -48,6 +26,9 @@ spec:
   - name: query
     port: 16686
     targetPort: query
+  - name: query-grpc
+    port: 16685
+    targetPort: query-grpc
   selector:
     app.kubernetes.io/name: jaeger
     app.kubernetes.io/instance: jaeger
@@ -86,7 +67,6 @@ spec:
         - name: SPAN_STORAGE_TYPE
           value: badger
         args:
-        - --query.base-path=/jaeger
         - --collector.otlp.enabled=true
         - --collector.zipkin.host-port=:9411
         - --badger.ephemeral=true
@@ -116,6 +96,8 @@ spec:
           containerPort: 9411
         - name: query
           containerPort: 16686
+        - name: query-grpc
+          containerPort: 16685
   volumeClaimTemplates:
   - metadata:
       name: jaeger-data
