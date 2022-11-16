@@ -87,7 +87,15 @@ func (s *UserTimelineService) ReadUserTimeline(ctx context.Context, req *pb.Read
 	// get posts from PostStorage
 	var posts []*proto.Post
 	g.Go(func() error {
-		postIds = make([]string, int(req.Stop-req.Start))
+		// prevent out of index panic when requesting more posts than we have
+		var nPost int
+		if len(postOids) < int(req.Stop) {
+			nPost = len(postOids) - int(req.Start)
+		} else {
+			nPost = int(req.Stop) - int(req.Start)
+		}
+
+		postIds = make([]string, nPost)
 		for i := range postIds {
 			postIds[i] = postOids[i+int(req.Start)].Hex()
 		}
