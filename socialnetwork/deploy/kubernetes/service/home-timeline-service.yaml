@@ -54,7 +54,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-hometimeline:0.1.0
+        image: waterlemongan/microless-socialnetwork-hometimeline:0.1.1
         ports:
         - name: grpc
           containerPort: 8080

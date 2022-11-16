@@ -21,7 +21,7 @@ services:
     command: ["--collector.otlp.enabled=true"]
 
   gateway:
-    image: waterlemongan/microless-socialnetwork-gateway:0.1.3
+    image: waterlemongan/microless-socialnetwork-gateway:0.1.1
     volumes:
       - ./config.json:/config.json:ro
     ports:
@@ -34,7 +34,7 @@ services:
       - user-timeline
 
   post-storage:
-    image: waterlemongan/microless-socialnetwork-poststorage:0.1.3
+    image: waterlemongan/microless-socialnetwork-poststorage:0.1.1
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -43,7 +43,7 @@ services:
       - otel-collector
 
   user-timeline:
-    image: waterlemongan/microless-socialnetwork-usertimeline:0.1.3
+    image: waterlemongan/microless-socialnetwork-usertimeline:0.1.1
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -53,7 +53,7 @@ services:
       - otel-collector
 
   user:
-    image: waterlemongan/microless-socialnetwork-user:0.1.3
+    image: waterlemongan/microless-socialnetwork-user:0.1.1
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -62,7 +62,7 @@ services:
       - otel-collector
 
   social-graph:
-    image: waterlemongan/microless-socialnetwork-socialgraph:0.1.3
+    image: waterlemongan/microless-socialnetwork-socialgraph:0.1.1
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -72,7 +72,7 @@ services:
       - otel-collector
 
   home-timeline:
-    image: waterlemongan/microless-socialnetwork-hometimeline:0.1.3
+    image: waterlemongan/microless-socialnetwork-hometimeline:0.1.1
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -82,14 +82,14 @@ services:
       - otel-collector
 
   media:
-    image: waterlemongan/microless-socialnetwork-media:0.1.3
+    image: waterlemongan/microless-socialnetwork-media:0.1.1
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
       - otel-collector
 
   url-shorten:
-    image: waterlemongan/microless-socialnetwork-urlshorten:0.1.3
+    image: waterlemongan/microless-socialnetwork-urlshorten:0.1.1
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -98,7 +98,7 @@ services:
       - otel-collector
 
   user-mention:
-    image: waterlemongan/microless-socialnetwork-usermention:0.1.3
+    image: waterlemongan/microless-socialnetwork-usermention:0.1.1
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -106,7 +106,7 @@ services:
       - otel-collector
 
   text:
-    image: waterlemongan/microless-socialnetwork-text:0.1.3
+    image: waterlemongan/microless-socialnetwork-text:0.1.1
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -115,7 +115,7 @@ services:
       - otel-collector
 
   compose-post:
-    image: waterlemongan/microless-socialnetwork-composepost:0.1.3
+    image: waterlemongan/microless-socialnetwork-composepost:0.1.1
     volumes:
       - ./config.json:/config.json:ro
     depends_on:

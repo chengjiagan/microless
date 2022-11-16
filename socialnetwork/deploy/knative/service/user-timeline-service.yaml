@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-usertimeline:0.1.0
+        image: waterlemongan/microless-socialnetwork-usertimeline:0.1.1
         ports:
         - name: h2c
           containerPort: 8080
