@@ -7,18 +7,20 @@ import (
 	"microless/socialnetwork/utils"
 
 	"github.com/go-redis/redis/v8"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 )
 
 type HomeTimelineService struct {
 	pb.UnimplementedHomeTimelineServiceServer
 	logger            *zap.SugaredLogger
+	mongodb           *mongo.Collection
 	rdb               *redis.Client
 	poststorageClient poststorage.PostStorageServiceClient
 	socialgraphClient socialgraph.SocialGraphServiceClient
 }
 
-func NewServer(logger *zap.SugaredLogger, rdb *redis.Client, config *utils.Config) (*HomeTimelineService, error) {
+func NewServer(logger *zap.SugaredLogger, mongodb *mongo.Collection, rdb *redis.Client, config *utils.Config) (*HomeTimelineService, error) {
 	conn, err := utils.NewConn(config.Service.PostStorage)
 	if err != nil {
 		return nil, err
@@ -33,6 +35,7 @@ func NewServer(logger *zap.SugaredLogger, rdb *redis.Client, config *utils.Confi
 
 	return &HomeTimelineService{
 		logger:            logger,
+		mongodb:           mongodb,
 		rdb:               rdb,
 		poststorageClient: poststorageClient,
 		socialgraphClient: socialgraphClient,

@@ -25,6 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type HomeTimelineServiceClient interface {
 	ReadHomeTimeline(ctx context.Context, in *ReadHomeTimelineRequest, opts ...grpc.CallOption) (*ReadHomeTimelineRespond, error)
 	WriteHomeTimeline(ctx context.Context, in *WriteHomeTimelineRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	InsertUser(ctx context.Context, in *InsertUserResquest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type homeTimelineServiceClient struct {
@@ -53,12 +54,22 @@ func (c *homeTimelineServiceClient) WriteHomeTimeline(ctx context.Context, in *W
 	return out, nil
 }
 
+func (c *homeTimelineServiceClient) InsertUser(ctx context.Context, in *InsertUserResquest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/microless.socialnetwork.hometimeline.HomeTimelineService/InsertUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // HomeTimelineServiceServer is the server API for HomeTimelineService service.
 // All implementations must embed UnimplementedHomeTimelineServiceServer
 // for forward compatibility
 type HomeTimelineServiceServer interface {
 	ReadHomeTimeline(context.Context, *ReadHomeTimelineRequest) (*ReadHomeTimelineRespond, error)
 	WriteHomeTimeline(context.Context, *WriteHomeTimelineRequest) (*emptypb.Empty, error)
+	InsertUser(context.Context, *InsertUserResquest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedHomeTimelineServiceServer()
 }
 
@@ -71,6 +82,9 @@ func (UnimplementedHomeTimelineServiceServer) ReadHomeTimeline(context.Context, 
 }
 func (UnimplementedHomeTimelineServiceServer) WriteHomeTimeline(context.Context, *WriteHomeTimelineRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method WriteHomeTimeline not implemented")
+}
+func (UnimplementedHomeTimelineServiceServer) InsertUser(context.Context, *InsertUserResquest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InsertUser not implemented")
 }
 func (UnimplementedHomeTimelineServiceServer) mustEmbedUnimplementedHomeTimelineServiceServer() {}
 
@@ -121,6 +135,24 @@ func _HomeTimelineService_WriteHomeTimeline_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _HomeTimelineService_InsertUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InsertUserResquest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(HomeTimelineServiceServer).InsertUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/microless.socialnetwork.hometimeline.HomeTimelineService/InsertUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(HomeTimelineServiceServer).InsertUser(ctx, req.(*InsertUserResquest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // HomeTimelineService_ServiceDesc is the grpc.ServiceDesc for HomeTimelineService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -135,6 +167,10 @@ var HomeTimelineService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "WriteHomeTimeline",
 			Handler:    _HomeTimelineService_WriteHomeTimeline_Handler,
+		},
+		{
+			MethodName: "InsertUser",
+			Handler:    _HomeTimelineService_InsertUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

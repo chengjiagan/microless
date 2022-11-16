@@ -28,10 +28,15 @@ class TestComposePost(utils.TestSocialNetwork):
             'followers': [ObjectId(i) for i in followers],
             'followees': []
         })
-        self.timeline_db.insert_one({
+        self.usertimeline_db.insert_one({
             'user_id': ObjectId(user_id_0),
             'post_ids': []
         })
+        for user in set(followers) & set(mentions):
+            self.hometimeline_db.insert_one({
+                'user_id': ObjectId(user),
+                'post_ids': []
+            })
 
         username = 'username_0'
         text = utils.get_text('json/test_compose_post_text.txt')
@@ -60,8 +65,8 @@ class TestComposePost(utils.TestSocialNetwork):
         expect = post
         self.assertEqual(expect, actual)
 
-        # should update user's timeline
-        actual = self.timeline_db.find_one()
+        # should update user's user timeline
+        actual = self.usertimeline_db.find_one()
         del actual['_id']
         expect = {
             'user_id': ObjectId(user_id_0),
@@ -69,10 +74,14 @@ class TestComposePost(utils.TestSocialNetwork):
         }
         self.assertEqual(expect, actual)
 
-        # should update followers' and mentioned users' timeline
-        expect = [str(post_id)]
-        for i in set(followers) & set(mentions):
-            actual = self.timeline_redis.zrange(i, 0, -1)
+        # should update followers' and mentioned users' home timeline
+        for user in set(followers) & set(mentions):
+            expect = {
+                'user_id': ObjectId(user),
+                'post_ids': [post_id],
+            }
+            actual = self.hometimeline_db.find_one({'user_id': ObjectId(user)})
+            del actual['_id']
             self.assertEqual(expect, actual)
 
     def test_compose_post_rest(self) -> None:
@@ -93,10 +102,15 @@ class TestComposePost(utils.TestSocialNetwork):
             'followers': [ObjectId(i) for i in followers],
             'followees': []
         })
-        self.timeline_db.insert_one({
+        self.usertimeline_db.insert_one({
             'user_id': ObjectId(user_id_0),
             'post_ids': []
         })
+        for user in set(followers) & set(mentions):
+            self.hometimeline_db.insert_one({
+                'user_id': ObjectId(user),
+                'post_ids': []
+            })
 
         url = 'http://' + addr + '/api/v1/composepost'
         req = {
@@ -128,7 +142,7 @@ class TestComposePost(utils.TestSocialNetwork):
         self.assertEqual(expect, actual)
 
         # should update user's timeline
-        actual = self.timeline_db.find_one()
+        actual = self.usertimeline_db.find_one()
         del actual['_id']
         expect = {
             'user_id': ObjectId(user_id_0),
@@ -136,10 +150,14 @@ class TestComposePost(utils.TestSocialNetwork):
         }
         self.assertEqual(expect, actual)
 
-        # should update followers' and mentioned users' timeline
-        expect = [str(post_id)]
-        for i in set(followers) & set(mentions):
-            actual = self.timeline_redis.zrange(i, 0, -1)
+        # should update followers' and mentioned users' home timeline
+        for user in set(followers) & set(mentions):
+            expect = {
+                'user_id': ObjectId(user),
+                'post_ids': [post_id],
+            }
+            actual = self.hometimeline_db.find_one({'user_id': ObjectId(user)})
+            del actual['_id']
             self.assertEqual(expect, actual)
 
 

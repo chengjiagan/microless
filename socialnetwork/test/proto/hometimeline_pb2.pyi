@@ -9,6 +9,12 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class InsertUserResquest(_message.Message):
+    __slots__ = ["user_id"]
+    USER_ID_FIELD_NUMBER: _ClassVar[int]
+    user_id: str
+    def __init__(self, user_id: _Optional[str] = ...) -> None: ...
+
 class ReadHomeTimelineRequest(_message.Message):
     __slots__ = ["start", "stop", "user_id"]
     START_FIELD_NUMBER: _ClassVar[int]

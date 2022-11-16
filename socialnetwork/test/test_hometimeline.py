@@ -2,7 +2,7 @@ import unittest
 import utils
 import requests
 from proto.hometimeline_pb2_grpc import HomeTimelineServiceStub
-from proto.hometimeline_pb2 import ReadHomeTimelineRequest, ReadHomeTimelineRespond, WriteHomeTimelineRequest
+from proto.hometimeline_pb2 import ReadHomeTimelineRequest, ReadHomeTimelineRespond, WriteHomeTimelineRequest, InsertUserResquest
 from google.protobuf.timestamp_pb2 import Timestamp
 from bson import ObjectId
 
@@ -12,6 +12,21 @@ class TestHomeTimeline(utils.TestSocialNetwork):
 
     def setUp(self) -> None:
         super().setUp('hometimeline', HomeTimelineServiceStub)
+
+    def test_insert_user(self) -> None:
+        user_id = '000000000000000000000001'
+        req = InsertUserResquest(user_id=user_id)
+        self.stub.InsertUser(req)
+
+        expect = {
+            'user_id': ObjectId(user_id),
+            'post_ids': [],
+        }
+
+        actual = self.hometimeline_db.find_one()
+        del actual['_id']
+
+        self.assertEqual(expect, actual)
 
     def test_write_home_timeline(self) -> None:
         user_id = '000000000000000000000000'
@@ -31,24 +46,36 @@ class TestHomeTimeline(utils.TestSocialNetwork):
             'followers': [ObjectId(i) for i in follower_ids],
             'followees': [],
         })
+        for user in set(follower_ids) & set(mention_ids):
+            self.hometimeline_db.insert_one(
+                {'user_id': ObjectId(user), 'post_ids': []}
+            )
 
         req = WriteHomeTimelineRequest(
             user_id=user_id, post_id=post_id, timestamp=timestamp, user_mentions_id=mention_ids)
         self.stub.WriteHomeTimeline(req)
 
-        expect = [post_id]
-        for i in set(follower_ids) & set(mention_ids):
-            actual = self.timeline_redis.zrange(i, 0, -1)
+        for user in set(follower_ids) & set(mention_ids):
+            expect = {
+                'user_id': ObjectId(user),
+                'post_ids': [ObjectId(post_id)],
+            }
+            actual = self.hometimeline_db.find_one({'user_id': ObjectId(user)})
+            del actual['_id']
             self.assertEqual(expect, actual)
 
     def test_read_home_timeline(self) -> None:
         user_id = '000000000000000000000001'
         posts = utils.get_bson('json/test_read_home_timeline_posts.json')
         self.post_db.insert_many(posts)
-        for p in posts:
-            post_id = str(p['_id'])
-            timestamp = p['_id'].generation_time.timestamp()
-            self.timeline_redis.zadd(user_id, {post_id: timestamp})
+        self.hometimeline_db.insert_one({
+            'user_id': ObjectId(user_id),
+            'post_ids': [
+                ObjectId('630f084e6b6cedf0046302ef'),
+                ObjectId('630eecc90daff4bcd9a36c40'),
+                ObjectId('630eebda0daff4bcd9a36c3e'),
+            ]
+        })
 
         req = ReadHomeTimelineRequest(user_id=user_id, start=0, stop=2)
         actual = self.stub.ReadHomeTimeline(req)
@@ -64,10 +91,14 @@ class TestHomeTimeline(utils.TestSocialNetwork):
         user_id = '000000000000000000000001'
         posts = utils.get_bson('json/test_read_home_timeline_posts.json')
         self.post_db.insert_many(posts)
-        for p in posts:
-            post_id = str(p['_id'])
-            timestamp = p['_id'].generation_time.timestamp()
-            self.timeline_redis.zadd(user_id, {post_id: timestamp})
+        self.hometimeline_db.insert_one({
+            'user_id': ObjectId(user_id),
+            'post_ids': [
+                ObjectId('630f084e6b6cedf0046302ef'),
+                ObjectId('630eecc90daff4bcd9a36c40'),
+                ObjectId('630eebda0daff4bcd9a36c3e'),
+            ]
+        })
 
         url = 'http://' + addr + '/api/v1/hometimeline/' + user_id
         req = {

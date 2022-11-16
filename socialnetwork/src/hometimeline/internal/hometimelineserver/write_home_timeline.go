@@ -6,6 +6,8 @@ import (
 	"microless/socialnetwork/proto/socialgraph"
 
 	"github.com/go-redis/redis/v8"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -21,20 +23,46 @@ func (s *HomeTimelineService) WriteHomeTimeline(ctx context.Context, req *pb.Wri
 	}
 	followers := userResp.FollowersId
 
-	// update redis
-	member := &redis.Z{Score: float64(req.Timestamp.Seconds), Member: req.PostId}
+	// update followers' and mentions' home timeline in mongodb
+	postOid, _ := primitive.ObjectIDFromHex(req.PostId)
+	userOids := make([]primitive.ObjectID, 0, len(followers)+len(req.UserMentionsId))
+	for _, userId := range followers {
+		userOid, _ := primitive.ObjectIDFromHex(userId)
+		userOids = append(userOids, userOid)
+	}
+	for _, userId := range req.UserMentionsId {
+		userOid, _ := primitive.ObjectIDFromHex(userId)
+		userOids = append(userOids, userOid)
+	}
+	// query and modifier of mongodb
+	query := bson.M{
+		"user_id": bson.M{
+			"$in": userOids,
+		},
+	}
+	update := bson.M{
+		"$push": bson.M{
+			"post_ids": bson.M{
+				"$each": bson.A{postOid},
+				"$sort": -1,
+			},
+		},
+	}
+	// send request to mongodb
+	_, err = s.mongodb.UpdateMany(ctx, query, update)
+	if err != nil {
+		s.logger.Errorw("Failed to update home timeline", "err", err)
+		return nil, status.Errorf(codes.Internal, "Mongo Err: %v", err)
+	}
+
+	// delete user's home timeline in redis
 	_, err = s.rdb.Pipelined(ctx, func(p redis.Pipeliner) error {
-		for _, id := range followers {
-			p.ZAddNX(ctx, id, member)
-		}
-		for _, id := range req.UserMentionsId {
-			p.ZAddNX(ctx, id, member)
-		}
+		p.Del(ctx, followers...)
+		p.Del(ctx, req.UserMentionsId...)
 		return nil
 	})
 	if err != nil {
-		s.logger.Errorw("Failed to update home timeline in Redis", "user_id", req.UserId, "err", err)
-		return nil, status.Errorf(codes.Internal, "Redis Err: %v", err)
+		s.logger.Warnw("Failed to delete home timeline in redis", "err", err)
 	}
 
 	return &emptypb.Empty{}, nil

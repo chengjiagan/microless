@@ -25,6 +25,11 @@ class HomeTimelineServiceStub(object):
                 request_serializer=proto_dot_hometimeline__pb2.WriteHomeTimelineRequest.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
+        self.InsertUser = channel.unary_unary(
+                '/microless.socialnetwork.hometimeline.HomeTimelineService/InsertUser',
+                request_serializer=proto_dot_hometimeline__pb2.InsertUserResquest.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                )
 
 
 class HomeTimelineServiceServicer(object):
@@ -42,6 +47,12 @@ class HomeTimelineServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def InsertUser(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_HomeTimelineServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -53,6 +64,11 @@ def add_HomeTimelineServiceServicer_to_server(servicer, server):
             'WriteHomeTimeline': grpc.unary_unary_rpc_method_handler(
                     servicer.WriteHomeTimeline,
                     request_deserializer=proto_dot_hometimeline__pb2.WriteHomeTimelineRequest.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'InsertUser': grpc.unary_unary_rpc_method_handler(
+                    servicer.InsertUser,
+                    request_deserializer=proto_dot_hometimeline__pb2.InsertUserResquest.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
     }
@@ -95,6 +111,23 @@ class HomeTimelineService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/microless.socialnetwork.hometimeline.HomeTimelineService/WriteHomeTimeline',
             proto_dot_hometimeline__pb2.WriteHomeTimelineRequest.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def InsertUser(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/microless.socialnetwork.hometimeline.HomeTimelineService/InsertUser',
+            proto_dot_hometimeline__pb2.InsertUserResquest.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -23,14 +23,14 @@ class TestUserTimeline(utils.TestSocialNetwork):
             'post_ids': [],
         }
 
-        actual = self.timeline_db.find_one()
+        actual = self.usertimeline_db.find_one()
         del actual['_id']
 
         self.assertEqual(expect, actual)
 
     def test_write_user_timeline(self) -> None:
         user_id = '000000000000000000000001'
-        self.timeline_db.insert_one(
+        self.usertimeline_db.insert_one(
             {'user_id': ObjectId(user_id), 'post_ids': []})
 
         # unordered write requests
@@ -53,7 +53,7 @@ class TestUserTimeline(utils.TestSocialNetwork):
             ],
         }
 
-        actual = self.timeline_db.find_one()
+        actual = self.usertimeline_db.find_one()
         del actual['_id']
 
         self.assertEqual(expect, actual)
@@ -62,7 +62,7 @@ class TestUserTimeline(utils.TestSocialNetwork):
         user_id = '000000000000000000000001'
         self.post_db.insert_many(utils.get_bson(
             'json/test_read_user_timeline_posts.json'))
-        self.timeline_db.insert_one({
+        self.usertimeline_db.insert_one({
             'user_id': ObjectId(user_id),
             'post_ids': [
                 ObjectId('630f084e6b6cedf0046302ef'),
@@ -86,7 +86,7 @@ class TestUserTimeline(utils.TestSocialNetwork):
         user_id = '000000000000000000000001'
         self.post_db.insert_many(utils.get_bson(
             'json/test_read_user_timeline_posts.json'))
-        self.timeline_db.insert_one({
+        self.usertimeline_db.insert_one({
             'user_id': ObjectId(user_id),
             'post_ids': [
                 ObjectId('630f084e6b6cedf0046302ef'),

@@ -44,8 +44,17 @@ class TestUser(utils.TestSocialNetwork):
         }
         self.assertEqual(expect, actual)
 
-        # check user timeline database
-        actual = self.timeline_db.find_one()
+        # check user's user timeline database
+        actual = self.usertimeline_db.find_one()
+        del actual['_id']
+        expect = {
+            'user_id': ObjectId(resp.user_id),
+            'post_ids': [],
+        }
+        self.assertEqual(expect, actual)
+
+        # check user's home timeline database
+        actual = self.hometimeline_db.find_one()
         del actual['_id']
         expect = {
             'user_id': ObjectId(resp.user_id),
@@ -92,7 +101,16 @@ class TestUser(utils.TestSocialNetwork):
         self.assertEqual(expect, actual)
 
         # check user timeline database
-        actual = self.timeline_db.find_one()
+        actual = self.usertimeline_db.find_one()
+        del actual['_id']
+        expect = {
+            'user_id': ObjectId(user_id),
+            'post_ids': [],
+        }
+        self.assertEqual(expect, actual)
+
+        # check user's home timeline database
+        actual = self.hometimeline_db.find_one()
         del actual['_id']
         expect = {
             'user_id': ObjectId(user_id),

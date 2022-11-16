@@ -64,6 +64,22 @@ func main() {
 		}
 	}()
 
+	// setup mongodb
+	logger.Info("connect to mongodb")
+	mongodb, err := utils.NewMongodbClient(ctx, config.MongoDB.Url)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+	defer func() {
+		if err := mongodb.Disconnect(context.Background()); err != nil {
+			logger.Fatal(err.Error())
+		}
+	}()
+	col := mongodb.Database(config.MongoDB.Database).Collection("home-timeline")
+	if err := utils.CreateIndex(ctx, col, "user_id"); err != nil {
+		logger.Fatal(err.Error())
+	}
+
 	// connection
 	lis, err := net.Listen("tcp", config.Grpc)
 	if err != nil {
@@ -71,7 +87,7 @@ func main() {
 	}
 
 	// setup grpc
-	server, err := server.NewServer(logger.Sugar(), rdb, config)
+	server, err := server.NewServer(logger.Sugar(), col, rdb, config)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}

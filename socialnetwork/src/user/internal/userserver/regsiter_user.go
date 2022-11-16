@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"io"
 
+	"microless/socialnetwork/proto/hometimeline"
 	"microless/socialnetwork/proto/socialgraph"
 	pb "microless/socialnetwork/proto/user"
 	"microless/socialnetwork/proto/usertimeline"
@@ -49,7 +50,7 @@ func (s *UserService) RegisterUser(ctx context.Context, req *pb.RegisterUserRequ
 	s.logger.Debugw("Insert new user", "username", req.Username)
 	userId := result.InsertedID.(primitive.ObjectID).Hex()
 
-	// insert new user in social graph and user timeline
+	// insert new user in social graph, user timeline and home timeline
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		req := &socialgraph.InsertUserRequest{UserId: userId}
@@ -65,6 +66,15 @@ func (s *UserService) RegisterUser(ctx context.Context, req *pb.RegisterUserRequ
 		_, err := s.usertimelineClient.InsertUser(ctx, req)
 		if err != nil {
 			s.logger.Errorw("Failed to insert user in user timeline", "err", err)
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		req := &hometimeline.InsertUserResquest{UserId: userId}
+		_, err := s.hometimelineClient.InsertUser(ctx, req)
+		if err != nil {
+			s.logger.Errorw("Failed to insert user in home timeline", "err", err)
 			return err
 		}
 		return nil

@@ -16,12 +16,11 @@ class TestSocialNetwork(unittest.TestCase):
     config_file = os.environ.get('SERVICE_CONFIG') or '../config/dev.json'
     # mongodb collection
     post_db: Collection
-    timeline_db: Collection
+    usertimeline_db: Collection
+    hometimeline_db: Collection
     user_db: Collection
     socialgraph_db: Collection
     url_db: Collection
-    # redis
-    timeline_redis: redis.Redis
     # config
     secret: str
     gateway: str
@@ -31,14 +30,11 @@ class TestSocialNetwork(unittest.TestCase):
 
         # connect mongodb
         self.post_db = mongo_connect(config['mongodb'], 'post')
-        self.timeline_db = mongo_connect(config['mongodb'], 'user-timeline')
+        self.usertimeline_db = mongo_connect(config['mongodb'], 'user-timeline')
+        self.hometimeline_db = mongo_connect(config['mongodb'], 'home-timeline')
         self.user_db = mongo_connect(config['mongodb'], 'user')
         self.socialgraph_db = mongo_connect(config['mongodb'], 'social-graph')
         self.url_db = mongo_connect(config['mongodb'], 'url-shorten')
-
-        # hometimelint uses redis as main database
-        self.timeline_redis = redis.Redis.from_url(
-            config['redis']['hometimeline'], decode_responses=True)
 
         # connect grpc service
         chan = grpc.insecure_channel(config['service'][service])
@@ -53,7 +49,8 @@ class TestSocialNetwork(unittest.TestCase):
         config = self.get_config()
         # clean mongodb
         self.post_db.delete_many({})
-        self.timeline_db.delete_many({})
+        self.usertimeline_db.delete_many({})
+        self.hometimeline_db.delete_many({})
         self.user_db.delete_many({})
         self.socialgraph_db.delete_many({})
         self.url_db.delete_many({})

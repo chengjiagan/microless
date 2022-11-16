@@ -1,6 +1,7 @@
 package userserver
 
 import (
+	"microless/socialnetwork/proto/hometimeline"
 	"microless/socialnetwork/proto/socialgraph"
 	pb "microless/socialnetwork/proto/user"
 	"microless/socialnetwork/proto/usertimeline"
@@ -15,6 +16,7 @@ type UserService struct {
 	pb.UnimplementedUserServiceServer
 	socialgraphClient  socialgraph.SocialGraphServiceClient
 	usertimelineClient usertimeline.UserTimelineServiceClient
+	hometimelineClient hometimeline.HomeTimelineServiceClient
 	logger             *zap.SugaredLogger
 	mongodb            *mongo.Collection
 	memcached          *otelmemcache.Client
@@ -34,9 +36,16 @@ func NewServer(logger *zap.SugaredLogger, mongodb *mongo.Collection, memcached *
 	}
 	usertimelineClient := usertimeline.NewUserTimelineServiceClient(conn)
 
+	conn, err = utils.NewConn(config.Service.HomeTimeline)
+	if err != nil {
+		return nil, err
+	}
+	hometimelineClinet := hometimeline.NewHomeTimelineServiceClient(conn)
+
 	return &UserService{
 		socialgraphClient:  socialgraphClient,
 		usertimelineClient: usertimelineClient,
+		hometimelineClient: hometimelineClinet,
 		logger:             logger,
 		mongodb:            mongodb,
 		memcached:          memcached,
