@@ -23,8 +23,7 @@ func (s *PostStorageService) ReadPosts(ctx context.Context, req *pb.ReadPostsReq
 	posts := make(map[string]*Post, len(req.PostIds))
 	postsMc, err := s.memcached.WithContext(ctx).GetMulti(req.PostIds)
 	if err != nil {
-		s.logger.Errorw("Cannot get post_ids from Memcached", "post_ids", req.PostIds, "err", err)
-		return nil, status.Errorf(codes.Internal, "Memcached Err: %v", err)
+		s.logger.Warnw("Cannot get post_ids from Memcached", "post_ids", req.PostIds, "err", err)
 	}
 	for k, v := range postsMc {
 		post := new(Post)

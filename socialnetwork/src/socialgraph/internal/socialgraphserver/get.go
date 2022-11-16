@@ -17,8 +17,7 @@ func (s *SocialGraphService) GetFollowers(ctx context.Context, req *pb.GetFollow
 	key := fmt.Sprintf("%v:followers", req.UserId)
 	result, err := s.rdb.SMembers(ctx, key).Result()
 	if err != nil {
-		s.logger.Errorw("Failed to get followers from Redis", "user_id", req.UserId, "err", err)
-		return nil, status.Errorf(codes.Internal, "Redis Err: %v", err)
+		s.logger.Warnw("Failed to get followers from Redis", "user_id", req.UserId, "err", err)
 	}
 
 	if len(result) > 0 {
@@ -48,7 +47,7 @@ func (s *SocialGraphService) GetFollowers(ctx context.Context, req *pb.GetFollow
 	}
 	err = s.rdb.SAdd(ctx, key, followers).Err()
 	if err != nil {
-		s.logger.Errorw("Failed to update social graph in Redis", "err", err)
+		s.logger.Warnw("Failed to update social graph in Redis", "err", err)
 	}
 
 	return &pb.GetFollowersRespond{FollowersId: followers}, nil
@@ -58,8 +57,7 @@ func (s *SocialGraphService) GetFollowees(ctx context.Context, req *pb.GetFollow
 	key := fmt.Sprintf("%v:followees", req.UserId)
 	result, err := s.rdb.SMembers(ctx, key).Result()
 	if err != nil {
-		s.logger.Errorw("Failed to get followees from Redis", "user_id", req.UserId, "err", err)
-		return nil, status.Errorf(codes.Internal, "Redis Err: %v", err)
+		s.logger.Warnw("Failed to get followees from Redis", "user_id", req.UserId, "err", err)
 	}
 
 	if len(result) > 0 {
@@ -89,7 +87,7 @@ func (s *SocialGraphService) GetFollowees(ctx context.Context, req *pb.GetFollow
 	}
 	err = s.rdb.SAdd(ctx, key, followees).Err()
 	if err != nil {
-		s.logger.Errorw("Failed to update social graph in Redis", "err", err)
+		s.logger.Warnw("Failed to update social graph in Redis", "err", err)
 	}
 
 	return &pb.GetFolloweesRespond{FolloweesId: followees}, nil

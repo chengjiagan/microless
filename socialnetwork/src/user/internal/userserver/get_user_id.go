@@ -24,7 +24,7 @@ func (s *UserService) getUserId(ctx context.Context, username string) (string, e
 	keyMc := username + ":user_id"
 	item, err := s.memcached.WithContext(ctx).Get(keyMc)
 	if err != nil && err != memcache.ErrCacheMiss {
-		s.logger.Errorw("Failed to get from Memcached", "err", err)
+		s.logger.Warnw("Failed to get from Memcached", "err", err)
 	}
 	if item != nil {
 		s.logger.Debugw("user_id cache hit from memcached", "username", username)

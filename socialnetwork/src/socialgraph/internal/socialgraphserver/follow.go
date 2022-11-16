@@ -94,7 +94,7 @@ func (s *SocialGraphService) follow(ctx context.Context, userId, followeeId stri
 			return nil
 		})
 		if err != nil {
-			s.logger.Errorw("Failed to update user social graph in Redis", "err", err)
+			s.logger.Warnw("Failed to update user social graph in Redis", "err", err)
 		}
 		return nil
 	})

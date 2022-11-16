@@ -40,8 +40,7 @@ func (s *UserTimelineService) WriteUserTimeline(ctx context.Context, req *pb.Wri
 	// Update user's timeline in redis
 	err = s.rdb.Del(ctx, req.UserId).Err()
 	if err != nil {
-		s.logger.Errorw("Failed to delete user timeline in redis", "err", err)
-		return nil, status.Errorf(codes.Internal, "Redis Err: %v", err)
+		s.logger.Warnw("Failed to delete user timeline in redis", "err", err)
 	}
 
 	return &emptypb.Empty{}, nil

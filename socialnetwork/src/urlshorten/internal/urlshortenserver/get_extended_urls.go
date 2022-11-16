@@ -16,8 +16,7 @@ func (s *UrlShortenService) GetExtendedUrls(ctx context.Context, req *pb.GetExte
 	// get from memcached
 	mcResp, err := s.memcached.WithContext(ctx).GetMulti(req.ShortenedUrls)
 	if err != nil {
-		s.logger.Errorw("Failed to get extened urls from Memcached", "err", err)
-		return nil, status.Errorf(codes.Internal, "Memcached Err: %v", err)
+		s.logger.Warnw("Failed to get extened urls from Memcached", "err", err)
 	}
 	for k, item := range mcResp {
 		urls[k] = string(item.Value)

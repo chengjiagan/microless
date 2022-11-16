@@ -73,15 +73,21 @@ def mongo_connect(config: Dict[str, str], collection: str) -> Collection:
 
 
 def memcached_clean(addr: str) -> None:
-    client = Client(addr)
-    client.flush_all()
-    client.close()
+    try:
+        client = Client(addr)
+        client.flush_all()
+        client.close()
+    except:
+        pass
 
 
 def redis_clean(url: str) -> None:
-    client = redis.Redis.from_url(url)
-    client.flushdb()
-    client.close()
+    try:
+        client = redis.Redis.from_url(url)
+        client.flushdb()
+        client.close()
+    except:
+        pass
 
 
 def get_bson(filename: str) -> Any:

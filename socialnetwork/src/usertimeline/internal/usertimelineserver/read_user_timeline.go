@@ -27,8 +27,7 @@ func (s *UserTimelineService) ReadUserTimeline(ctx context.Context, req *pb.Read
 	// get user timeline from redis
 	postIds, err := s.rdb.ZRevRange(ctx, req.UserId, int64(req.Start), int64(req.Stop-1)).Result()
 	if err != nil {
-		s.logger.Errorw("Failed to get user timeline from Redis", "user_id", req.UserId, "err", err)
-		return nil, status.Errorf(codes.Internal, "Redis Err: %v", err)
+		s.logger.Warnw("Failed to get user timeline from Redis", "user_id", req.UserId, "err", err)
 	}
 
 	// everything in redis

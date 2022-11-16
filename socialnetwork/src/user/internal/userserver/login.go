@@ -49,7 +49,7 @@ func (s *UserService) getUser(ctx context.Context, username string) (*User, erro
 	keyMc := username + ":login"
 	userMc, err := s.memcached.WithContext(ctx).Get(keyMc)
 	if err != nil && err != memcache.ErrCacheMiss {
-		s.logger.Errorw("Failed to get from Memcached", "err", err)
+		s.logger.Warnw("Failed to get from Memcached", "err", err)
 	}
 	if userMc != nil {
 		s.logger.Debugw("User cache hit from memcached", "username", username)
