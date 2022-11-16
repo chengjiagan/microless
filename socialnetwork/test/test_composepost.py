@@ -101,6 +101,7 @@ class TestComposePost(utils.TestSocialNetwork):
         url = 'http://' + addr + '/api/v1/composepost'
         req = {
             'username': 'username_0',
+            'user_id': user_id_0,
             'text': utils.get_text('json/test_compose_post_text.txt'),
             'mediaIds': [0, 1],
             'mediaTypes': ['png', 'png'],
