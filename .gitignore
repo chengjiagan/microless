@@ -63,3 +63,5 @@ Temporary Items
 
 # Ignore dev container setting
 .devcontainer/
+# Ignore golang workspace setting
+go.work*
