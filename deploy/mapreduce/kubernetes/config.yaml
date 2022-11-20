@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: mapreduce
+data:
+  config.json: |
+    {
+      "rest": ":8080",
+      "minio": {
+          "url": "minio.minio:9000",
+          "access_key": "minioadmin",
+          "secret_key": "minioadmin",
+          "secure": false
+      },
+      "service": {
+          "mapreduce": "http://mapreduce:8080/",
+          "file": "http://file:8080/",
+          "mapper": "http://mapper:8080/",
+          "reducer": "http://reducer:8080/"
+      }
+    }

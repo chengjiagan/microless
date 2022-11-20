@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: mapreduce-kn
+data:
+  config.json: |
+    {
+      "rest": ":8080",
+      "minio": {
+          "url": "minio.minio:9000",
+          "access_key": "minioadmin",
+          "secret_key": "minioadmin",
+          "secure": false
+      },
+      "service": {
+          "mapreduce": "http://mapreduce.mapreduce-kn.svc.cluster.local:80/",
+          "file": "http://file.mapreduce-kn.svc.cluster.local:80/",
+          "mapper": "http://mapper.mapreduce-kn.svc.cluster.local:80/",
+          "reducer": "http://reducer.mapreduce-kn.svc.cluster.local:80/"
+      }
+    }
