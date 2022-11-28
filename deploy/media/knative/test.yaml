@@ -41,7 +41,7 @@ data:
         "user": "user.media-kn.svc.cluster.local:80",
         "page": "page.media-kn.svc.cluster.local:80"
       },
-      "gateway": "gateway.media-kn.svc.cluster.local:80",
+      "gateway": "gateway.media-kn.10.2.64.8.sslip.io:80",
       "secret": "GT%j8S4GzJuha%oTM624rFPMSTfL@m&Q"
     }
 ---

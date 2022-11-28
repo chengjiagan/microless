@@ -24,6 +24,3 @@ spec:
 
     autoscaler:
       min-scale: "1"
-
-    domain:
-      svc.cluster.local: |

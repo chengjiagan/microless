@@ -22,6 +22,7 @@ kubectl create -f jaeger.yaml
 # Install knative
 kubectl apply -f https://github.com/knative/operator/releases/download/knative-v1.7.0/operator.yaml
 kubectl create -f knative.yaml
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.7.0/serving-default-domain.yaml
 
 # Install mongodb
 kubectl create -f mongodb.yaml

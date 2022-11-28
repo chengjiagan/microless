@@ -8,7 +8,6 @@ metadata:
     app.kubernetes.io/instance: kn-deploy
     app.kubernetes.io/component: video-service
     app.kubernetes.io/part-of: video
-    networking.knative.dev/visibility: cluster-local
   namespace: video-kn
 spec:
   template:

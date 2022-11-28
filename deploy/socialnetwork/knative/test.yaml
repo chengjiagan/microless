@@ -40,7 +40,7 @@ data:
         "text": "text.social-network-kn.svc.cluster.local:80",
         "composepost": "compose-post.social-network-kn.svc.cluster.local:80"
       },
-      "gateway": "gateway.social-network-kn.svc.cluster.local:80",
+      "gateway": "gateway.social-network-kn.10.2.64.8.sslip.io:80",
       "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
     }
 ---

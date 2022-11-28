@@ -8,7 +8,6 @@ metadata:
     app.kubernetes.io/instance: kn-deploy
     app.kubernetes.io/component: mapreduce-service
     app.kubernetes.io/part-of: mapreduce
-    networking.knative.dev/visibility: cluster-local
   namespace: mapreduce-kn
 spec:
   template:

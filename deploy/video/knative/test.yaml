@@ -19,7 +19,7 @@ data:
           "secure": false
       },
       "service": {
-          "video": "http://video.video-kn.svc.cluster.local:80/",
+          "video": "http://video.video-kn.10.2.64.8.sslip.io:80/",
           "preview": "http://preview.video-kn.svc.cluster.local:80/",
           "split": "http://split.video-kn.svc.cluster.local:80/",
           "transcode": "http://transcode.video-kn.svc.cluster.local:80/",

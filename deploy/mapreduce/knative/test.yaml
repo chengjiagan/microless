@@ -19,7 +19,7 @@ data:
           "secure": false
       },
       "service": {
-          "mapreduce": "http://mapreduce.mapreduce-kn.svc.cluster.local:80/",
+          "mapreduce": "http://mapreduce.mapreduce-kn.10.2.64.8.sslip.io:80/",
           "file": "http://file.mapreduce-kn.svc.cluster.local:80/",
           "mapper": "http://mapper.mapreduce-kn.svc.cluster.local:80/",
           "reducer": "http://reducer.mapreduce-kn.svc.cluster.local:80/"
