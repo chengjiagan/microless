@@ -23,9 +23,6 @@ for i in range(NUM_USER):
     }
     resp = requests.post(URL_REGUSER, json=req)
     user_ids[i] = resp.json()['userId']
-# save user_ids
-with open(SAVE_USERIDS, 'w') as f:
-    json.dump(user_ids, f)
 
 # gen social graph
 SNAP_DATA = 'facebook_combined.txt'
@@ -41,8 +38,11 @@ for i, u in enumerate(user_ids):
 
 # gen post for users
 URL_POST = URL_GATEWAY + '/api/v1/composepost'
+saved = []
 for i, user_id in enumerate(user_ids):
     num_post = random.randint(1, 100)
+    saved.append({'user_id': user_id, 'num_post': num_post})
+
     for _ in range(num_post):
         post_len = random.randint(1, 200)
         text = ''.join(random.choices(ALPHANUM, k=post_len))
@@ -55,3 +55,6 @@ for i, user_id in enumerate(user_ids):
             'post_type': 0
         }
         requests.post(URL_POST, json=req)
+# save user ids and number of posts
+with open(SAVE_USERIDS, 'w') as f:
+    json.dump(saved, f)

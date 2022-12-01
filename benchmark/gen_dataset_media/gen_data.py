@@ -83,8 +83,6 @@ for m in movies:
         'review_ids': []
     }
     review_col.insert_one(review)
-with open(SAVE_MOVIEIDS, 'w') as f:
-    json.dump(movieids, f)
 
 # gen users
 userids = [None for _ in range(NUM_USER)]
@@ -97,14 +95,17 @@ for i in range(NUM_USER):
     }
     res = requests.post(URL_REGUSER, json=req)
     userids[i] = res.json()['userId']
-with open(SAVE_USERIDS, 'w') as f:
-    json.dump(userids, f)
 
 # gen reviews
+saved_user = []
+movie_reviews = {m: 0 for m in movieids}
 for u in userids:
     num_review = random.randint(1, 100)
+    saved_user.append({'user_id': u, 'num_review': num_review})
+
     movies = random.choices(movieids, k=num_review)
     for m in movies:
+        movie_reviews[m] += 1
         rate = random.randint(1, 10)
         post_len = random.randint(1, 200)
         text = ''.join(random.choices(ALPHANUM, k=post_len))
@@ -115,3 +116,13 @@ for u in userids:
             'rating': rate
         }
         requests.post(URL_REVIEW, json=req)
+
+# save
+with open(SAVE_USERIDS, 'w') as f:
+    json.dump(saved_user, f)
+saved_movie = [
+    {'movie_id': k, 'num_review': v}
+    for k, v in movie_reviews.items()
+]
+with open(SAVE_MOVIEIDS, 'w') as f:
+    json.dump(saved_movie, f)
