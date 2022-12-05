@@ -13,7 +13,7 @@ from pymemcache.client.base import Client
 
 
 class TestSocialNetwork(unittest.TestCase):
-    config_file = os.environ.get('SERVICE_CONFIG') or '../config/dev.json'
+    config_file = os.environ.get('TEST_CONFIG') or '../config/dev.json'
     # mongodb collection
     post_db: Collection
     usertimeline_db: Collection

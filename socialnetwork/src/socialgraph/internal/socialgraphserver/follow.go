@@ -7,7 +7,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -54,14 +53,15 @@ func (s *SocialGraphService) follow(ctx context.Context, userId, followeeId stri
 				"followees": followeeOid,
 			},
 		}
-		err := s.mongodb.FindOneAndUpdate(ctx, query, update).Err()
+
+		res, err := s.mongodb.UpdateOne(ctx, query, update)
 		if err != nil {
-			if err == mongo.ErrNoDocuments {
-				return status.Errorf(codes.NotFound, "user_id: %v doesn't exist", userId, followeeId)
-			} else {
-				s.logger.Errorw("Failed to update user social graph in MongoDB", "user_id", userId, "err", err)
-				return status.Errorf(codes.Internal, "MongoDB Err: %v", err)
-			}
+			s.logger.Errorw("Failed to update user social graph in MongoDB", "user_id", userId, "err", err)
+			return status.Errorf(codes.Internal, "MongoDB Err: %v", err)
+		}
+		if res.MatchedCount < 1 {
+			s.logger.Errorw("Unknown user", "user_id", userId)
+			return status.Errorf(codes.NotFound, "user_id: %v doesn't exist", userId)
 		}
 		return nil
 	})
@@ -74,14 +74,15 @@ func (s *SocialGraphService) follow(ctx context.Context, userId, followeeId stri
 				"followers": userOid,
 			},
 		}
-		err := s.mongodb.FindOneAndUpdate(ctx, query, update).Err()
+
+		res, err := s.mongodb.UpdateOne(ctx, query, update)
 		if err != nil {
-			if err == mongo.ErrNoDocuments {
-				return status.Errorf(codes.NotFound, "user_id: %v doesn't exist", followeeId, userId)
-			} else {
-				s.logger.Errorw("Failed to update user social graph in MongoDB", "user_id", userId, "err", err)
-				return status.Errorf(codes.Internal, "MongoDB Err: %v", err)
-			}
+			s.logger.Errorw("Failed to update user social graph in MongoDB", "user_id", followeeId, "err", err)
+			return status.Errorf(codes.Internal, "MongoDB Err: %v", err)
+		}
+		if res.MatchedCount < 1 {
+			s.logger.Errorw("Unknown user", "user_id", followeeId)
+			return status.Errorf(codes.NotFound, "user_id: %v doesn't exist", followeeId)
 		}
 		return nil
 	})
