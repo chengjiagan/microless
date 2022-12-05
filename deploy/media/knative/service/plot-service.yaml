@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-media-plot:0.1.0
+        image: waterlemongan/microless-media-plot:0.1.1
         ports:
         - name: h2c
           containerPort: 8080

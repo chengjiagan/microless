@@ -54,7 +54,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-media-movieinfo:0.1.0
+        image: waterlemongan/microless-media-movieinfo:0.1.1
         ports:
         - name: grpc
           containerPort: 8080

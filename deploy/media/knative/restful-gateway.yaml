@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-media-gateway:0.1.0
+        image: waterlemongan/microless-media-gateway:0.1.1
         ports:
         - name: http1
           containerPort: 8081
