@@ -26,10 +26,14 @@ func (s *UserReviewService) UploadUserReview(ctx context.Context, req *pb.Upload
 			},
 		},
 	}
-	err := s.mongodb.FindOneAndUpdate(ctx, query, update).Err()
+	res, err := s.mongodb.UpdateOne(ctx, query, update)
 	if err != nil {
 		s.logger.Errorw("Failed to update user reviews", "user_id", req.UserId, "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
+	}
+	if res.MatchedCount < 1 {
+		s.logger.Errorw("Unknown user", "user_id", req.UserId)
+		return nil, status.Errorf(codes.NotFound, "user_id: %v doesn't exist", req.UserId)
 	}
 
 	// invalidate cache in redis
