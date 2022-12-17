@@ -1,0 +1,47 @@
+[
+    {
+        "hotel_id": {
+            "$oid": "000000000000000000000001"
+        },
+        "location": {
+            "type": "Point",
+            "coordinates": [121.44, 31.03]
+        }
+    },
+    {
+        "hotel_id": {
+            "$oid": "000000000000000000000002"
+        },
+        "location": {
+            "type": "Point",
+            "coordinates": [121.51, 31.30]
+        }
+    },
+    {
+        "hotel_id": {
+            "$oid": "000000000000000000000003"
+        },
+        "location": {
+            "type": "Point",
+            "coordinates": [121.51, 31.29]
+        }
+    },
+    {
+        "hotel_id": {
+            "$oid": "000000000000000000000004"
+        },
+        "location": {
+            "type": "Point",
+            "coordinates": [121.45, 31.03]
+        }
+    },
+    {
+        "hotel_id": {
+            "$oid": "000000000000000000000005"
+        },
+        "location": {
+            "type": "Point",
+            "coordinates": [121.50, 31.31]
+        }
+    }
+]

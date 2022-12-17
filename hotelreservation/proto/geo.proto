@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package microless.hotelreservation.geo;
+option go_package = "microless/hotelreservation/proto/geo";
+
+import "google/protobuf/empty.proto";
+
+service GeoService {
+    // Finds the hotels contained nearby the current lat/lon.
+    rpc Nearby(NearbyRequest) returns (NearbyRespond);
+    // Add a new hotel to the geospacial database
+    rpc AddHotel(AddHotelRequest) returns (google.protobuf.Empty);
+}
+
+// The latitude and longitude of the current location.
+message NearbyRequest {
+    double lat = 1;
+    double lon = 2;
+}
+
+message NearbyRespond {
+    repeated string hotel_ids = 1;
+}
+
+// The latitude and longitude of the hotel
+message AddHotelRequest {
+    string hotel_id = 1;
+    double lat = 2;
+    double lon = 3;
+}

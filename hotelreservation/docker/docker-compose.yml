@@ -1,0 +1,117 @@
+# docker compose for development
+version: '3'
+
+services:
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    depends_on:
+      - mongodb
+    ports:
+      - 8081:8081
+
+  redis-commander:
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: always
+    environment:
+    - REDIS_HOSTS=geo:redis:6379:0
+    ports:
+      - 8082:8081
+
+  profile-memcached:
+    image: memcached:1.6
+  rate-memcached:
+    image: memcached:1.6
+  user-memcached:
+    image: memcached:1.6
+  reservation-memcached:
+    image: memcached:1.6
+
+  redis:
+    image: redis:6.2
+    ports:
+      - 6379:6379
+
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - 27017:27017
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.37
+    command: ["--collector.otlp.enabled=true"]
+    ports:
+      - 16685:16685
+      - 16686:16686
+
+  gateway:
+    image: waterlemongan/microless-hotelreservation-gateway:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - profile
+      - rate
+      - reservation
+      - search
+      - user
+      - jaeger
+    ports:
+      - 8080:8081
+
+  geo:
+    image: waterlemongan/microless-hotelreservation-geo:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - mongodb
+      - redis
+      - jaeger
+
+  profile:
+    image: waterlemongan/microless-hotelreservation-profile:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - mongodb
+      - profile-memcached
+      - jaeger
+
+  rate:
+    image: waterlemongan/microless-hotelreservation-rate:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - mongodb
+      - rate-memcached
+      - jaeger
+
+  reservation:
+    image: waterlemongan/microless-hotelreservation-reservation:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - mongodb
+      - reservation-memcached
+      - jaeger
+
+  search:
+    image: waterlemongan/microless-hotelreservation-search:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - geo
+      - profile
+      - rate
+      - reservation
+      - jaeger
+
+  user:
+    image: waterlemongan/microless-hotelreservation-user:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - mongodb
+      - user-memcached
+      - jaeger

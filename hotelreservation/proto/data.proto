@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package microless.hotelreservation;
+option go_package = "microless/hotelreservation/proto";
+
+message Hotel {
+    string hotel_id = 1;
+    string name = 2;
+    string phone_number = 3;
+    string description = 4;
+    Address address = 5;
+    repeated Image images = 6;
+    int32 room_number = 7;
+}
+
+message Address {
+    string street_number = 1;
+    string street_name = 2;
+    string city = 3;
+    string state = 4;
+    string country = 5;
+    string postal_code = 6;
+    double lat = 7;
+    double lon = 8;
+}
+
+message Image {
+    string url = 1;
+    bool default = 2;
+}

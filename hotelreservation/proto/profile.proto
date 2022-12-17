@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package microless.hotelreservation.profile;
+option go_package = "microless/hotelreservation/proto/profile";
+
+import "proto/data.proto";
+import "google/api/annotations.proto";
+
+service ProfileService {
+    rpc GetRoomNumber (GetRoomNumberRequest) returns (GetRoomNumberRespond);
+    rpc GetProfiles(GetProfilesRequest) returns (GetProfilesRespond);
+    rpc AddProfile(AddProfileRequest) returns (AddProfileRespond) {
+        option (google.api.http) = {
+            post: "/api/v1/profile"
+            body: "*"
+        };
+    }
+}
+
+message GetRoomNumberRequest {
+    string hotel_id = 1;
+}
+
+message GetRoomNumberRespond {
+    int32 room_number = 1;
+}
+
+message GetProfilesRequest {
+    repeated string hotel_ids = 1;
+}
+
+message GetProfilesRespond {
+    repeated Hotel hotels = 1;
+}
+
+message AddProfileRequest {
+    Hotel hotel = 1;
+}
+
+message AddProfileRespond {
+    string hotel_id = 1;
+}

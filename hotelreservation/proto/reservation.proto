@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package microless.hotelreservation.reservation;
+option go_package = "microless/hotelreservation/proto/reservation";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+service ReservationService {
+    // MakeReservation makes a reservation based on given information
+    rpc MakeReservation(MakeReservationRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/api/v1/reservation"
+            body: "*"
+        };
+    }
+    // CheckAvailability checks if given information is available
+    rpc CheckAvailability(CheckAvailabilityRequest) returns (CheckAvailabilityRespond);
+}
+
+message MakeReservationRequest {
+    string user_id = 1;
+    string hotel_id = 2;
+    google.protobuf.Timestamp in_date = 3;
+    google.protobuf.Timestamp out_date = 4;
+    int32 room_number = 5;
+}
+
+message CheckAvailabilityRequest {
+    repeated string hotel_ids = 2;
+    google.protobuf.Timestamp in_date = 3;
+    google.protobuf.Timestamp out_date = 4;
+    int32 room_number = 5;
+}
+
+message CheckAvailabilityRespond {
+    repeated string hotel_ids = 1;
+}

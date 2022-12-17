@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package microless.hotelreservation.user;
+option go_package = "microless/hotelreservation/proto/user";
+
+import "google/api/annotations.proto";
+
+message RegisterUserRequest {
+    string username = 3;
+    string password = 4;
+}
+
+message RegisterUserRespond {
+    string user_id = 1;
+}
+
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginRespond {
+    string token = 1;
+}
+
+service UserService {
+    rpc RegisterUser (RegisterUserRequest) returns (RegisterUserRespond) {
+        option (google.api.http) = {
+            post: "/api/v1/user/register"
+            body: "*"
+        };
+    }
+    rpc Login (LoginRequest) returns (LoginRespond) {
+        option (google.api.http) = {
+            post: "/api/v1/user/login"
+            body: "*"
+        };
+    }
+}

@@ -1,0 +1,147 @@
+[
+    {
+        "_id": {
+            "$oid": "000000000000000000000001"
+        },
+        "name": "SJTU",
+        "phone_number": "86-21-54740000",
+        "description": "Shanghai Jiao Tong University",
+        "address": {
+            "street_number": "800",
+            "street_name": "Dongchuan",
+            "city": "Shanghai",
+            "state": "Shanghai",
+            "country": "China",
+            "postal_code": "200240",
+            "lat": 31.03,
+            "lon": 121.44
+        },
+        "images": [
+            {
+                "url": "1.jpg",
+                "default": true
+            },
+            {
+                "url": "2.jpg",
+                "default": false
+            }
+        ],
+        "room_number": 10
+    },
+    {
+        "_id": {
+            "$oid": "000000000000000000000002"
+        },
+        "name": "FDU",
+        "phone_number": "021-65642222",
+        "description": "Fudan University",
+        "address": {
+            "street_number": "220",
+            "street_name": "Handan",
+            "city": "Shanghai",
+            "state": "Shanghai",
+            "country": "China",
+            "postal_code": "200433",
+            "lat": 31.30,
+            "lon": 121.51
+        },
+        "images": [
+            {
+                "url": "1.jpg",
+                "default": true
+            },
+            {
+                "url": "2.jpg",
+                "default": false
+            }
+        ],
+        "room_number": 10
+    },
+    {
+        "_id": {
+            "$oid": "000000000000000000000003"
+        },
+        "name": "TJU",
+        "phone_number": "021-65982641",
+        "description": "Tongji University",
+        "address": {
+            "street_number": "1239",
+            "street_name": "Siping",
+            "city": "Shanghai",
+            "state": "Shanghai",
+            "country": "China",
+            "postal_code": "200000",
+            "lat": 31.29,
+            "lon": 121.51
+        },
+        "images": [
+            {
+                "url": "1.jpg",
+                "default": true
+            },
+            {
+                "url": "2.jpg",
+                "default": false
+            }
+        ],
+        "room_number": 10
+    },
+    {
+        "_id": {
+            "$oid": "000000000000000000000004"
+        },
+        "name": "ECNU",
+        "phone_number": "86-21-62233333",
+        "description": "East China Normal University",
+        "address": {
+            "street_number": "500",
+            "street_name": "Dongchuan",
+            "city": "Shanghai",
+            "state": "Shanghai",
+            "country": "China",
+            "postal_code": "200241",
+            "lat": 31.03,
+            "lon": 121.45
+        },
+        "images": [
+            {
+                "url": "1.jpg",
+                "default": true
+            },
+            {
+                "url": "2.jpg",
+                "default": false
+            }
+        ],
+        "room_number": 10
+    },
+    {
+        "_id": {
+            "$oid": "000000000000000000000005"
+        },
+        "name": "SUFE",
+        "phone_number": "65904466",
+        "description": "Shanghai University of Finance and Economics",
+        "address": {
+            "street_number": "777",
+            "street_name": "Guoding",
+            "city": "Shanghai",
+            "state": "Shanghai",
+            "country": "China",
+            "postal_code": "200433",
+            "lat": 31.31,
+            "lon": 121.50
+        },
+        "images": [
+            {
+                "url": "1.jpg",
+                "default": true
+            },
+            {
+                "url": "2.jpg",
+                "default": false
+            }
+        ],
+        "room_number": 10
+    }
+]

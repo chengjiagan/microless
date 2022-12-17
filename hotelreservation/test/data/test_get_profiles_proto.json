@@ -1,0 +1,31 @@
+{
+    "hotels": [
+        {
+            "hotel_id": "000000000000000000000001",
+            "name": "SJTU",
+            "phone_number": "86-21-54740000",
+            "description": "Shanghai Jiao Tong University",
+            "address": {
+                "street_number": "800",
+                "street_name": "Dongchuan",
+                "city": "Shanghai",
+                "state": "Shanghai",
+                "country": "China",
+                "postal_code": "200240",
+                "lat": 31.03,
+                "lon": 121.44
+            },
+            "images": [
+                {
+                    "url": "1.jpg",
+                    "default": true
+                },
+                {
+                    "url": "2.jpg",
+                    "default": false
+                }
+            ],
+            "room_number": 300
+        }
+    ]
+}

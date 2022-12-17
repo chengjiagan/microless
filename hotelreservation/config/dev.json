@@ -1,0 +1,28 @@
+{
+    "grpc": ":8080",
+    "rest": ":8081",
+    "otel": "jaeger:4317",
+    "mongodb": {
+        "url": "mongodb://mongodb:27017",
+        "database": "hotelreservation-dev"
+    },
+    "memcached": {
+        "profile": "profile-memcached:11211",
+        "rate": "rate-memcached:11211",
+        "user": "user-memcached:11211",
+        "reservation": "reservation-memcached:11211"
+    },
+    "redis": {
+        "geo": "redis://redis:6379/0"
+    },
+    "service": {
+        "geo": "geo:8080",
+        "profile": "profile:8080",
+        "rate": "rate:8080",
+        "reservation": "reservation:8080",
+        "search": "search:8080",
+        "user": "user:8080"
+    },
+    "gateway": "gateway:8081",
+    "secret": "secret"
+}

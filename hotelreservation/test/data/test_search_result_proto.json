@@ -1,0 +1,58 @@
+{
+  "hotels": [
+    {
+      "hotel_id": "000000000000000000000003",
+      "name": "TJU",
+      "phone_number": "021-65982641",
+      "description": "Tongji University",
+      "address": {
+        "street_number": "1239",
+        "street_name": "Siping",
+        "city": "Shanghai",
+        "state": "Shanghai",
+        "country": "China",
+        "postal_code": "200000",
+        "lat": 31.29,
+        "lon": 121.51
+      },
+      "images": [
+        {
+          "url": "1.jpg",
+          "default": true
+        },
+        {
+          "url": "2.jpg",
+          "default": false
+        }
+      ],
+      "room_number": 10
+    },
+    {
+      "hotel_id": "000000000000000000000005",
+      "name": "SUFE",
+      "phone_number": "65904466",
+      "description": "Shanghai University of Finance and Economics",
+      "address": {
+        "street_number": "777",
+        "street_name": "Guoding",
+        "city": "Shanghai",
+        "state": "Shanghai",
+        "country": "China",
+        "postal_code": "200433",
+        "lat": 31.31,
+        "lon": 121.50
+      },
+      "images": [
+        {
+          "url": "1.jpg",
+          "default": true
+        },
+        {
+          "url": "2.jpg",
+          "default": false
+        }
+      ],
+      "room_number": 10
+    }
+  ]
+}

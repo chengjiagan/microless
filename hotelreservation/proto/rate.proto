@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package microless.hotelreservation.rate;
+option go_package = "microless/hotelreservation/proto/rate";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+service RateService {
+    // GetRates returns rate codes for hotels for a given date range
+    rpc GetRates(GetRatesRequest) returns (GetRatesRespond);
+    rpc AddRate(AddRateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/api/v1/rate"
+            body: "*"
+        };
+    }
+}
+
+message GetRatesRequest {
+    repeated string hotel_ids = 1;
+}
+
+message GetRatesRespond {
+    repeated HotelRate rates = 1;
+}
+
+message AddRateRequest {
+    string hotel_id = 1;
+    string user_id = 2;
+    google.protobuf.Timestamp in_date = 3;
+    google.protobuf.Timestamp out_date = 4;
+    int32 rate = 5;
+}
+
+message HotelRate {
+    string hotel_id = 1;
+    double rate = 2;
+}

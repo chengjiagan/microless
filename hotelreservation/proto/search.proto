@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package microless.hotelreservation.search;
+option go_package = "microless/hotelreservation/proto/search";
+
+import "proto/data.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+// Search service returns best hotel chocies for a user.
+service SearchService {
+    rpc Search(SearchRequest) returns (SearchRespond) {
+        option (google.api.http) = {
+            post: "/api/v1/search"
+            body: "*"
+        };
+    }
+}
+
+message SearchRequest {
+    double lat = 1;
+    double lon = 2;
+    google.protobuf.Timestamp in_date = 3;
+    google.protobuf.Timestamp out_date = 4;
+    int32 room_number = 5;
+}
+
+message SearchRespond {
+    repeated Hotel hotels = 1;
+}
