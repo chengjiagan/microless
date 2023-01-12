@@ -1,0 +1,32 @@
+[
+    {
+        "_id": {
+            "$oid": "63bf9410831e972f68508e64"
+        },
+        "one_way_flight": true,
+        "to_flight_id": {
+            "$oid": "63bfa0ec6ced8e7900d05169"
+        },
+        "return_flight_id": {
+            "$oid": "000000000000000000000000"
+        },
+        "customer_id": {
+            "$oid": "000000000000000000000001"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "63bf947b831e972f68508e65"
+        },
+        "one_way_flight": false,
+        "to_flight_id": {
+            "$oid": "63bfa0ec6ced8e7900d0516a"
+        },
+        "return_flight_id": {
+            "$oid": "63bfa0ec6ced8e7900d0516c"
+        },
+        "customer_id": {
+            "$oid": "000000000000000000000001"
+        }
+    }
+]

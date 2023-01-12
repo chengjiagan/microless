@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package microless.acmeair;
+option go_package = "microless/acmeair/proto";
+
+import "google/protobuf/timestamp.proto";
+
+message BookingInfo {
+    string booking_id = 1;
+    bool one_way_flight = 2;
+    FlightInfo to_flight = 3;
+    FlightInfo return_flight = 4;
+    CustomerInfo customer = 5;
+    google.protobuf.Timestamp date_of_booking = 6;
+}
+
+message CustomerInfo {
+    string customer_id = 1;
+    string username = 2;
+    MemberShipStatus status = 3;
+    int32 total_miles = 4;
+    int32 miles_ytd = 5;
+    AddressInfo address = 6;
+    string phone_number = 7;
+    PhoneType phone_number_type = 8;
+}
+
+message AddressInfo {
+    string street_address1 = 1;
+    string street_address2 = 2;
+    string city = 3;
+    string state_province = 4;
+    string country = 5;
+    string postal_code = 6;
+}
+
+enum PhoneType {
+    UNKNOWN = 0;
+    HOME = 1;
+    BUSINESS = 2;
+    MOBILE = 3;
+}
+
+enum MemberShipStatus {
+    NONE = 0;
+    SILVER = 1;
+    GOLD = 2;
+    PLATINUM = 3;
+    EXEC_PLATINUM = 4;
+    GRAPHITE = 5;
+}
+
+message FlightInfo {
+    string flight_id = 1;
+    google.protobuf.Timestamp scheduled_departure_time = 3;
+    google.protobuf.Timestamp scheduled_arrival_time = 4;
+    int64 first_class_base_cost = 5;
+    int64 economy_class_base_cost = 6;
+    int32 num_first_class_seats = 7;
+    int32 num_economy_class_seats = 8;
+    string airplane_type_id = 9;
+    FlightSegmentInfo flight_segment = 10;
+}
+
+message FlightSegmentInfo {
+    string flight_name = 1;
+    string flight_segment = 2;
+    string origin_port = 3;
+    string dest_port = 4;
+    int32 miles = 5;
+}

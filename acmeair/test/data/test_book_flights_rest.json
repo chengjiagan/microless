@@ -1,0 +1,38 @@
+{
+  "oneWayFlight": true,
+  "toFlight": {
+    "flightId": "63bfa0ec6ced8e7900d0516e",
+    "scheduledDepartureTime": "2023-01-02T12:00:00Z",
+    "scheduledArrivalTime": "2023-01-02T15:00:00Z",
+    "firstClassBaseCost": "2000",
+    "economyClassBaseCost": "1000",
+    "numFirstClassSeats": 20,
+    "numEconomyClassSeats": 100,
+    "airplaneTypeId": "TE767",
+    "flightSegment": {
+      "flightName": "TE0001",
+      "flightSegment": "CAN-SHA",
+      "originPort": "CAN",
+      "destPort": "SHA",
+      "miles": 2000
+    }
+  },
+  "returnFlight": null,
+  "customer": {
+    "customerId": "000000000000000000000001",
+    "username": "test",
+    "address": {
+      "streetAddress1": "Shanghai, China",
+      "streetAddress2": "Dongcuan 800, Minhang",
+      "city": "Shanghai",
+      "stateProvince": "Shanghai",
+      "country": "China",
+      "postalCode": "200000"
+    },
+    "totalMiles": 0,
+    "milesYtd": 0,
+    "status": "NONE",
+    "phoneNumber": "86-10000000000",
+    "phoneNumberType": "MOBILE"
+  }
+}

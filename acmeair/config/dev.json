@@ -1,0 +1,20 @@
+{
+    "grpc": ":8080",
+    "rest": ":8081",
+    "otel": "jaeger:4317",
+    "mongodb": {
+        "url": "mongodb://mongodb:27017",
+        "database": "acmeair-dev"
+    },
+    "memcached": {
+        "bookings": "bookings-memcached:11211",
+        "customer": "customer-memcached:11211",
+        "flights": "flights-memcached:11211"
+    },
+    "service": {
+        "bookings": "bookings:8080",
+        "customer": "customer:8080",
+        "flights": "flights:8080"
+    },
+    "gateway": "gateway:8081"
+}

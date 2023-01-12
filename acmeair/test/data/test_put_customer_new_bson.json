@@ -1,0 +1,19 @@
+{
+    "_id": {
+        "$oid": "000000000000000000000001"
+    },
+    "username": "test",
+    "status": "GOLD",
+    "total_miles": 2000,
+    "miles_ytd": 0,
+    "address": {
+        "street_address1": "Shanghai, China",
+        "street_address2": "Dongcuan 800, Minhang",
+        "city": "Shanghai",
+        "state_province": "Shanghai",
+        "country": "China",
+        "postal_code": "200000"
+    },
+    "phone_number": "86-10000000000",
+    "phone_number_type": "MOBILE"
+}

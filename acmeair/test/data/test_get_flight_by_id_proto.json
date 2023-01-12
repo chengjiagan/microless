@@ -1,0 +1,17 @@
+{
+  "flightId": "63bfa0ec6ced8e7900d05169",
+  "scheduledDepartureTime": "2023-01-01T12:00:00Z",
+  "scheduledArrivalTime": "2023-01-01T15:00:00Z",
+  "firstClassBaseCost": "2000",
+  "economyClassBaseCost": "1000",
+  "numFirstClassSeats": 20,
+  "numEconomyClassSeats": 100,
+  "airplaneTypeId": "TE767",
+  "flightSegment": {
+    "flightName": "TE0001",
+    "flightSegment": "CAN-SHA",
+    "originPort": "CAN",
+    "destPort": "SHA",
+    "miles": 2000
+  }
+}

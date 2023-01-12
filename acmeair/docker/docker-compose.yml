@@ -1,0 +1,73 @@
+# docker compose for development
+version: '3'
+
+services:
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    depends_on:
+      - mongodb
+    ports:
+      - 8081:8081
+
+  bookings-memcached:
+    image: memcached:1.6
+  customer-memcached:
+    image: memcached:1.6
+  flights-memcached:
+    image: memcached:1.6
+
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - 27017:27017
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.37
+    command: ["--collector.otlp.enabled=true"]
+    ports:
+      - 16685:16685
+      - 16686:16686
+
+  gateway:
+    image: waterlemongan/microless-acmeair-gateway:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - bookings
+      - customer
+      - flights
+      - jaeger
+    ports:
+      - 8080:8081
+
+  bookings:
+    image: waterlemongan/microless-acmeair-bookings:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - mongodb
+      - bookings-memcached
+      - jaeger
+      - flights
+      - customer
+
+  customer:
+    image: waterlemongan/microless-acmeair-customer:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - mongodb
+      - customer-memcached
+      - jaeger
+
+  flights:
+    image: waterlemongan/microless-acmeair-flights:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - mongodb
+      - flights-memcached
+      - jaeger

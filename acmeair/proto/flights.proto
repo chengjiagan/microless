@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package microless.acmeair.flights;
+option go_package = "microless/acmeair/proto/flights";
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "proto/data.proto";
+
+service FlightsService {
+    // REST api
+    rpc GetTripFlights (GetTripFlightsRequest) returns (GetTripFlightsRespond) {
+        option (google.api.http) = {
+            post: "/api/v1/flights/queryflights"
+            body: "*"
+        };
+    }
+    rpc BrowseFlights (BrowseFlightsRequest) returns (BrowseFlightsRespond) {
+        option (google.api.http) = {
+            post: "/api/v1/flights/browseflights"
+            body: "*"
+        };
+    }
+
+    // internal api
+    rpc GetFlightById (GetFlightByIdRequest) returns (GetFlightByIdRespond);
+}
+
+message GetTripFlightsRequest {
+    string from_airport = 1;
+    string to_airport = 2;
+    google.protobuf.Timestamp from_date = 3;
+    google.protobuf.Timestamp return_date = 4;
+    bool one_way_flight = 5;
+}
+
+message GetTripFlightsRespond {
+    repeated FlightInfo to_flights = 1;
+    repeated FlightInfo return_flights = 2;
+    bool one_way_flight = 3;
+}
+
+message BrowseFlightsRequest {
+    string from_airport = 1;
+    string to_airport = 2;
+    bool one_way_flight = 3;
+}
+
+message BrowseFlightsRespond {
+    repeated FlightInfo to_flights = 1;
+    repeated FlightInfo return_flights = 2;
+    bool one_way_flight = 3;
+}
+
+message GetFlightByIdRequest {
+    string flight_id = 1;
+}
+
+message GetFlightByIdRespond {
+    FlightInfo flight = 1;
+}

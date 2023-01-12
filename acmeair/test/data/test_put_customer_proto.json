@@ -1,0 +1,16 @@
+{
+  "customerId": "000000000000000000000001",
+  "username": "test",
+  "status": "GOLD",
+  "totalMiles": 2000,
+  "address": {
+    "streetAddress1": "Shanghai, China",
+    "streetAddress2": "Dongcuan 800, Minhang",
+    "city": "Shanghai",
+    "stateProvince": "Shanghai",
+    "country": "China",
+    "postalCode": "200000"
+  },
+  "phoneNumber": "86-10000000000",
+  "phoneNumberType": "MOBILE"
+}

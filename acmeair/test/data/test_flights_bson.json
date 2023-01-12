@@ -1,0 +1,163 @@
+[
+    {
+        "_id": {
+            "$oid": "63bfa0ec6ced8e7900d05169"
+        },
+        "scheduled_departure_time": {
+            "$date": "2023-01-01T12:00:00Z"
+        },
+        "scheduled_arrival_time": {
+            "$date": "2023-01-01T15:00:00Z"
+        },
+        "first_class_base_cost": 2000,
+        "economy_class_base_cost": 1000,
+        "num_first_class_seats": 20,
+        "num_economy_class_seats": 100,
+        "airplane_type_id": "TE767",
+        "flight_segment": {
+            "flight_name": "TE0001",
+            "flight_segment": "CAN-SHA",
+            "origin_port": "CAN",
+            "dest_port": "SHA",
+            "miles": 2000
+        }
+    },
+    {
+        "_id": {
+            "$oid": "63bfa0ec6ced8e7900d0516a"
+        },
+        "scheduled_departure_time": {
+            "$date": "2023-01-01T13:00:00Z"
+        },
+        "scheduled_arrival_time": {
+            "$date": "2023-01-01T15:00:00Z"
+        },
+        "first_class_base_cost": 2000,
+        "economy_class_base_cost": 1000,
+        "num_first_class_seats": 20,
+        "num_economy_class_seats": 100,
+        "airplane_type_id": "TE767",
+        "flight_segment": {
+            "flight_name": "TE0002",
+            "flight_segment": "SHA-PEK",
+            "origin_port": "SHA",
+            "dest_port": "PEK",
+            "miles": 2000
+        }
+    },
+    {
+        "_id": {
+            "$oid": "63bfa0ec6ced8e7900d0516b"
+        },
+        "scheduled_departure_time": {
+            "$date": "2023-01-02T12:00:00Z"
+        },
+        "scheduled_arrival_time": {
+            "$date": "2023-01-02T15:00:00Z"
+        },
+        "first_class_base_cost": 2000,
+        "economy_class_base_cost": 1000,
+        "num_first_class_seats": 20,
+        "num_economy_class_seats": 100,
+        "airplane_type_id": "TE767",
+        "flight_segment": {
+            "flight_name": "TE0003",
+            "flight_segment": "SHA-CAN",
+            "origin_port": "SHA",
+            "dest_port": "CAN",
+            "miles": 2000
+        }
+    },
+    {
+        "_id": {
+            "$oid": "63bfa0ec6ced8e7900d0516c"
+        },
+        "scheduled_departure_time": {
+            "$date": "2023-01-02T09:00:00Z"
+        },
+        "scheduled_arrival_time": {
+            "$date": "2023-01-02T11:00:00Z"
+        },
+        "first_class_base_cost": 2000,
+        "economy_class_base_cost": 1000,
+        "num_first_class_seats": 20,
+        "num_economy_class_seats": 100,
+        "airplane_type_id": "TE767",
+        "flight_segment": {
+            "flight_name": "TE0003",
+            "flight_segment": "PEK-SHA",
+            "origin_port": "PEK",
+            "dest_port": "SHA",
+            "miles": 2000
+        }
+    },
+    {
+        "_id": {
+            "$oid": "63bfa0ec6ced8e7900d0516d"
+        },
+        "scheduled_departure_time": {
+            "$date": "2023-01-02T09:00:00Z"
+        },
+        "scheduled_arrival_time": {
+            "$date": "2023-01-02T15:00:00Z"
+        },
+        "first_class_base_cost": 2000,
+        "economy_class_base_cost": 1000,
+        "num_first_class_seats": 20,
+        "num_economy_class_seats": 100,
+        "airplane_type_id": "TE767",
+        "flight_segment": {
+            "flight_name": "TE0003",
+            "flight_segment": "PEK-CAN",
+            "origin_port": "PEK",
+            "dest_port": "CAN",
+            "miles": 4000
+        }
+    },
+    {
+        "_id": {
+            "$oid": "63bfa0ec6ced8e7900d0516e"
+        },
+        "scheduled_departure_time": {
+            "$date": "2023-01-02T12:00:00Z"
+        },
+        "scheduled_arrival_time": {
+            "$date": "2023-01-02T15:00:00Z"
+        },
+        "first_class_base_cost": 2000,
+        "economy_class_base_cost": 1000,
+        "num_first_class_seats": 20,
+        "num_economy_class_seats": 100,
+        "airplane_type_id": "TE767",
+        "flight_segment": {
+            "flight_name": "TE0001",
+            "flight_segment": "CAN-SHA",
+            "origin_port": "CAN",
+            "dest_port": "SHA",
+            "miles": 2000
+        }
+    },
+    {
+        "_id": {
+            "$oid": "63bfa0ec6ced8e7900d0516f"
+        },
+        "scheduled_departure_time": {
+            "$date": "2023-01-02T13:00:00Z"
+        },
+        "scheduled_arrival_time": {
+            "$date": "2023-01-02T15:00:00Z"
+        },
+        "first_class_base_cost": 2000,
+        "economy_class_base_cost": 1000,
+        "num_first_class_seats": 20,
+        "num_economy_class_seats": 100,
+        "airplane_type_id": "TE767",
+        "flight_segment": {
+            "flight_name": "TE0002",
+            "flight_segment": "SHA-PEK",
+            "origin_port": "SHA",
+            "dest_port": "PEK",
+            "miles": 2000
+        }
+    }
+]

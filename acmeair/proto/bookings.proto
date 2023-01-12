@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package microless.acmeair.bookings;
+option go_package = "microless/acmeair/proto/bookings";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "proto/data.proto";
+
+service BookingsService {
+    // REST api
+    rpc BookFlights (BookFlightsRequest) returns (BookFlightsRespond) {
+        option (google.api.http) = {
+            post: "/api/v1/bookings/bookflights"
+            body: "*"
+        };
+    }
+    rpc GetBookingById (GetBookingByIdRequest) returns (GetBookingByIdRespond) {
+        option (google.api.http) = {
+            get: "/api/v1/bookings/byid/{booking_id}"
+        };
+    }
+    rpc GetBookingByUser (GetBookingByUserRequest) returns (GetBookingByUserRespond) {
+        option (google.api.http) = {
+            get: "/api/v1/bookings/byuser/{customer_id}"
+        };
+    }
+    rpc CancelBookingById (CancelBookingByIdRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/api/v1/bookings/cancelbooking"
+            body: "*"
+        };
+    }
+}
+
+message BookFlightsRequest {
+    string customer_id = 1;
+    string to_flight_id = 2;
+    string ret_flight_id = 4;
+    bool one_way_flight = 6;
+}
+
+message BookFlightsRespond {
+    BookingInfo booking = 1;
+}
+
+message GetBookingByIdRequest {
+    string booking_id = 1;
+}
+
+message GetBookingByIdRespond {
+    BookingInfo booking = 1;
+}
+
+message GetBookingByUserRequest {
+    string customer_id = 1;
+}
+
+message GetBookingByUserRespond {
+    repeated BookingInfo bookings = 1;
+}
+
+message CancelBookingByIdRequest {
+    string booking_id = 1;
+    string customer_id = 2;
+}

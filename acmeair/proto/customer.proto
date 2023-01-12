@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package microless.acmeair.customer;
+option go_package = "microless/acmeair/proto/customer";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "proto/data.proto";
+
+service CustomerService {
+    // REST api
+    rpc GetCustomer (GetCustomerRequest) returns (GetCustomerRespond) {
+        option (google.api.http) = {
+            get: "/api/v1/customer/byid/{customer_id}"
+        };
+    }
+    rpc PutCustomer (PutCustomerRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/api/v1/customer/byid/{customer_id}"
+            body: "*"
+        };
+    }
+}
+
+message GetCustomerRequest {
+    string customer_id = 1;
+}
+
+message GetCustomerRespond {
+    CustomerInfo customer = 1;
+}
+
+message PutCustomerRequest {
+    string customer_id = 1;
+    CustomerInfo customer = 2;
+}

@@ -1,0 +1,12 @@
+{
+    "one_way_flight": true,
+    "to_flight_id": {
+        "$oid": "63bfa0ec6ced8e7900d0516e"
+    },
+    "return_flight_id": {
+        "$oid": "000000000000000000000000"
+    },
+    "customer_id": {
+        "$oid": "000000000000000000000001"
+    }
+}
