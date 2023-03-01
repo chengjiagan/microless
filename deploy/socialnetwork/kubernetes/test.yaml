@@ -56,7 +56,7 @@ spec:
       - name: test
         image: waterlemongan/microless-socialnetwork-test:0.1.2
         env:
-        - name: SERVICE_CONFIG
+        - name: TEST_CONFIG
           value: "/config/config.json"
         volumeMounts:
         - name: config-test
