@@ -1,0 +1,1 @@
+mongorestore --nsFrom='socialnetwork-dev.*' --nsTo='social-network.*' --gzip --archive='socialnetwork.mongo.gz' --drop
