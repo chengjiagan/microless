@@ -47,8 +47,8 @@ class TestUserTimeline(utils.TestSocialNetwork):
         expect = {
             'user_id': ObjectId(user_id),
             'post_ids': [
-                ObjectId(post_id_1),
                 ObjectId(post_id_2),
+                ObjectId(post_id_1),
                 ObjectId(post_id_0),
             ],
         }

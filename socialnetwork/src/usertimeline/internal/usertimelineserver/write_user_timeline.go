@@ -5,6 +5,7 @@ import (
 
 	pb "microless/socialnetwork/proto/usertimeline"
 
+	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
@@ -20,8 +21,8 @@ func (s *UserTimelineService) WriteUserTimeline(ctx context.Context, req *pb.Wri
 	update := bson.M{
 		"$push": bson.M{
 			"post_ids": bson.M{
-				"$each": bson.A{postOid},
-				"$sort": -1,
+				"$each":     bson.A{postOid},
+				"$position": 0,
 			},
 		},
 	}
@@ -36,10 +37,29 @@ func (s *UserTimelineService) WriteUserTimeline(ctx context.Context, req *pb.Wri
 	}
 
 	// Update user's timeline in redis
-	err = s.rdb.Del(ctx, req.UserId).Err()
+	ts := float64(postOid.Timestamp().Unix())
+	err = s.updateRedis(ctx, req.UserId, ts, req.PostId)
 	if err != nil {
-		s.logger.Warnw("Failed to delete user timeline in redis", "err", err)
+		s.logger.Errorw("Failed to update user timeline in redis", "err", err)
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+func (s *UserTimelineService) updateRedis(ctx context.Context, userId string, ts float64, postId string) error {
+	redisResult := s.rdb.Exists(ctx, userId)
+	if err := redisResult.Err(); err != nil {
+		return err
+	}
+
+	if redisResult.Val() != 0 {
+		err := s.rdb.ZAdd(ctx, userId, &redis.Z{
+			Score:  ts,
+			Member: postId,
+		}).Err()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
