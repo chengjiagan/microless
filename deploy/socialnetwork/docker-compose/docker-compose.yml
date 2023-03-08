@@ -15,10 +15,14 @@ services:
     image: mongo:6.0
     volumes:
       - mongo-data:/data/db
+    ports:
+      - 27017:27017
 
   jaeger:
     image: jaegertracing/all-in-one:1.37
     command: ["--collector.otlp.enabled=true"]
+    ports:
+      - 16686:16686
 
   gateway:
     image: waterlemongan/microless-socialnetwork-gateway:0.1.2
@@ -40,7 +44,7 @@ services:
     depends_on:
       - post-storage-memcached
       - mongodb
-      - otel-collector
+      - jaeger
 
   user-timeline:
     image: waterlemongan/microless-socialnetwork-usertimeline:0.1.2
@@ -50,7 +54,7 @@ services:
       - redis
       - mongodb
       - post-storage
-      - otel-collector
+      - jaeger
 
   user:
     image: waterlemongan/microless-socialnetwork-user:0.1.2
@@ -59,7 +63,7 @@ services:
     depends_on:
       - user-memcached
       - mongodb
-      - otel-collector
+      - jaeger
 
   social-graph:
     image: waterlemongan/microless-socialnetwork-socialgraph:0.1.2
@@ -69,7 +73,7 @@ services:
       - redis
       - mongodb
       - user
-      - otel-collector
+      - jaeger
 
   home-timeline:
     image: waterlemongan/microless-socialnetwork-hometimeline:0.1.2
@@ -79,14 +83,14 @@ services:
       - redis
       - post-storage
       - social-graph
-      - otel-collector
+      - jaeger
 
   media:
     image: waterlemongan/microless-socialnetwork-media:0.1.2
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
-      - otel-collector
+      - jaeger
 
   url-shorten:
     image: waterlemongan/microless-socialnetwork-urlshorten:0.1.2
@@ -95,7 +99,7 @@ services:
     depends_on:
       - url-shorten-memcached
       - mongodb
-      - otel-collector
+      - jaeger
 
   user-mention:
     image: waterlemongan/microless-socialnetwork-usermention:0.1.2
@@ -103,7 +107,7 @@ services:
       - ./config.json:/config.json:ro
     depends_on:
       - user
-      - otel-collector
+      - jaeger
 
   text:
     image: waterlemongan/microless-socialnetwork-text:0.1.2
@@ -112,7 +116,7 @@ services:
     depends_on:
       - url-shorten
       - user-mention
-      - otel-collector
+      - jaeger
 
   compose-post:
     image: waterlemongan/microless-socialnetwork-composepost:0.1.2
@@ -125,7 +129,7 @@ services:
       - media
       - text
       - home-timeline
-      - otel-collector
+      - jaeger
 
 volumes:
   mongo-data:

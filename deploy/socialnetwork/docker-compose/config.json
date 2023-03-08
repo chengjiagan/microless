@@ -4,7 +4,7 @@
     "otel": "jaeger:4317",
     "mongodb": {
         "url": "mongodb://mongodb:27017",
-        "database": "socialnetwork"
+        "database": "social-network"
     },
     "memcached": {
         "poststorage": "post-storage-memcached:11211",
