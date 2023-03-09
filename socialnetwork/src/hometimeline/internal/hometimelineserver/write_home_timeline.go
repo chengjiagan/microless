@@ -46,8 +46,8 @@ func (s *HomeTimelineService) WriteHomeTimeline(ctx context.Context, req *pb.Wri
 	update := bson.M{
 		"$push": bson.M{
 			"post_ids": bson.M{
-				"$each":     bson.A{postOid},
-				"$position": 0,
+				"$each": bson.A{postOid},
+				"$sort": -1,
 			},
 		},
 	}
