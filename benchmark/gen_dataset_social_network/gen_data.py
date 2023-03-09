@@ -4,9 +4,17 @@ import networkx as nx
 import random
 import requests
 import json
+import pymongo
 
 URL_GATEWAY = 'http://localhost:8080'
 ALPHANUM = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+
+URL_MONGO = 'mongodb://localhost:27017'
+MONGO_DB = 'socialnetwork-dev'
+COL_HOME = 'home-timeline'
+
+client = pymongo.MongoClient(URL_MONGO)
+db = client.get_database(MONGO_DB)
 
 # gen user
 NUM_USER = 4039
@@ -38,10 +46,10 @@ for i, u in enumerate(user_ids):
 
 # gen post for users
 URL_POST = URL_GATEWAY + '/api/v1/composepost'
-saved = []
+posts = {}
 for i, user_id in enumerate(user_ids):
     num_post = random.randint(1, 100)
-    saved.append({'user_id': user_id, 'num_post': num_post})
+    posts[user_id] = num_post
 
     for _ in range(num_post):
         post_len = random.randint(1, 200)
@@ -55,6 +63,15 @@ for i, user_id in enumerate(user_ids):
             'post_type': 0
         }
         requests.post(URL_POST, json=req)
-# save user ids and number of posts
+
+saved = []
+col = db.get_collection(COL_HOME)
+for doc in col.find():
+    user_id = str(doc['user_id'])
+    saved.append({
+        'user_id': user_id,
+        'num_post': posts[user_id],
+        'home_post': len(doc['post_ids'])
+    })
 with open(SAVE_USERIDS, 'w') as f:
     json.dump(saved, f)
