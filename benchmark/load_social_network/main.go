@@ -12,6 +12,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -19,6 +20,9 @@ import (
 var addr = flag.String("addr", "", "address to the gateway service")
 var pathUserIds = flag.String("userid", "", "path to json file that contains user ids")
 var mode = flag.String("mode", "", "load test mode: close for close-loop, open for open-loop, prewarm for pre-warming")
+
+// required by pre-warming
+var nThread = flag.Int("nthread", 1, "number of threads sending requests")
 
 // required by close-loop and open-loop
 var seconds = flag.Int("time", 0, "load duration in seconds")
@@ -146,11 +150,35 @@ func openLoop() {
 }
 
 func prewarm() {
+	var wg sync.WaitGroup
 	ctx := context.Background()
-	for i, user := range users {
-		fmt.Printf("\r%d/%d", i, len(users))
-		sendRead(ctx, user.UserId, 0, user.HomePost)
+	cnt := int32(0)
+
+	wg.Add(*nThread)
+	for t := 0; t < *nThread; t++ {
+		go func(t int) {
+			for i := t; i < len(users); i += *nThread {
+				for j := 0; j < users[i].NumPost; j += 100 {
+					if j+100 < users[i].NumPost {
+						sendRead(ctx, users[i].UserId, j, j+100)
+					} else {
+						sendRead(ctx, users[i].UserId, j, users[i].NumPost)
+					}
+				}
+				atomic.AddInt32(&cnt, 1)
+			}
+			wg.Done()
+		}(t)
 	}
+
+	go func() {
+		for {
+			fmt.Printf("\r%d/%d", atomic.LoadInt32(&cnt), len(users))
+			time.Sleep(time.Second)
+		}
+	}()
+
+	wg.Wait()
 	fmt.Println()
 }
 
