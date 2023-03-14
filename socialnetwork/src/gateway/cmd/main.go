@@ -14,6 +14,7 @@ import (
 	"os"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 )
 
@@ -95,8 +96,11 @@ func main() {
 		logger.Fatal(err.Error())
 	}
 
+	// setup opentelemetry http handler
+	handler := otelhttp.NewHandler(mux, "gateway")
+
 	logger.Info("start server")
-	err = http.ListenAndServe(config.Rest, mux)
+	err = http.ListenAndServe(config.Rest, handler)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
