@@ -224,8 +224,9 @@ func loadWithRate(ctx context.Context) chan sample {
 	var wg sync.WaitGroup
 
 	go func() {
+		timer := time.Tick(time.Second / time.Duration(*rate))
 		for ctx.Err() == nil {
-			time.Sleep(time.Second / time.Duration(*rate))
+			<-timer
 			wg.Add(1)
 			go func() {
 				p := rand.Float64()
