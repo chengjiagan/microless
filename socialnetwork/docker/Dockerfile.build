@@ -7,9 +7,7 @@ ARG GOPROXY="https://goproxy.cn"
 WORKDIR /go/src
 COPY . .
 # build services, disable cgo
+RUN go mod download
 RUN for s in ${SERVICES}; do \
-	cd $s && \
-	go mod download && \
-        CGO_ENABLED=0 go build -o /go/bin/$s cmd/main.go && \
-	cd ..; \
+        CGO_ENABLED=0 go build -o /go/bin/$s $s/cmd/main.go; \
     done
