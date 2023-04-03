@@ -18,15 +18,13 @@ data:
         "url": "mongodb://mongodb.mongodb:27017",
         "database": "social-network"
       },
-      "memcached": {
-        "poststorage": "post-storage-memcached.social-network-backend:11211",
-        "user": "user-memcached.social-network-backend:11211",
-        "urlshorten": "url-shorten-memcached.social-network-backend:11211"
-      },
       "redis": {
         "usertimeline": "redis://redis.social-network-backend:6379/0",
         "socialgraph": "redis://redis.social-network-backend:6379/1",
-        "hometimeline": "redis://redis.social-network-backend:6379/2"
+        "hometimeline": "redis://redis.social-network-backend:6379/2",
+        "poststorage": "redis://redis.social-network-backend:6379/3",
+        "user": "redis://redis.social-network-backend:6379/4",
+        "urlshorten": "redis://redis.social-network-backend:6379/5"
       },
       "service": {
         "poststorage": "post-storage.social-network:8080",
@@ -54,7 +52,7 @@ spec:
     spec:
       containers:
       - name: test
-        image: waterlemongan/microless-socialnetwork-test:0.1.5
+        image: waterlemongan/microless-socialnetwork-test:0.1.6
         env:
         - name: TEST_CONFIG
           value: "/config/config.json"

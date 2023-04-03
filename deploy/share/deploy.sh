@@ -37,3 +37,6 @@ helm install mongodb-exporter prometheus-mongodb-exporter \
 
 # Install minio
 kubectl create -f minio.yaml
+
+# Install redis
+kubectl create -f redis.yaml

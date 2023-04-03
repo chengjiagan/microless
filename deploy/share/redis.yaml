@@ -1,56 +1,50 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: redis
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: redis
   labels:
-    microless: social-network
     app.kubernetes.io/name: redis
     app.kubernetes.io/instance: k8s-backend
     app.kubernetes.io/component: redis-service
-    app.kubernetes.io/part-of: social-network
-  namespace: social-network-backend
+  namespace: redis
 spec:
   ports:
   - port: 6379
   clusterIP: None
   selector:
-    microless: social-network
     app.kubernetes.io/name: redis
     app.kubernetes.io/instance: k8s-backend
     app.kubernetes.io/component: redis
-    app.kubernetes.io/part-of: social-network
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
   labels:
-    microless: social-network
     app.kubernetes.io/name: redis
     app.kubernetes.io/instance: k8s-backend
     app.kubernetes.io/component: redis-deployment
-    app.kubernetes.io/part-of: social-network
-  namespace: social-network-backend
+  namespace: redis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      microless: social-network
       app.kubernetes.io/name: redis
       app.kubernetes.io/instance: k8s-backend
       app.kubernetes.io/component: redis
-      app.kubernetes.io/part-of: social-network
   template:
     metadata:
       labels:
-        microless: social-network
         app.kubernetes.io/name: redis
         app.kubernetes.io/instance: k8s-backend
         app.kubernetes.io/component: redis
-        app.kubernetes.io/part-of: social-network
       name: redis
-      namespace: social-network-backend
+      namespace: redis
     spec:
       containers:
       - name: redis

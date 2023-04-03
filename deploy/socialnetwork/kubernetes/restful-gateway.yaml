@@ -77,7 +77,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-gateway:0.1.5
+        image: waterlemongan/microless-socialnetwork-gateway:0.1.6
         ports:
         - name: http
           containerPort: 8081
