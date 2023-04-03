@@ -71,7 +71,7 @@ DOCKER_PREFIX = waterlemongan/microless-socialnetwork-
 # name for build image
 BUILD_IMAGE = $(DOCKER_PREFIX)build
 # tag for image
-VERSION = 0.1.5
+VERSION = 0.1.6
 
 docker-build: docker-build-gateway docker-build-test $(foreach s, $(SERVICES), docker-build-$(s))
 
