@@ -7,7 +7,6 @@ import (
 	"microless/socialnetwork/proto"
 	pb "microless/socialnetwork/proto/poststorage"
 
-	"github.com/bradfitz/gomemcache/memcache"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
@@ -19,19 +18,21 @@ func (s *PostStorageService) ReadPosts(ctx context.Context, req *pb.ReadPostsReq
 		return &pb.ReadPostsRespond{}, nil
 	}
 
-	// get posts from memcached
+	// get posts from redis
 	posts := make(map[string]*Post, len(req.PostIds))
-	postsMc, err := s.memcached.WithContext(ctx).GetMulti(req.PostIds)
+	postsCache, err := s.rdb.MGet(ctx, req.PostIds...).Result()
 	if err != nil {
-		s.logger.Warnw("Cannot get post_ids from Memcached", "post_ids", req.PostIds, "err", err)
+		s.logger.Warnw("Cannot get post_ids from Redis", "post_ids", req.PostIds, "err", err)
 	}
-	for k, v := range postsMc {
-		post := new(Post)
-		json.Unmarshal(v.Value, post)
-		posts[k] = post
+	for i, v := range postsCache {
+		if v != nil {
+			post := new(Post)
+			json.Unmarshal([]byte(v.(string)), post)
+			posts[req.PostIds[i]] = post
+		}
 	}
 
-	// got all posts from memcached
+	// got all posts from redis
 	if len(posts) == len(req.PostIds) {
 		pbPosts := make([]*proto.Post, len(posts))
 		for i, id := range req.PostIds {
@@ -61,19 +62,17 @@ func (s *PostStorageService) ReadPosts(ctx context.Context, req *pb.ReadPostsReq
 		s.logger.Errorw("Failed to find posts from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
+	// update redis
+	postsMiss := make(map[string][]byte, len(mongoPosts))
 	for _, post := range mongoPosts {
 		id := post.PostOid.Hex()
 		posts[id] = post
-
-		// upload posts to memcached
 		postJson, _ := json.Marshal(post)
-		err = s.memcached.WithContext(ctx).Set(&memcache.Item{
-			Key:   id,
-			Value: postJson,
-		})
-		if err != nil {
-			s.logger.Errorw("Failed to set post to Memcached", "err", err)
-		}
+		postsMiss[id] = postJson
+	}
+	_, err = s.rdb.MSet(ctx, postsMiss).Result()
+	if err != nil {
+		s.logger.Errorw("Failed to set post to Redis", "err", err)
 	}
 
 	// still unknown post_id exists

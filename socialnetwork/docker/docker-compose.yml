@@ -16,16 +16,9 @@ services:
     image: ghcr.io/joeferner/redis-commander:latest
     restart: always
     environment:
-    - REDIS_HOSTS=usertimeline:redis:6379:0,socialgraph:redis:6379:1,hometimeline:redis:6379:2
+    - REDIS_HOSTS=usertimeline:redis:6379:0,socialgraph:redis:6379:1,hometimeline:redis:6379:2,poststorage:redis:6379:3,user:redis:6379:4,urlshorten:redis:6379:5
     ports:
       - 8082:8081
-
-  post-storage-memcached:
-    image: memcached:1.6
-  user-memcached:
-    image: memcached:1.6
-  url-shorten-memcached:
-    image: memcached:1.6
 
   redis:
     image: redis:6.2
@@ -60,7 +53,7 @@ services:
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
-      - post-storage-memcached
+      - redis
       - mongodb
       - jaeger
 
@@ -79,7 +72,7 @@ services:
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
-      - user-memcached
+      - redis
       - mongodb
       - jaeger
 
@@ -115,7 +108,7 @@ services:
     volumes:
       - ../config/dev.json:/config.json:ro
     depends_on:
-      - url-shorten-memcached
+      - redis
       - mongodb
       - jaeger
 

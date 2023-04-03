@@ -3,13 +3,11 @@ module microless/socialnetwork
 go 1.18
 
 require (
-	github.com/bradfitz/gomemcache v0.0.0-20230124162541-5f7a7d875746
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-redis/redis/extra/redisotel v0.3.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 	go.mongodb.org/mongo-driver v1.11.2
-	go.opentelemetry.io/contrib/instrumentation/github.com/bradfitz/gomemcache/memcache/otelmemcache v0.40.0
 	go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.40.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.40.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.40.0

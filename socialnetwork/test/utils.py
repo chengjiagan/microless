@@ -9,7 +9,6 @@ from bson import json_util
 from pymongo.collection import Collection
 from google.protobuf.json_format import Parse, MessageToDict
 from google.protobuf.message import Message
-from pymemcache.client.base import Client
 
 
 class TestSocialNetwork(unittest.TestCase):
@@ -54,9 +53,6 @@ class TestSocialNetwork(unittest.TestCase):
         self.user_db.delete_many({})
         self.socialgraph_db.delete_many({})
         self.url_db.delete_many({})
-        # clean memcached
-        for addr in config['memcached'].values():
-            memcached_clean(addr)
         # clean redis
         for addr in config['redis'].values():
             redis_clean(addr)
@@ -70,15 +66,6 @@ def mongo_connect(config: Dict[str, str], collection: str) -> Collection:
     client = pymongo.MongoClient(config['url'])
     col = client[config['database']][collection]
     return col
-
-
-def memcached_clean(addr: str) -> None:
-    try:
-        client = Client(addr)
-        client.flush_all()
-        client.close()
-    except:
-        pass
 
 
 def redis_clean(url: str) -> None:

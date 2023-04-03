@@ -11,8 +11,8 @@ import (
 
 	pb "microless/socialnetwork/proto/user"
 
-	"github.com/bradfitz/gomemcache/memcache"
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc/codes"
@@ -47,18 +47,19 @@ func (s *UserService) getUser(ctx context.Context, username string) (*User, erro
 	user := new(User)
 
 	keyMc := username + ":login"
-	userMc, err := s.memcached.WithContext(ctx).Get(keyMc)
-	if err != nil && err != memcache.ErrCacheMiss {
-		s.logger.Warnw("Failed to get from Memcached", "err", err)
-	}
-	if userMc != nil {
-		s.logger.Debugw("User cache hit from memcached", "username", username)
-		json.Unmarshal(userMc.Value, user)
+	userCache, err := s.rdb.Get(ctx, keyMc).Result()
+	if err != nil {
+		if err != redis.Nil {
+			s.logger.Warnw("Failed to get from Redis", "err", err)
+		}
+	} else {
+		s.logger.Debugw("User cache hit from Redis", "username", username)
+		json.Unmarshal([]byte(userCache), user)
 		return user, nil
 	}
 
 	// cache miss
-	s.logger.Debugw("user_id cache miss from memcached", "username", username)
+	s.logger.Debugw("user_id cache miss from Redis", "username", username)
 	err = s.mongodb.FindOne(ctx, bson.M{"username": username}).Decode(user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -72,12 +73,9 @@ func (s *UserService) getUser(ctx context.Context, username string) (*User, erro
 
 	s.logger.Debugw("User found in MongoDB", "username", username)
 	userJson, _ := json.Marshal(user)
-	err = s.memcached.WithContext(ctx).Set(&memcache.Item{
-		Key:   keyMc,
-		Value: userJson,
-	})
+	_, err = s.rdb.Set(ctx, keyMc, userJson, 0).Result()
 	if err != nil {
-		s.logger.Errorw("Failed to set to Memcached", "err", err)
+		s.logger.Errorw("Failed to set to Redis", "err", err)
 	}
 
 	return user, nil

@@ -11,8 +11,6 @@ import (
 	pb "microless/socialnetwork/proto/poststorage"
 	"microless/socialnetwork/utils"
 
-	"github.com/bradfitz/gomemcache/memcache"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/bradfitz/gomemcache/memcache/otelmemcache"
 	"go.uber.org/zap"
 )
 
@@ -47,10 +45,17 @@ func main() {
 		}
 	}()
 
-	// setup memcached
-	logger.Info("connect to memcached")
-	mc := otelmemcache.NewClientWithTracing(
-		memcache.New(config.Memcached.PostStorage))
+	// setup redis
+	logger.Info("connect to redis")
+	rdb, err := utils.NewRedisClient(config.Redis.PostStorage)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+	defer func() {
+		if err := rdb.Close(); err != nil {
+			logger.Fatal(err.Error())
+		}
+	}()
 
 	// setup mongodb
 	logger.Info("connect to mongodb")
@@ -72,7 +77,7 @@ func main() {
 	}
 
 	// setup grpc
-	server, err := server.NewServer(logger.Sugar(), mc, col)
+	server, err := server.NewServer(logger.Sugar(), rdb, col)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}

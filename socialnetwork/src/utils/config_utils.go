@@ -6,19 +6,17 @@ import (
 )
 
 type Config struct {
-	Grpc      string      `json:"grpc"`
-	Rest      string      `json:"rest"`
-	Otel      string      `json:"otel"`
-	MongoDB   MongoConfig `json:"mongodb"`
-	Memcached struct {
-		PostStorage string `json:"poststorage"`
-		User        string `json:"user"`
-		UrlShorten  string `json:"urlshorten"`
-	} `json:"memcached"`
-	Redis struct {
+	Grpc    string      `json:"grpc"`
+	Rest    string      `json:"rest"`
+	Otel    string      `json:"otel"`
+	MongoDB MongoConfig `json:"mongodb"`
+	Redis   struct {
 		UserTimeline string `json:"usertimeline"`
 		SocialGraph  string `json:"socialgraph"`
 		HomeTimeline string `json:"hometimeline"`
+		PostStorage  string `json:"poststorage"`
+		User         string `json:"user"`
+		UrlShorten   string `json:"urlshorten"`
 	} `json:"redis"`
 	Service struct {
 		PostStorage  string `json:"poststorage"`

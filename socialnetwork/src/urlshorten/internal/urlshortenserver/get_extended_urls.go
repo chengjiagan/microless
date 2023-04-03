@@ -4,7 +4,6 @@ import (
 	"context"
 	pb "microless/socialnetwork/proto/urlshorten"
 
-	"github.com/bradfitz/gomemcache/memcache"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,16 +12,18 @@ import (
 func (s *UrlShortenService) GetExtendedUrls(ctx context.Context, req *pb.GetExtendedUrlsRequest) (*pb.GetExtendedUrlsRespond, error) {
 	urls := make(map[string]string, len(req.ShortenedUrls))
 
-	// get from memcached
-	mcResp, err := s.memcached.WithContext(ctx).GetMulti(req.ShortenedUrls)
+	// get from redis
+	urlsCache, err := s.rdb.MGet(ctx, req.ShortenedUrls...).Result()
 	if err != nil {
-		s.logger.Warnw("Failed to get extened urls from Memcached", "err", err)
+		s.logger.Warnw("Failed to get extened urls from Redis", "err", err)
 	}
-	for k, item := range mcResp {
-		urls[k] = string(item.Value)
+	for i, item := range urlsCache {
+		if item != nil {
+			urls[req.ShortenedUrls[i]] = item.(string)
+		}
 	}
 
-	// everything in memcacheds
+	// everything in redis
 	if len(req.ShortenedUrls) == len(urls) {
 		extUrls := make([]string, len(urls))
 		for i, url := range req.ShortenedUrls {
@@ -46,15 +47,15 @@ func (s *UrlShortenService) GetExtendedUrls(ctx context.Context, req *pb.GetExte
 	}
 	var mongoResult []Url
 	cursor.All(ctx, &mongoResult)
+	// update redis
+	urlsMiss := make(map[string]string, len(mongoResult))
 	for _, url := range mongoResult {
 		urls[url.ShortenedUrl] = url.ExpandedUrl
-
-		// update memcached
-		item := &memcache.Item{
-			Key:   url.ShortenedUrl,
-			Value: []byte(url.ExpandedUrl),
-		}
-		s.memcached.WithContext(ctx).Add(item)
+		urlsMiss[url.ShortenedUrl] = url.ExpandedUrl
+	}
+	_, err = s.rdb.MSet(ctx, urlsMiss).Result()
+	if err != nil {
+		s.logger.Warnw("Failed to set extened urls to Redis", "err", err)
 	}
 
 	// still unknown url exists

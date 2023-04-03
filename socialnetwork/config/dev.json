@@ -6,15 +6,13 @@
         "url": "mongodb://mongodb:27017",
         "database": "socialnetwork-dev"
     },
-    "memcached": {
-        "poststorage": "post-storage-memcached:11211",
-        "user": "user-memcached:11211",
-        "urlshorten": "url-shorten-memcached:11211"
-    },
     "redis": {
         "usertimeline": "redis://redis:6379/0",
         "socialgraph": "redis://redis:6379/1",
-        "hometimeline": "redis://redis:6379/2"
+        "hometimeline": "redis://redis:6379/2",
+        "poststorage": "redis://redis:6379/3",
+        "user": "redis://redis:6379/4",
+        "urlshorten": "redis://redis:6379/5"
     },
     "service": {
         "poststorage": "post-storage:8080",

@@ -7,8 +7,8 @@ import (
 	"microless/socialnetwork/proto/usertimeline"
 	"microless/socialnetwork/utils"
 
+	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/bradfitz/gomemcache/memcache/otelmemcache"
 	"go.uber.org/zap"
 )
 
@@ -19,11 +19,11 @@ type UserService struct {
 	hometimelineClient hometimeline.HomeTimelineServiceClient
 	logger             *zap.SugaredLogger
 	mongodb            *mongo.Collection
-	memcached          *otelmemcache.Client
+	rdb                *redis.Client
 	secret             string
 }
 
-func NewServer(logger *zap.SugaredLogger, mongodb *mongo.Collection, memcached *otelmemcache.Client, config *utils.Config) (*UserService, error) {
+func NewServer(logger *zap.SugaredLogger, mongodb *mongo.Collection, rdb *redis.Client, config *utils.Config) (*UserService, error) {
 	conn, err := utils.NewConn(config.Service.SocialGraph)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func NewServer(logger *zap.SugaredLogger, mongodb *mongo.Collection, memcached *
 		hometimelineClient: hometimelineClinet,
 		logger:             logger,
 		mongodb:            mongodb,
-		memcached:          memcached,
+		rdb:                rdb,
 		secret:             config.Secret,
 	}, nil
 }
