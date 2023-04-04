@@ -63,14 +63,14 @@ func (s *PostStorageService) ReadPosts(ctx context.Context, req *pb.ReadPostsReq
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	// update redis
-	postsMiss := make(map[string][]byte, len(mongoPosts))
+	postsMiss := make([]interface{}, 0, len(mongoPosts)*2)
 	for _, post := range mongoPosts {
 		id := post.PostOid.Hex()
 		posts[id] = post
 		postJson, _ := json.Marshal(post)
-		postsMiss[id] = postJson
+		postsMiss = append(postsMiss, id, postJson)
 	}
-	_, err = s.rdb.MSet(ctx, postsMiss).Result()
+	_, err = s.rdb.MSet(ctx, postsMiss...).Result()
 	if err != nil {
 		s.logger.Errorw("Failed to set post to Redis", "err", err)
 	}

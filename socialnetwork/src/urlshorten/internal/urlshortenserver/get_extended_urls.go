@@ -48,12 +48,12 @@ func (s *UrlShortenService) GetExtendedUrls(ctx context.Context, req *pb.GetExte
 	var mongoResult []Url
 	cursor.All(ctx, &mongoResult)
 	// update redis
-	urlsMiss := make(map[string]string, len(mongoResult))
+	urlsMiss := make([]interface{}, len(mongoResult)*2)
 	for _, url := range mongoResult {
 		urls[url.ShortenedUrl] = url.ExpandedUrl
-		urlsMiss[url.ShortenedUrl] = url.ExpandedUrl
+		urlsMiss = append(urlsMiss, url.ShortenedUrl, url.ExpandedUrl)
 	}
-	_, err = s.rdb.MSet(ctx, urlsMiss).Result()
+	_, err = s.rdb.MSet(ctx, urlsMiss...).Result()
 	if err != nil {
 		s.logger.Warnw("Failed to set extened urls to Redis", "err", err)
 	}
