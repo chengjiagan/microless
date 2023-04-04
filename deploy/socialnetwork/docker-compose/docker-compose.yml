@@ -18,7 +18,7 @@ services:
       - 16686:16686
 
   gateway:
-    image: waterlemongan/microless-socialnetwork-gateway:0.1.6
+    image: waterlemongan/microless-socialnetwork-gateway:0.1.7
     volumes:
       - ./config.json:/config.json:ro
     ports:
@@ -31,7 +31,7 @@ services:
       - user-timeline
 
   post-storage:
-    image: waterlemongan/microless-socialnetwork-poststorage:0.1.6
+    image: waterlemongan/microless-socialnetwork-poststorage:0.1.7
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -40,7 +40,7 @@ services:
       - jaeger
 
   user-timeline:
-    image: waterlemongan/microless-socialnetwork-usertimeline:0.1.6
+    image: waterlemongan/microless-socialnetwork-usertimeline:0.1.7
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -50,7 +50,7 @@ services:
       - jaeger
 
   user:
-    image: waterlemongan/microless-socialnetwork-user:0.1.6
+    image: waterlemongan/microless-socialnetwork-user:0.1.7
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -59,7 +59,7 @@ services:
       - jaeger
 
   social-graph:
-    image: waterlemongan/microless-socialnetwork-socialgraph:0.1.6
+    image: waterlemongan/microless-socialnetwork-socialgraph:0.1.7
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -69,7 +69,7 @@ services:
       - jaeger
 
   home-timeline:
-    image: waterlemongan/microless-socialnetwork-hometimeline:0.1.6
+    image: waterlemongan/microless-socialnetwork-hometimeline:0.1.7
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -79,14 +79,14 @@ services:
       - jaeger
 
   media:
-    image: waterlemongan/microless-socialnetwork-media:0.1.6
+    image: waterlemongan/microless-socialnetwork-media:0.1.7
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
       - jaeger
 
   url-shorten:
-    image: waterlemongan/microless-socialnetwork-urlshorten:0.1.6
+    image: waterlemongan/microless-socialnetwork-urlshorten:0.1.7
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -95,7 +95,7 @@ services:
       - jaeger
 
   user-mention:
-    image: waterlemongan/microless-socialnetwork-usermention:0.1.6
+    image: waterlemongan/microless-socialnetwork-usermention:0.1.7
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -103,7 +103,7 @@ services:
       - jaeger
 
   text:
-    image: waterlemongan/microless-socialnetwork-text:0.1.6
+    image: waterlemongan/microless-socialnetwork-text:0.1.7
     volumes:
       - ./config.json:/config.json:ro
     depends_on:
@@ -112,7 +112,7 @@ services:
       - jaeger
 
   compose-post:
-    image: waterlemongan/microless-socialnetwork-composepost:0.1.6
+    image: waterlemongan/microless-socialnetwork-composepost:0.1.7
     volumes:
       - ./config.json:/config.json:ro
     depends_on:

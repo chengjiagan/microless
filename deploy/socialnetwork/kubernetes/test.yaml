@@ -52,7 +52,7 @@ spec:
     spec:
       containers:
       - name: test
-        image: waterlemongan/microless-socialnetwork-test:0.1.6
+        image: waterlemongan/microless-socialnetwork-test:0.1.7
         env:
         - name: TEST_CONFIG
           value: "/config/config.json"
