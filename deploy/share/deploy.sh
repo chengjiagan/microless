@@ -3,12 +3,6 @@
 # this script is just for reference, please do not run it directly
 # require helm
 
-# Install ingress-nginx
-# helm install ingress-nginx ingress-nginx \
-#   --repo https://kubernetes.github.io/ingress-nginx \
-#   --namespace ingress-nginx --create-namespace \
-#   --version 4.2.5
-
 # Install prometheus and grafana
 # grafana user: admin password: prom-operator
 helm install prometheus-stack kube-prometheus-stack \
@@ -40,3 +34,6 @@ kubectl create -f minio.yaml
 
 # Install redis
 kubectl create -f redis.yaml
+
+# Install istio
+istioctl install -y

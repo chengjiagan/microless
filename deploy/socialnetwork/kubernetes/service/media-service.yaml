@@ -34,7 +34,6 @@ metadata:
     app.kubernetes.io/part-of: social-network
   namespace: social-network
 spec:
-  replicas: 1
   selector:
     matchLabels:
       microless: social-network

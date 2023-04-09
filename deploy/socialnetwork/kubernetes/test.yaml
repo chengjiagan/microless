@@ -38,7 +38,7 @@ data:
         "text": "text.social-network:8080",
         "composepost": "compose-post.social-network:8080"
       },
-      "gateway": "gateway.social-network:8081",
+      "gateway": "10.2.64.8:80",
       "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
     }
 ---

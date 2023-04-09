@@ -1,27 +1,3 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: service-gateway
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: service-ingress
-    app.kubernetes.io/part-of: social-network
-  name: ingress
-  namespace: social-network
-spec:
-  ingressClassName: nginx
-  rules:
-  - http:
-      paths:
-      - path: /api/v1
-        pathType: Prefix
-        backend:
-          service:
-            name: gateway
-            port:
-              number: 8081
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -57,7 +33,6 @@ metadata:
     app.kubernetes.io/part-of: social-network
   namespace: social-network
 spec:
-  replicas: 1
   selector:
     matchLabels:
       microless: social-network
