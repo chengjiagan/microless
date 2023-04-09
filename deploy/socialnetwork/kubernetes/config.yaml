@@ -14,12 +14,12 @@ data:
         "database": "social-network"
       },
       "redis": {
-        "usertimeline": "redis://redis.social-network-backend:6379/0",
-        "socialgraph": "redis://redis.social-network-backend:6379/1",
-        "hometimeline": "redis://redis.social-network-backend:6379/2",
-        "poststorage": "redis://redis.social-network-backend:6379/3",
-        "user": "redis://redis.social-network-backend:6379/4",
-        "urlshorten": "redis://redis.social-network-backend:6379/5"
+        "usertimeline": "redis://redis.redis:6379/0",
+        "socialgraph": "redis://redis.redis:6379/1",
+        "hometimeline": "redis://redis.redis:6379/2",
+        "poststorage": "redis://redis.redis:6379/3",
+        "user": "redis://redis.redis:6379/4",
+        "urlshorten": "redis://redis.redis:6379/5"
       },
       "service": {
         "poststorage": "post-storage:8080",
