@@ -36,4 +36,4 @@ kubectl create -f minio.yaml
 kubectl create -f redis.yaml
 
 # Install istio
-istioctl install -y
+istioctl install --set meshConfig.defaultConfig.holdApplicationUntilProxyStarts=true -y
