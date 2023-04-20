@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: text
+  labels:
+    microless: social-network
+    app.kubernetes.io/name: text
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: text-vm-service
+    app.kubernetes.io/part-of: social-network
+  namespace: social-network-lb-vm
+spec:
+  ports:
+  - port: 8080
+    name: grpc
+    targetPort: grpc
+  selector:
+    microless: social-network
+    app.kubernetes.io/name: text
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: text-vm
+    app.kubernetes.io/part-of: social-network
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: text
+  labels:
+    microless: social-network
+    app.kubernetes.io/name: text
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: text-vm-deployment
+    app.kubernetes.io/part-of: social-network
+  namespace: social-network-lb-vm
+spec:
+  selector:
+    matchLabels:
+      microless: social-network
+      app.kubernetes.io/name: text
+      app.kubernetes.io/instance: k8s-deploy
+      app.kubernetes.io/component: text-vm
+      app.kubernetes.io/part-of: social-network
+  template:
+    metadata:
+      labels:
+        microless: social-network
+        app.kubernetes.io/name: text
+        app.kubernetes.io/instance: k8s-deploy
+        app.kubernetes.io/component: text-vm
+        app.kubernetes.io/part-of: social-network
+      name: text
+    spec:
+      containers:
+      - name: server
+        image: waterlemongan/microless-socialnetwork-text:0.1.7
+        ports:
+        - name: grpc
+          containerPort: 8080
+        env:
+        - name: SERVICE_CONFIG
+          value: "/config/config.json"
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: config
+            items:
+            - key: config.json
+              path: config.json

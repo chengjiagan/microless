@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: media
+  labels:
+    microless: social-network
+    app.kubernetes.io/name: media
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: media-lb-service
+    app.kubernetes.io/part-of: social-network
+  namespace: social-network-lb
+spec:
+  ports:
+  - port: 8080
+    name: grpc
+    targetPort: grpc
+  selector:
+    microless: social-network
+    app.kubernetes.io/name: media
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: media-lb
+    app.kubernetes.io/part-of: social-network
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: media
+  labels:
+    microless: social-network
+    app.kubernetes.io/name: media
+    app.kubernetes.io/instance: k8s-deploy
+    app.kubernetes.io/component: media-lb-deployment
+    app.kubernetes.io/part-of: social-network
+  namespace: social-network-lb
+spec:
+  selector:
+    matchLabels:
+      microless: social-network
+      app.kubernetes.io/name: media
+      app.kubernetes.io/instance: k8s-deploy
+      app.kubernetes.io/component: media-lb
+      app.kubernetes.io/part-of: social-network
+  template:
+    metadata:
+      labels:
+        microless: social-network
+        app.kubernetes.io/name: media
+        app.kubernetes.io/instance: k8s-deploy
+        app.kubernetes.io/component: media-lb
+        app.kubernetes.io/part-of: social-network
+      name: media
+    spec:
+      containers:
+      - name: server
+        image: waterlemongan/microless-loadbalancer:0.1.0
+        ports:
+        - name: grpc
+          containerPort: 8080
+        env:
+        - name: LOADBALANCER_CONFIG
+          value: "/config/config.json"
+        volumeMounts:
+        - name: media-config-lb
+          mountPath: "/config"
+          readOnly: true
+      volumes:
+        - name: media-config-lb
+          configMap:
+            name: media-config-lb
+            items:
+            - key: config.json
+              path: config.json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: media-config-lb
+  namespace: social-network-lb
+data:
+  config.json: |
+    {
+      "grpc": ":8080",
+      "http": ":8081",
+      "backend": {
+        "vm": "media.social-network-lb-vm:8080",
+        "serverless": "media.social-network-lb-kn.svc.cluster.local:80"
+      },
+      "deployment": {
+        "namespace": "social-network-lb-vm",
+        "name": "media"
+      },
+      "rate_per_pod": 1000
+    }
