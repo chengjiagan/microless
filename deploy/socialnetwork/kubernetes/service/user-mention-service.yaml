@@ -2,12 +2,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: user-mention
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: user-mention
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: user-mention-service
-    app.kubernetes.io/part-of: social-network
   namespace: social-network
 spec:
   ports:
@@ -15,40 +9,23 @@ spec:
     name: grpc
     targetPort: grpc
   selector:
-    microless: social-network
-    app.kubernetes.io/name: user-mention
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: user-mention
-    app.kubernetes.io/part-of: social-network
+    app: user-mention
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-mention
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: user-mention
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: user-mention-deployment
-    app.kubernetes.io/part-of: social-network
   namespace: social-network
 spec:
   selector:
     matchLabels:
-      microless: social-network
-      app.kubernetes.io/name: user-mention
-      app.kubernetes.io/instance: k8s-deploy
-      app.kubernetes.io/component: user-mention
-      app.kubernetes.io/part-of: social-network
+      app: user-mention
   template:
     metadata:
       labels:
-        microless: social-network
-        app.kubernetes.io/name: user-mention
-        app.kubernetes.io/instance: k8s-deploy
-        app.kubernetes.io/component: user-mention
-        app.kubernetes.io/part-of: social-network
+        app: user-mention
       name: user-mention
+      namespace: social-network
     spec:
       containers:
       - name: server

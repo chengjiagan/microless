@@ -1,12 +1,6 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: post-storage
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: post-storage-hpa
-    app.kubernetes.io/part-of: social-network
   name: post-storage-hpa
   namespace: social-network
 spec:

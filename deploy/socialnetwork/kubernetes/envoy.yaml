@@ -6,7 +6,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app.kubernetes.io/name: compose-post
+      app: compose-post
   configPatches:
   - applyTo: HTTP_FILTER
     match:
@@ -41,7 +41,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app.kubernetes.io/name: home-timeline
+      app: home-timeline
   configPatches:
   - applyTo: HTTP_FILTER
     match:
@@ -76,7 +76,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app.kubernetes.io/name: social-graph
+      app: social-graph
   configPatches:
   - applyTo: HTTP_FILTER
     match:
@@ -111,7 +111,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app.kubernetes.io/name: user
+      app: user
   configPatches:
   - applyTo: HTTP_FILTER
     match:
@@ -146,7 +146,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app.kubernetes.io/name: user-timeline
+      app: user-timeline
   configPatches:
   - applyTo: HTTP_FILTER
     match:

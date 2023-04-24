@@ -2,12 +2,6 @@ apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: gateway
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: restful-gateway
-    app.kubernetes.io/instance: kn-deploy
-    app.kubernetes.io/component: restful-gateway-service
-    app.kubernetes.io/part-of: social-network
   namespace: social-network-kn
 spec:
   template:

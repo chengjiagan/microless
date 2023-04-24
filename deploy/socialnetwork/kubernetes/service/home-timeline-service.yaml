@@ -2,12 +2,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: home-timeline
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: home-timeline
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: home-timeline-service
-    app.kubernetes.io/part-of: social-network
   namespace: social-network
 spec:
   ports:
@@ -15,40 +9,23 @@ spec:
     name: grpc
     targetPort: grpc
   selector:
-    microless: social-network
-    app.kubernetes.io/name: home-timeline
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: home-timeline
-    app.kubernetes.io/part-of: social-network
+    app: home-timeline
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: home-timeline
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: home-timeline
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: home-timeline-deployment
-    app.kubernetes.io/part-of: social-network
   namespace: social-network
 spec:
   selector:
     matchLabels:
-      microless: social-network
-      app.kubernetes.io/name: home-timeline
-      app.kubernetes.io/instance: k8s-deploy
-      app.kubernetes.io/component: home-timeline
-      app.kubernetes.io/part-of: social-network
+      app: home-timeline
   template:
     metadata:
       labels:
-        microless: social-network
-        app.kubernetes.io/name: home-timeline
-        app.kubernetes.io/instance: k8s-deploy
-        app.kubernetes.io/component: home-timeline
-        app.kubernetes.io/part-of: social-network
+        app: home-timeline
       name: home-timeline
+      namespace: social-network
     spec:
       containers:
       - name: server

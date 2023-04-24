@@ -3,11 +3,6 @@ kind: Service
 metadata:
   name: user-mention
   labels:
-    microless: social-network
-    app.kubernetes.io/name: user-mention
-    app.kubernetes.io/instance: kn-deploy
-    app.kubernetes.io/component: user-mention-service
-    app.kubernetes.io/part-of: social-network
     networking.knative.dev/visibility: cluster-local
   namespace: social-network-kn
 spec:

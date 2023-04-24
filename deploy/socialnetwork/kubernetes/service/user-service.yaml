@@ -2,12 +2,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: user
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: user
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: user-service
-    app.kubernetes.io/part-of: social-network
   namespace: social-network
 spec:
   ports:
@@ -15,40 +9,23 @@ spec:
     name: grpc
     targetPort: grpc
   selector:
-    microless: social-network
-    app.kubernetes.io/name: user
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: user
-    app.kubernetes.io/part-of: social-network
+    app: user
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: user
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: user-deployment
-    app.kubernetes.io/part-of: social-network
   namespace: social-network
 spec:
   selector:
     matchLabels:
-      microless: social-network
-      app.kubernetes.io/name: user
-      app.kubernetes.io/instance: k8s-deploy
-      app.kubernetes.io/component: user
-      app.kubernetes.io/part-of: social-network
+      app: user
   template:
     metadata:
       labels:
-        microless: social-network
-        app.kubernetes.io/name: user
-        app.kubernetes.io/instance: k8s-deploy
-        app.kubernetes.io/component: user
-        app.kubernetes.io/part-of: social-network
+        app: user
       name: user
+      namespace: social-network
     spec:
       containers:
       - name: server

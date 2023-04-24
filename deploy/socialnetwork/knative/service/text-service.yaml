@@ -3,11 +3,6 @@ kind: Service
 metadata:
   name: text
   labels:
-    microless: social-network
-    app.kubernetes.io/name: text
-    app.kubernetes.io/instance: kn-deploy
-    app.kubernetes.io/component: text-service
-    app.kubernetes.io/part-of: social-network
     networking.knative.dev/visibility: cluster-local
   namespace: social-network-kn
 spec:

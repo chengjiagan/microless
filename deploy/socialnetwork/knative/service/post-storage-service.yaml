@@ -3,11 +3,6 @@ kind: Service
 metadata:
   name: post-storage
   labels:
-    microless: social-network
-    app.kubernetes.io/name: post-storage
-    app.kubernetes.io/instance: kn-deploy
-    app.kubernetes.io/component: post-storage-service
-    app.kubernetes.io/part-of: social-network
     networking.knative.dev/visibility: cluster-local
   namespace: social-network-kn
 spec:

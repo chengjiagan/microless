@@ -3,11 +3,6 @@ kind: Service
 metadata:
   name: social-graph
   labels:
-    microless: social-network
-    app.kubernetes.io/name: social-graph
-    app.kubernetes.io/instance: kn-deploy
-    app.kubernetes.io/component: social-graph-service
-    app.kubernetes.io/part-of: social-network
     networking.knative.dev/visibility: cluster-local
   namespace: social-network-kn
 spec:

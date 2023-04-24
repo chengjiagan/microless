@@ -3,11 +3,6 @@ kind: Service
 metadata:
   name: url-shorten
   labels:
-    microless: social-network
-    app.kubernetes.io/name: url-shorten
-    app.kubernetes.io/instance: kn-deploy
-    app.kubernetes.io/component: url-shorten-service
-    app.kubernetes.io/part-of: social-network
     networking.knative.dev/visibility: cluster-local
   namespace: social-network-kn
 spec:
