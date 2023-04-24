@@ -12,7 +12,6 @@ data:
   config.json: |
     {
       "grpc": ":8080",
-      "rest": ":8081",
       "otel": "jaeger.jaeger:4317",
       "mongodb": {
         "url": "mongodb://mongodb.mongodb:27017",
@@ -52,7 +51,7 @@ spec:
     spec:
       containers:
       - name: test
-        image: waterlemongan/microless-socialnetwork-test:0.1.7
+        image: waterlemongan/microless-socialnetwork-test:0.1.8
         env:
         - name: TEST_CONFIG
           value: "/config/config.json"

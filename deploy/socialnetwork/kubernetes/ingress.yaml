@@ -39,9 +39,41 @@ spec:
   http:
   - match:
     - uri:
-        prefix: /api/v1
+        prefix: /api/v1/composepost
     route:
     - destination:
-        host: gateway
+        host: compose-post
         port:
-          number: 8081
+          number: 8080
+  - match:
+    - uri:
+        prefix: /api/v1/hometimeline/
+    route:
+    - destination:
+        host: home-timeline
+        port:
+          number: 8080
+  - match:
+    - uri:
+        prefix: /api/v1/socialgraph/
+    route:
+    - destination:
+        host: social-graph
+        port:
+          number: 8080
+  - match:
+    - uri:
+        prefix: /api/v1/user/
+    route:
+    - destination:
+        host: user
+        port:
+          number: 8080
+  - match:
+    - uri:
+        prefix: /api/v1/usertimeline/
+    route:
+    - destination:
+        host: user-timeline
+        port:
+          number: 8080

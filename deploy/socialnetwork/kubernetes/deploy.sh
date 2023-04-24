@@ -20,8 +20,8 @@ kubectl create -f service/user-mention-service.yaml
 kubectl create -f service/text-service.yaml
 kubectl create -f service/compose-post-service.yaml
 
-# Install restful gateway
-kubectl create -f service/restful-gateway-service.yaml
+# Install ingress
+kubectl create -f envoy.yaml
 kubectl create -f ingress.yaml
 
 # Install HPA objects
@@ -35,7 +35,6 @@ kubectl create -f hpa/url-shorten-hpa.yaml
 kubectl create -f hpa/user-mention-hpa.yaml
 kubectl create -f hpa/text-hpa.yaml
 kubectl create -f hpa/compose-post-hpa.yaml
-kubectl create -f hpa/restful-gateway-hpa.yaml
 
 # Wait for services
 sleep 30

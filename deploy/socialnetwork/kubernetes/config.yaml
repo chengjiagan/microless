@@ -7,7 +7,6 @@ data:
   config.json: |
     {
       "grpc": ":8080",
-      "rest": ":8081",
       "otel": "jaeger.jaeger:4317",
       "mongodb": {
         "url": "mongodb://mongodb.mongodb:27017",
