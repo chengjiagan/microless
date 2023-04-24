@@ -1,6 +1,5 @@
 {
     "grpc": ":8080",
-    "rest": ":8081",
     "otel": "jaeger:4317",
     "mongodb": {
         "url": "mongodb://mongodb:27017",
@@ -26,6 +25,6 @@
         "text": "text:8080",
         "composepost": "compose-post:8080"
     },
-    "gateway": "gateway:8081",
+    "gateway": "gateway:8080",
     "secret": "secret"
 }

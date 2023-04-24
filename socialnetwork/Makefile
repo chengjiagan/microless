@@ -35,13 +35,6 @@ proto-%: $(PROTO_DIR)/%.proto
 		--go_out=src --go_opt=module="microless/socialnetwork" \
 		$<
 
-proto-rest-%: $(PROTO_DIR)/%.proto
-	protoc --proto_path=. --proto_path=proto \
-		--grpc-gateway_out src \
-		--grpc-gateway_opt logtostderr=true \
-		--grpc-gateway_opt module="microless/socialnetwork" \
-		$<
-
 proto-test-data: $(PROTO_DATA)
 	protoc --proto_path=. --proto_path=proto \
 		--pyi_out=test \
@@ -61,28 +54,39 @@ proto-test-%: $(PROTO_DIR)/%.proto
 		--grpc_python_out=test \
 		$<
 
-proto: proto-data $(foreach s, $(SERVICES), proto-$(s)) $(foreach s, $(REST_SERVICES), proto-rest-$(s))
+proto: proto-data $(foreach s, $(SERVICES), proto-$(s))
 
 proto-test: proto-test-data $(foreach s, $(SERVICES), proto-test-$(s))
 	touch test/proto/__init__.py
+
+descriptor-%: $(PROTO_DIR)/%.proto
+	protoc --proto_path=. --proto_path=proto \
+		--include_imports \
+		--descriptor_set_out=descriptor/$*.desc \
+		$<
+	base64 -w 0 descriptor/$*.desc > descriptor/$*.desc.b64
+
+descriptor-test: $(foreach s, $(REST_SERVICES), $(PROTO_DIR)/$(s).proto)
+	protoc --proto_path=. --proto_path=proto \
+		--include_imports \
+		--descriptor_set_out=descriptor/test.desc \
+		$^
+
+descriptor: descriptor-test $(foreach s, $(REST_SERVICES), descriptor-$(s))
 
 # prefix of image name
 DOCKER_PREFIX = waterlemongan/microless-socialnetwork-
 # name for build image
 BUILD_IMAGE = $(DOCKER_PREFIX)build
 # tag for image
-VERSION = 0.1.7
+VERSION = 0.1.8
 
-docker-build: docker-build-gateway docker-build-test $(foreach s, $(SERVICES), docker-build-$(s))
+docker-build: docker-build-test $(foreach s, $(SERVICES), docker-build-$(s))
 
 docker-build-build: docker/Dockerfile.build
 	docker build \
 		--build-arg SERVICES="$(SERVICES)" \
 		-t $(BUILD_IMAGE) -f $< src
-
-docker-build-gateway: docker/Dockerfile.gateway
-	docker build \
-		-t $(DOCKER_PREFIX)gateway -f $< src
 
 docker-build-test: test/Dockerfile
 	docker build \
@@ -94,12 +98,12 @@ docker-build-%: docker/Dockerfile.service docker-build-build
 		--build-arg SERVICE=$* \
 		-t $(DOCKER_PREFIX)$* -f $< .
 
-docker-tag: docker-tag-gateway docker-tag-test $(foreach s, $(SERVICES), docker-tag-$(s))
+docker-tag: docker-tag-test $(foreach s, $(SERVICES), docker-tag-$(s))
 
 docker-tag-%:
 	docker tag $(DOCKER_PREFIX)$* $(DOCKER_PREFIX)$*:$(VERSION)
 
-docker-push: docker-push-gateway docker-push-test $(foreach s, $(SERVICES), docker-push-$(s))
+docker-push: docker-push-test $(foreach s, $(SERVICES), docker-push-$(s))
 
 docker-push-%:
 	docker push $(DOCKER_PREFIX)$*:$(VERSION)
