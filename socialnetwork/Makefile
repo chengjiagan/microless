@@ -59,20 +59,12 @@ proto: proto-data $(foreach s, $(SERVICES), proto-$(s))
 proto-test: proto-test-data $(foreach s, $(SERVICES), proto-test-$(s))
 	touch test/proto/__init__.py
 
-descriptor-%: $(PROTO_DIR)/%.proto
+.PHONY descriptor: $(foreach s, $(REST_SERVICES), $(PROTO_DIR)/$(s).proto)
 	protoc --proto_path=. --proto_path=proto \
 		--include_imports \
-		--descriptor_set_out=descriptor/$*.desc \
-		$<
-	base64 -w 0 descriptor/$*.desc > descriptor/$*.desc.b64
-
-descriptor-test: $(foreach s, $(REST_SERVICES), $(PROTO_DIR)/$(s).proto)
-	protoc --proto_path=. --proto_path=proto \
-		--include_imports \
-		--descriptor_set_out=descriptor/test.desc \
+		--descriptor_set_out=descriptor/rest.desc \
 		$^
-
-descriptor: descriptor-test $(foreach s, $(REST_SERVICES), descriptor-$(s))
+	base64 -w 0 descriptor/rest.desc > descriptor/rest.desc.b64
 
 # prefix of image name
 DOCKER_PREFIX = waterlemongan/microless-socialnetwork-
