@@ -4,3 +4,4 @@
 
 kubectl delete ns social-network-test
 kubectl delete ns social-network
+kubectl delete -f envoy.yaml
