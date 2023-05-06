@@ -10,7 +10,7 @@ proto-loadbalancer: $(PROTO_DIR)/loadbalancer.proto
 		$<
 
 # prefix of image name
-DOCKER_NAME = waterlemongan/microless-loadbalancer
+DOCKER_NAME = waterlemongan/microless-loadbalancer-base
 # tag for image
 VERSION = 0.1.0
 
