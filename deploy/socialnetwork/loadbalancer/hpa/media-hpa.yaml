@@ -1,19 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: media
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: media-hpa
-    app.kubernetes.io/part-of: social-network
   name: media-hpa
-  namespace: social-network-lb-vm
+  namespace: social-network
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: media
+    name: media-vm
   minReplicas: 1
   maxReplicas: 10
   metrics:

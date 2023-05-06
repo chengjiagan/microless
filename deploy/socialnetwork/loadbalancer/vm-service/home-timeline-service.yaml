@@ -1,64 +1,43 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: home-timeline
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: home-timeline
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: home-timeline-vm-service
-    app.kubernetes.io/part-of: social-network
-  namespace: social-network-lb-vm
+  name: home-timeline-vm
+  namespace: social-network
 spec:
-  ports:
-  - port: 8080
-    name: grpc
-    targetPort: grpc
+  clusterIP: None
   selector:
-    microless: social-network
-    app.kubernetes.io/name: home-timeline
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: home-timeline-vm
-    app.kubernetes.io/part-of: social-network
+    app: home-timeline
+    type: vm
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: home-timeline
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: home-timeline
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: home-timeline-vm-deployment
-    app.kubernetes.io/part-of: social-network
-  namespace: social-network-lb-vm
+  name: home-timeline-vm
+  namespace: social-network
 spec:
   selector:
     matchLabels:
-      microless: social-network
-      app.kubernetes.io/name: home-timeline
-      app.kubernetes.io/instance: k8s-deploy
-      app.kubernetes.io/component: home-timeline-vm
-      app.kubernetes.io/part-of: social-network
+      app: home-timeline
+      type: vm
   template:
     metadata:
       labels:
-        microless: social-network
-        app.kubernetes.io/name: home-timeline
-        app.kubernetes.io/instance: k8s-deploy
-        app.kubernetes.io/component: home-timeline-vm
-        app.kubernetes.io/part-of: social-network
-      name: home-timeline
+        app: home-timeline
+        type: vm
+      name: home-timeline-vm
+      namespace: social-network
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-hometimeline:0.1.7
+        image: waterlemongan/microless-socialnetwork-hometimeline:0.2.0
         ports:
         - name: grpc
           containerPort: 8080
         env:
         - name: SERVICE_CONFIG
           value: "/config/config.json"
+        - name: LB_CONFIG
+          value: "/config/lb.json"
         volumeMounts:
         - name: config
           mountPath: "/config"
@@ -70,3 +49,5 @@ spec:
             items:
             - key: config.json
               path: config.json
+            - key: lb.json
+              path: lb.json

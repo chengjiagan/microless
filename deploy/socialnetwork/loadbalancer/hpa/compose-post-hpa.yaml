@@ -1,19 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  labels:
-    microless: social-network
-    app.kubernetes.io/name: compose-post
-    app.kubernetes.io/instance: k8s-deploy
-    app.kubernetes.io/component: compose-post-hpa
-    app.kubernetes.io/part-of: social-network
   name: compose-post-hpa
-  namespace: social-network-lb-vm
+  namespace: social-network
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: compose-post
+    name: compose-post-vm
   minReplicas: 1
   maxReplicas: 10
   metrics:

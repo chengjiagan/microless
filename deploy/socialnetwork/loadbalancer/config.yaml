@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: social-network
+data:
+  config.json: |
+    {
+      "grpc": ":8080",
+      "otel": "jaeger.jaeger:4317",
+      "mongodb": {
+        "url": "mongodb://mongodb.mongodb:27017",
+        "database": "social-network"
+      },
+      "redis": {
+        "usertimeline": "redis://redis.redis:6379/0",
+        "socialgraph": "redis://redis.redis:6379/1",
+        "hometimeline": "redis://redis.redis:6379/2",
+        "poststorage": "redis://redis.redis:6379/3",
+        "user": "redis://redis.redis:6379/4",
+        "urlshorten": "redis://redis.redis:6379/5"
+      },
+      "service": {
+        "poststorage": "post-storage:8080",
+        "usertimeline": "user-timeline:8080",
+        "user": "user:8080",
+        "socialgraph": "social-graph:8080",
+        "hometimeline": "home-timeline:8080",
+        "media": "media:8080",
+        "urlshorten": "url-shorten:8080",
+        "usermention": "user-mention:8080",
+        "text": "text:8080",
+        "composepost": "compose-post:8080"
+      },
+      "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
+    }
+  lb.json: |
+    {
+      "server": {
+        "enable": true,
+        "max_tokens": 1,
+        "tokens_per_fill": 1,
+        "fill_interval": 10
+      },
+      "client": {
+        "enable": true,
+        "degrade_interval": 10,
+        "vm_postfix": "-vm",
+        "serverless_postfix": "-kn.social-network.svc.cluster.local"
+      },
+      "serverless": {
+        "enable": false
+      }
+    }
+  lb-serverless.json: |
+    {
+      "server": {
+        "enable": false
+      },
+      "client": {
+        "enable": true,
+        "degrade_interval": 10,
+        "vm_postfix": "-vm",
+        "serverless_postfix": "-kn.social-network.svc.cluster.local"
+      },
+      "serverless": {
+        "enable": false
+      }
+    }
+  lb-gateway.json: |
+    {
+      "server": {
+        "enable": false
+      },
+      "client": {
+        "enable": true,
+        "degrade_interval": 10,
+        "vm_postfix": "-vm",
+        "serverless_postfix": "-kn.social-network.svc.cluster.local"
+      },
+      "serverless": {
+        "enable": false
+      }
+    }
