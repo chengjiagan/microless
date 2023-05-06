@@ -1,13 +1,15 @@
-FROM golang:1.18
+# image containing necessary dependencies
+ARG BASE_IMAGE="microless/base"
+FROM ${BASE_IMAGE}
 # service to build
 ARG SERVICES
 # using go modules proxy in China
 ARG GOPROXY="https://goproxy.cn"
 
-WORKDIR /go/src
+WORKDIR /go/src/socialnetwork
 COPY . .
+RUN go mod edit -replace microless/loadbalancer=../loadbalancer && go mod download
 # build services, disable cgo
-RUN go mod download
 RUN for s in ${SERVICES}; do \
         CGO_ENABLED=0 go build -o /go/bin/$s $s/cmd/main.go; \
     done

@@ -57,7 +57,7 @@ static_resources:
           - name: envoy.filters.http.grpc_json_transcoder
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder
-              proto_descriptor: "/descriptor/all.desc"
+              proto_descriptor: "/descriptor/rest.desc"
               services:
               - "microless.socialnetwork.composepost.ComposePostService"
               - "microless.socialnetwork.hometimeline.HomeTimelineService"

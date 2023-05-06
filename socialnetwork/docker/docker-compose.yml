@@ -39,7 +39,7 @@ services:
     image: envoyproxy/envoy:v1.26-latest
     volumes:
       - ../config/gateway.yaml:/etc/envoy/envoy.yaml:ro
-      - ../descriptor/all.desc:/descriptor/all.desc:ro
+      - ../descriptor/rest.desc:/descriptor/rest.desc:ro
     depends_on:
       - compose-post
       - home-timeline
@@ -54,6 +54,7 @@ services:
     image: waterlemongan/microless-socialnetwork-poststorage:latest
     volumes:
       - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
     depends_on:
       - redis
       - mongodb
@@ -63,6 +64,7 @@ services:
     image: waterlemongan/microless-socialnetwork-usertimeline:latest
     volumes:
       - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
     depends_on:
       - redis
       - mongodb
@@ -73,6 +75,7 @@ services:
     image: waterlemongan/microless-socialnetwork-user:latest
     volumes:
       - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
     depends_on:
       - redis
       - mongodb
@@ -82,6 +85,7 @@ services:
     image: waterlemongan/microless-socialnetwork-socialgraph:latest
     volumes:
       - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
     depends_on:
       - redis
       - mongodb
@@ -92,6 +96,7 @@ services:
     image: waterlemongan/microless-socialnetwork-hometimeline:latest
     volumes:
       - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
     depends_on:
       - redis
       - post-storage
@@ -102,6 +107,7 @@ services:
     image: waterlemongan/microless-socialnetwork-media:latest
     volumes:
       - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
     depends_on:
       - jaeger
 
@@ -109,6 +115,7 @@ services:
     image: waterlemongan/microless-socialnetwork-urlshorten:latest
     volumes:
       - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
     depends_on:
       - redis
       - mongodb
@@ -118,6 +125,7 @@ services:
     image: waterlemongan/microless-socialnetwork-usermention:latest
     volumes:
       - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
     depends_on:
       - user
       - jaeger
@@ -126,6 +134,7 @@ services:
     image: waterlemongan/microless-socialnetwork-text:latest
     volumes:
       - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
     depends_on:
       - url-shorten
       - user-mention
@@ -135,6 +144,7 @@ services:
     image: waterlemongan/microless-socialnetwork-composepost:latest
     volumes:
       - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
     depends_on:
       - post-storage
       - user-timeline

@@ -1,0 +1,14 @@
+{
+  "server": {
+    "enable": true,
+    "max_tokens": 1,
+    "tokens_per_fill": 1,
+    "fill_interval": 10
+  },
+  "client": {
+    "enable": false
+  },
+  "serverless": {
+    "enable": false
+  }
+}

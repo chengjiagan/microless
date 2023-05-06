@@ -54,7 +54,14 @@ proto-test-%: $(PROTO_DIR)/%.proto
 		--grpc_python_out=test \
 		$<
 
-proto: proto-data $(foreach s, $(SERVICES), proto-$(s))
+proto-rest-%: $(PROTO_DIR)/%.proto
+	protoc --proto_path=. --proto_path=proto \
+		--grpc-gateway_out src \
+		--grpc-gateway_opt logtostderr=true \
+		--grpc-gateway_opt module="microless/socialnetwork" \
+		$<
+
+proto: proto-data $(foreach s, $(SERVICES), proto-$(s)) $(foreach s, $(REST_SERVICES), proto-rest-$(s))
 
 proto-test: proto-test-data $(foreach s, $(SERVICES), proto-test-$(s))
 	touch test/proto/__init__.py
@@ -68,16 +75,20 @@ proto-test: proto-test-data $(foreach s, $(SERVICES), proto-test-$(s))
 
 # prefix of image name
 DOCKER_PREFIX = waterlemongan/microless-socialnetwork-
+DOCKER_PREFIX_TEST = dev.local/microless-socialnetwork-
+# name for base build image
+BASE_IMAGE = waterlemongan/microless-loadbalancer-base
 # name for build image
 BUILD_IMAGE = $(DOCKER_PREFIX)build
 # tag for image
-VERSION = 0.1.8
+VERSION = 0.2.0
 
-docker-build: docker-build-test $(foreach s, $(SERVICES), docker-build-$(s))
+docker-build: docker-build-test docker-build-gateway $(foreach s, $(SERVICES), docker-build-$(s))
 
 docker-build-build: docker/Dockerfile.build
 	docker build \
-		--build-arg SERVICES="$(SERVICES)" \
+		--build-arg BASE_IMAGE="$(BASE_IMAGE)" \
+		--build-arg SERVICES="gateway $(SERVICES)" \
 		-t $(BUILD_IMAGE) -f $< src
 
 docker-build-test: test/Dockerfile
@@ -90,16 +101,17 @@ docker-build-%: docker/Dockerfile.service docker-build-build
 		--build-arg SERVICE=$* \
 		-t $(DOCKER_PREFIX)$* -f $< .
 
-docker-tag: docker-tag-test $(foreach s, $(SERVICES), docker-tag-$(s))
+docker-tag: docker-tag-test docker-tag-gateway $(foreach s, $(SERVICES), docker-tag-$(s))
 
 docker-tag-%:
 	docker tag $(DOCKER_PREFIX)$* $(DOCKER_PREFIX)$*:$(VERSION)
 
-docker-push: docker-push-test $(foreach s, $(SERVICES), docker-push-$(s))
+docker-test-tag: $(foreach s, $(SERVICES), docker-test-tag-$(s))
+
+docker-test-tag-%:
+	docker tag $(DOCKER_PREFIX)$* $(DOCKER_PREFIX_TEST)$*:$(VERSION)
+
+docker-push: docker-push-test docker-push-gateway $(foreach s, $(SERVICES), docker-push-$(s))
 
 docker-push-%:
 	docker push $(DOCKER_PREFIX)$*:$(VERSION)
-
-.PHONY init:
-	cd src && go mod download && cd ..
-	cd test && pipenv install --dev --system && cd ..
