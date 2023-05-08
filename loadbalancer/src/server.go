@@ -23,6 +23,9 @@ type ServerLB struct {
 
 func NewServerLB() *ServerLB {
 	config := utils.GetServerConfig()
+	if !config.Enable {
+		return &ServerLB{enable: false}
+	}
 
 	lb := &ServerLB{
 		enable:   config.Enable,

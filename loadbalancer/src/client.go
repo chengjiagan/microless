@@ -42,6 +42,9 @@ func splitAddr(addr string) (string, string) {
 
 func NewClientLB(addr string) *ClientLB {
 	config := utils.GetClientConfig()
+	if !config.Enable {
+		return &ClientLB{enable: false}
+	}
 
 	service, port := splitAddr(addr)
 	vmServiceName := service + config.VmPostfix
