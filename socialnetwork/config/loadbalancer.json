@@ -1,9 +1,6 @@
 {
   "server": {
-    "enable": true,
-    "max_tokens": 1,
-    "tokens_per_fill": 1,
-    "fill_interval": 10
+    "enable": false
   },
   "client": {
     "enable": false
