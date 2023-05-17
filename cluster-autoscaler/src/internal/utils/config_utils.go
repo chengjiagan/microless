@@ -9,7 +9,8 @@ type Config struct {
 	Interval       int           `json:"interval"`        // check interval in seconds
 	StableInterval int           `json:"stable_interval"` // stable interval in minutes
 	Namespace      string        `json:"namespace"`
-	Ratio          int           `json:"ratio"` // serverless/vm ratio for same rps
+	Ratio          int           `json:"ratio"`     // serverless/vm ratio for same rps
+	MaxDelta       int           `json:"max_delta"` // max change in number of nodes for scale up/down
 	Kube           KubeConfig    `json:"kube"`
 	Cluster        ClusterConfig `json:"cluster"`
 }
@@ -20,6 +21,9 @@ type KubeConfig struct {
 }
 
 type ClusterConfig struct {
+	Namespace      string `json:"namespace"`        // namespace where pods stay
+	ScaleUpLatency int    `json:"scale_up_latency"` // scale up latency in minutes
+
 	ServerlessCpu float64 `json:"serverless_cpu"`
 	ServerlessMem float64 `json:"serverless_mem"`
 	VmCpu         float64 `json:"vm_cpu"`

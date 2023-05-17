@@ -17,6 +17,7 @@ type Autoscaler struct {
 	stableInterval time.Duration
 	namespace      string
 	ratio          int
+	maxDelta       int
 
 	lastScale time.Time
 
@@ -40,9 +41,9 @@ func NewAutoscaler(config *utils.Config) (*Autoscaler, error) {
 		stableInterval: time.Duration(config.StableInterval) * time.Minute,
 		namespace:      config.Namespace,
 		ratio:          config.Ratio,
+		maxDelta:       config.MaxDelta,
 		km:             km,
 		cm:             cm,
-		lastScale:      time.Now(),
 	}
 	return as, nil
 }
@@ -125,23 +126,29 @@ func (as *Autoscaler) calcScaleUp(serverlessPods []*corev1.Pod, vmPods []*corev1
 	spec := as.cm.GetServerlessPodSpec(serverlessPods)
 
 	n := 1 // number of nodes to add
-	for ; n <= cluster.MaxDelta; n++ {
+	for ; n <= as.maxDelta; n++ {
 		// calculate the price of adding n nodes
 		nprice := as.cm.GetVmPrice(n)
+		// cost much than serverless part
+		if nprice >= price {
+			n-- // cannot afford n nodes, add n-1 nodes
+			break
+		}
+
 		// calculate the spec of adding n nodes
 		nspec := as.cm.GetVmSpec(n)
-
-		if nprice >= price || spec.LessThan(nspec) {
+		// can contain all serverless pods
+		if spec.LessThan(nspec) {
 			break
 		}
 	}
-	return n - 1
+	return n
 }
 
 // calculate the number of nodes to scale down
 func (as *Autoscaler) calcScaleDown(pods []*corev1.Pod, curNodes int) int {
 	n := 1 // number of nodes to remove
-	for ; n <= cluster.MaxDelta && n <= curNodes; n++ {
+	for ; n <= as.maxDelta && n <= curNodes; n++ {
 		// node spec of current node - n
 		s := as.cm.GetVmSpec(curNodes - n)
 		// number of vm pods that cannot be scheduled on vm

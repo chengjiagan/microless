@@ -3,12 +3,9 @@ package cluster
 import (
 	"microless/cluster-autoscaler/internal/utils"
 	"microless/cluster-autoscaler/spec"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
-)
-
-const (
-	MaxDelta = 10
 )
 
 // vender specific cluster manager
@@ -41,6 +38,8 @@ func NewClusterManager(config *utils.ClusterConfig) (ClusterManager, error) {
 		serverlessCpuPrice: config.ServerlessCpuPrice,
 		serverlessMemPrice: config.ServerlessMemPrice,
 		vmPrice:            config.VmPrice,
+		namespace:          config.Namespace,
+		scaleUpLatency:     time.Duration(config.ScaleUpLatency) * time.Minute,
 		c:                  c,
 	}
 	return cm, nil

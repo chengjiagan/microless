@@ -24,14 +24,14 @@ type kubeManager struct {
 	c *kubernetes.Clientset
 }
 
-func (km *kubeManager) GetVmPods(ns string) ([]*corev1.Pod, error) {
+func (km *kubeManager) GetVmPods(namespace string) ([]*corev1.Pod, error) {
 	ctx := context.Background()
 	opts := metav1.ListOptions{
 		LabelSelector: km.vmSelector,
 	}
-	list, err := km.c.CoreV1().Pods(ns).List(ctx, opts)
+	list, err := km.c.CoreV1().Pods(namespace).List(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list vm pods in namespace %s: %v", ns, err)
+		return nil, fmt.Errorf("failed to list vm pods in namespace %s: %v", namespace, err)
 	}
 
 	pods := make([]*corev1.Pod, len(list.Items))
@@ -41,14 +41,14 @@ func (km *kubeManager) GetVmPods(ns string) ([]*corev1.Pod, error) {
 	return pods, nil
 }
 
-func (km *kubeManager) GetServerlessPods(ns string) ([]*corev1.Pod, error) {
+func (km *kubeManager) GetServerlessPods(namespace string) ([]*corev1.Pod, error) {
 	ctx := context.Background()
 	opts := metav1.ListOptions{
 		LabelSelector: km.serverlessSelector,
 	}
-	list, err := km.c.CoreV1().Pods(ns).List(ctx, opts)
+	list, err := km.c.CoreV1().Pods(namespace).List(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list serverless pods in namespace %s: %v", ns, err)
+		return nil, fmt.Errorf("failed to list serverless pods in namespace %s: %v", namespace, err)
 	}
 
 	pods := make([]*corev1.Pod, len(list.Items))
@@ -84,7 +84,8 @@ func (km *kubeManager) SimulateSchedule(s spec.Spec, pods []*corev1.Pod) int {
 		if cur.LessThan(s) {
 			n++
 		} else {
-			break
+			cur[spec.Cpu] -= cpu
+			cur[spec.Mem] -= mem
 		}
 	}
 

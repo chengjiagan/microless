@@ -3,11 +3,14 @@
   "stable_interval": 1,
   "namespace": "social-network",
   "ratio": 2,
+  "max_delta": 10,
   "kube": {
     "vm_selector": "type=vm",
     "serverless_selector": "type=serverless"
   },
   "cluster": {
+    "namespace": "social-network",
+    "scale_up_latency": 1,
     "serverless_cpu": 0.25,
     "serverless_mem": 0.5,
     "vm_cpu": 16,
