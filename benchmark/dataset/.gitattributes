@@ -1,14 +1,2 @@
-mapreduce/yellow_tripdata_2021-10.parquet filter=lfs diff=lfs merge=lfs -text
-mapreduce/yellow_tripdata_2021-01.parquet filter=lfs diff=lfs merge=lfs -text
-mapreduce/yellow_tripdata_2021-05.parquet filter=lfs diff=lfs merge=lfs -text
-mapreduce/yellow_tripdata_2021-07.parquet filter=lfs diff=lfs merge=lfs -text
-mapreduce/yellow_tripdata_2021-08.parquet filter=lfs diff=lfs merge=lfs -text
-mapreduce/yellow_tripdata_2021-09.parquet filter=lfs diff=lfs merge=lfs -text
-mapreduce/yellow_tripdata_2021-12.parquet filter=lfs diff=lfs merge=lfs -text
-mapreduce/yellow_tripdata_2021-02.parquet filter=lfs diff=lfs merge=lfs -text
-mapreduce/yellow_tripdata_2021-03.parquet filter=lfs diff=lfs merge=lfs -text
-mapreduce/yellow_tripdata_2021-04.parquet filter=lfs diff=lfs merge=lfs -text
-mapreduce/yellow_tripdata_2021-06.parquet filter=lfs diff=lfs merge=lfs -text
-mapreduce/yellow_tripdata_2021-11.parquet filter=lfs diff=lfs merge=lfs -text
 socialnetwork/socialnetwork.mongo.gz filter=lfs diff=lfs merge=lfs -text
 media/media.mongo.gz filter=lfs diff=lfs merge=lfs -text
