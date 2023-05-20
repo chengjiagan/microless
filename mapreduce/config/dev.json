@@ -1,0 +1,15 @@
+{
+    "rest": ":8080",
+    "minio": {
+        "url": "minio:9000",
+        "access_key": "minioadmin",
+        "secret_key": "minioadmin",
+        "secure": false
+    },
+    "service": {
+        "mapreduce": "http://mapreduce:8080/",
+        "file": "http://file:8080/",
+        "mapper": "http://mapper:8080/",
+        "reducer": "http://reducer:8080/"
+    }
+}

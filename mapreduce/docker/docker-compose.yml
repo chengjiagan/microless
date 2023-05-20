@@ -1,0 +1,52 @@
+# docker compose for development
+version: '3'
+
+volumes:
+  minio-data:
+
+networks:
+  default:
+    name: microless
+    external: true
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.37
+    command: ["--collector.otlp.enabled=true"]
+    ports:
+      - "16686:16686"
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2022-10-15T19-57-03Z
+    restart: always
+    volumes:
+      - minio-data:/data
+    command: ["server", "/data"]
+
+  mapreduce:
+    image: microless/mapreduce-mapreduce:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - file
+      - mapper
+      - reducer
+
+  file:
+    image: microless/mapreduce-file:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - minio
+
+  mapper:
+    image: microless/mapreduce-mapper:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+    depends_on:
+      - minio
+
+  reducer:
+    image: microless/mapreduce-reducer:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
