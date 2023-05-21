@@ -13,4 +13,4 @@ ENV CLUSTER_AUTOSCALER_CONFIG="/ca.json"
 
 COPY --from=build /go/bin/ca /ca
 
-CMD [ '/ca' ]
+CMD [ "/ca" ]
