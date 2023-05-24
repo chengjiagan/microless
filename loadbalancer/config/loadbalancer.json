@@ -1,15 +1,22 @@
 {
   "_comment": "for testing only",
+  "metric_addr": ":9000",
   "server": {
     "enable": true,
+    "reject": false,
     "max_tokens": 1,
     "tokens_per_fill": 1,
     "fill_interval": 10
   },
   "client": {
-    "enable": false
+    "enable": true,
+    "vm_postfix": "-vm",
+    "serverless_postfix": "-serverless",
+    "degrade_interval": 10
   },
   "serverless": {
-    "enable": false
+    "enable": true,
+    "max_concurrency": 1,
+    "max_capacity": 10
   }
 }

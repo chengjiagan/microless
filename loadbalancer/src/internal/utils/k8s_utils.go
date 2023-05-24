@@ -2,8 +2,8 @@ package utils
 
 import (
 	"context"
-	"io/ioutil"
 	"log"
+	"os"
 
 	"google.golang.org/grpc"
 	corev1 "k8s.io/api/core/v1"
@@ -27,7 +27,7 @@ func NewKubeClient() (*kubernetes.Clientset, error) {
 const nsPath = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
 
 func getNamespace() string {
-	ns, err := ioutil.ReadFile(nsPath)
+	ns, err := os.ReadFile(nsPath)
 	if err != nil || len(ns) == 0 {
 		return "default"
 	}

@@ -15,8 +15,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// support bundling
 type ClientLB struct {
-	enable          bool
 	vm              string
 	serverless      string
 	port            string
@@ -43,7 +43,7 @@ func splitAddr(addr string) (string, string) {
 func NewClientLB(addr string) *ClientLB {
 	config := utils.GetClientConfig()
 	if !config.Enable {
-		return &ClientLB{enable: false}
+		return nil
 	}
 
 	service, port := splitAddr(addr)
@@ -56,7 +56,6 @@ func NewClientLB(addr string) *ClientLB {
 	}
 
 	lb := &ClientLB{
-		enable:          config.Enable,
 		port:            port,
 		vm:              vmServiceName,
 		serverless:      serverlessServiceName,
@@ -93,38 +92,27 @@ func (lb *ClientLB) updateVmConn(conn []*grpc.ClientConn) {
 	lb.numDegradConn = 0
 }
 
-// func (lb *ClientLB) updateServerlessConn(conn []*grpc.ClientConn) {
-// 	lb.mu.Lock()
-// 	defer lb.mu.Unlock()
+func (lb *ClientLB) updateServerlessConn(conn []*grpc.ClientConn) {
+	lb.mu.Lock()
+	defer lb.mu.Unlock()
 
-// 	go closeConn(lb.serverlessConn)
-// 	lb.serverlessConn = conn
-// 	lb.serverlessNext = rand.Uint32()
-// }
+	go closeConn(lb.serverlessConn)
+	lb.serverlessConn = conn
+	lb.serverlessNext = rand.Uint32()
+}
 
 func (lb *ClientLB) watchService() {
-	if !lb.enable {
-		return
-	}
-
-	// use knative service as serverless
-	serverlessConn, err := utils.NewConn(lb.serverless + ":80")
-	if err != nil {
-		log.Fatalf("Failed to connect to serverless: %v", err)
-	}
-	lb.serverlessConn = []*grpc.ClientConn{serverlessConn}
-
 	// watch
 	vmCh := utils.WatchEndpointConns(lb.kubeClient, lb.vm, lb.port)
-	// serverlessCh := utils.WatchEndpointConns(lb.kubeClient, lb.serverless, lb.port)
+	serverlessCh := utils.WatchEndpointConns(lb.kubeClient, lb.serverless, lb.port)
 	for {
 		select {
 		case vmConn := <-vmCh:
 			log.Printf("%s conn: %v", lb.vm, len(vmConn))
 			lb.updateVmConn(vmConn)
-			// case serverlessConn := <-serverlessCh:
-			// 	log.Printf("%s conn: %v", lb.serverless, len(serverlessConn))
-			// 	lb.updateServerlessConn(serverlessConn)
+		case serverlessConn := <-serverlessCh:
+			log.Printf("%s conn: %v", lb.serverless, len(serverlessConn))
+			lb.updateServerlessConn(serverlessConn)
 		}
 	}
 }
@@ -196,10 +184,6 @@ func (lb *ClientLB) updateConnDegrade(idx int, overload bool) {
 }
 
 func (lb *ClientLB) updateDegrade() {
-	if !lb.enable {
-		return
-	}
-
 	ticker := time.NewTicker(UpdateInterval * time.Millisecond)
 	for {
 		<-ticker.C
@@ -238,7 +222,7 @@ func (lb *ClientLB) UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 		invoker grpc.UnaryInvoker,
 		opts ...grpc.CallOption,
 	) error {
-		if !lb.enable {
+		if lb == nil {
 			return invoker(ctx, method, req, reply, cc, opts...)
 		}
 

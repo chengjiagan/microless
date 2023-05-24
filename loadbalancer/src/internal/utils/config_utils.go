@@ -7,6 +7,7 @@ import (
 )
 
 type Config struct {
+	MetricAddr string           `json:"metric_addr"`
 	Server     ServerConfig     `json:"server"`
 	Client     ClientConfig     `json:"client"`
 	Serverless ServerlessConfig `json:"serverless"`
@@ -14,9 +15,12 @@ type Config struct {
 
 type ServerConfig struct {
 	Enable        bool `json:"enable"`
+	Reject        bool `json:"reject"`
 	MaxTokens     int  `json:"max_tokens"`
 	TokensPerFill int  `json:"tokens_per_fill"`
 	FillInterval  int  `json:"fill_interval"`
+
+	MetricAddr string
 }
 
 type ClientConfig struct {
@@ -27,7 +31,11 @@ type ClientConfig struct {
 }
 
 type ServerlessConfig struct {
-	Enable bool `json:"enable"`
+	Enable         bool `json:"enable"`
+	MaxConcurrency int  `json:"max_concurrency"`
+	MaxCapacity    int  `json:"max_capacity"`
+
+	MetricAddr string
 }
 
 var configPath = os.Getenv("LB_CONFIG")
@@ -49,6 +57,10 @@ func getConfig() *Config {
 		config = nil
 		log.Fatalf("Failed to parse config file: %v", err)
 	}
+
+	// set metric address
+	config.Server.MetricAddr = config.MetricAddr
+	config.Serverless.MetricAddr = config.MetricAddr
 
 	return config
 }
