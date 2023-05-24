@@ -12,3 +12,6 @@ docker-tag:
 
 docker-push:
 	docker push $(DOCKER_NAME):$(VERSION)
+
+docker-minikube:
+	minikube image load $(DOCKER_NAME)$*:$(VERSION)
