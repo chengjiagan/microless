@@ -81,7 +81,7 @@ BASE_IMAGE = waterlemongan/microless-loadbalancer-base
 # name for build image
 BUILD_IMAGE = $(DOCKER_PREFIX)build
 # tag for image
-VERSION = 0.2.2
+VERSION = 0.2.3
 
 docker-build: docker-build-test docker-build-gateway $(foreach s, $(SERVICES), docker-build-$(s))
 
@@ -115,3 +115,8 @@ docker-push: docker-push-test docker-push-gateway $(foreach s, $(SERVICES), dock
 
 docker-push-%:
 	docker push $(DOCKER_PREFIX)$*:$(VERSION)
+
+docker-minikube: docker-minikube-gateway $(foreach s, $(SERVICES), docker-minikube-$(s))
+
+docker-minikube-%:
+	minikube image load $(DOCKER_PREFIX)$*:$(VERSION)
