@@ -12,7 +12,11 @@
     "enable": true,
     "vm_postfix": "-vm",
     "serverless_postfix": "-serverless",
-    "degrade_interval": 10
+    "degrade_interval": 10,
+    "local_services": {
+      "home-timeline": "8080",
+      "post-storage": "8081"
+    }
   },
   "serverless": {
     "enable": true,

@@ -15,12 +15,15 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// support bundling
 type ClientLB struct {
 	vm              string
 	serverless      string
 	port            string
 	degradeInterval int
+
+	// for local service connection
+	local bool
+	conn  *grpc.ClientConn
 
 	kubeClient *kubernetes.Clientset
 
@@ -47,6 +50,18 @@ func NewClientLB(addr string) *ClientLB {
 	}
 
 	service, port := splitAddr(addr)
+	if localPort, ok := config.LocalServices[service]; ok {
+		localAddr := "localhost:" + localPort
+		conn, err := utils.NewConn(localAddr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return &ClientLB{
+			local: true,
+			conn:  conn,
+		}
+	}
+
 	vmServiceName := service + config.VmPostfix
 	serverlessServiceName := service + config.ServerlessPostfix
 
@@ -56,6 +71,7 @@ func NewClientLB(addr string) *ClientLB {
 	}
 
 	lb := &ClientLB{
+		local:           false,
 		port:            port,
 		vm:              vmServiceName,
 		serverless:      serverlessServiceName,
@@ -224,6 +240,11 @@ func (lb *ClientLB) UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 	) error {
 		if lb == nil {
 			return invoker(ctx, method, req, reply, cc, opts...)
+		}
+
+		if lb.local {
+			// local mode, no need to load balance
+			return invoker(ctx, method, req, reply, lb.conn, opts...)
 		}
 
 		conn, idx := lb.selectConn()

@@ -24,10 +24,11 @@ type ServerConfig struct {
 }
 
 type ClientConfig struct {
-	Enable            bool   `json:"enable"`
-	VmPostfix         string `json:"vm_postfix"`
-	ServerlessPostfix string `json:"serverless_postfix"`
-	DegradeInterval   int    `json:"degrade_interval"`
+	Enable            bool              `json:"enable"`
+	VmPostfix         string            `json:"vm_postfix"`
+	ServerlessPostfix string            `json:"serverless_postfix"`
+	DegradeInterval   int               `json:"degrade_interval"`
+	LocalServices     map[string]string `json:"local_services"`
 }
 
 type ServerlessConfig struct {
