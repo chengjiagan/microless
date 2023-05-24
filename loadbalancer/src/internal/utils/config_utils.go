@@ -32,9 +32,10 @@ type ClientConfig struct {
 }
 
 type ServerlessConfig struct {
-	Enable         bool `json:"enable"`
-	MaxConcurrency int  `json:"max_concurrency"`
-	MaxCapacity    int  `json:"max_capacity"`
+	Enable            bool           `json:"enable"`
+	MaxConcurrency    int            `json:"max_concurrency"`
+	MaxCapacity       int            `json:"max_capacity"`
+	MethodReqirements map[string]int `json:"method_requirements"` // if method requires a full CPU core, then its requirement is 100
 
 	MetricAddr string
 }

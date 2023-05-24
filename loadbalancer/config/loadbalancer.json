@@ -21,6 +21,10 @@
   "serverless": {
     "enable": true,
     "max_concurrency": 1,
-    "max_capacity": 10
+    "max_capacity": 10,
+    "method_requirements": {
+      "ReadPosts": 100,
+      "StorePost": 50
+    }
   }
 }
