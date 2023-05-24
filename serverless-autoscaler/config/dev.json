@@ -1,0 +1,16 @@
+{
+    "interval": 5,
+    "namespace": "social-network",
+    "apps": [
+        "post-storage",
+        "user-timeline",
+        "user",
+        "social-graph",
+        "home-timeline",
+        "media",
+        "url-shorten",
+        "user-mention",
+        "text",
+        "compose-post"
+    ]
+}
