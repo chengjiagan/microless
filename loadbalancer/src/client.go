@@ -19,7 +19,7 @@ type ClientLB struct {
 	vm              string
 	serverless      string
 	port            string
-	degradeInterval int
+	degradeInterval uint32
 
 	// for local service connection
 	local bool
@@ -29,11 +29,11 @@ type ClientLB struct {
 
 	mu sync.RWMutex
 	// mu protects the following fields
-	vmConn         []*grpc.ClientConn
-	serverlessConn []*grpc.ClientConn
-	// mu read lock protects the following fields
-	degradeConn    []uint32 // time left being degraded, >0: degraded, 0: normal
-	numDegradConn  int32
+	vmConn          []*grpc.ClientConn
+	serverlessConn  []*grpc.ClientConn
+	degradeConn     []uint32 // time left being degraded, >0: degraded, 0: normal
+	numDegradedConn int32
+	// use atomic to update vmNext and serverlessNext, when mu read lock is held
 	vmNext         uint32
 	serverlessNext uint32
 }
@@ -75,13 +75,13 @@ func NewClientLB(addr string) *ClientLB {
 		port:            port,
 		vm:              vmServiceName,
 		serverless:      serverlessServiceName,
-		degradeInterval: config.DegradeInterval * 1000, // seconds to milliseconds
+		degradeInterval: uint32(config.DegradeInterval * 1000), // seconds to milliseconds
 		kubeClient:      kubeClient,
 		vmNext:          rand.Uint32(),
 		serverlessNext:  rand.Uint32(),
 	}
 	go lb.watchService()
-	go lb.updateDegrade()
+	go lb.updateDegradedLoop()
 
 	return lb
 }
@@ -105,7 +105,7 @@ func (lb *ClientLB) updateVmConn(conn []*grpc.ClientConn) {
 
 	// reset degradation when vmConn changes
 	lb.degradeConn = make([]uint32, len(conn))
-	lb.numDegradConn = 0
+	lb.numDegradedConn = 0
 }
 
 func (lb *ClientLB) updateServerlessConn(conn []*grpc.ClientConn) {
@@ -133,7 +133,7 @@ func (lb *ClientLB) watchService() {
 	}
 }
 
-func (lb *ClientLB) selectConn() (*grpc.ClientConn, int) {
+func (lb *ClientLB) selectConn() *grpc.ClientConn {
 	lb.mu.RLock()
 	defer lb.mu.RUnlock()
 
@@ -141,92 +141,100 @@ func (lb *ClientLB) selectConn() (*grpc.ClientConn, int) {
 	if len(lb.vmConn) == 0 {
 		if len(lb.serverlessConn) == 0 {
 			// no available connection
-			return nil, -1
+			return nil
 		}
 
 		// select serverless connection
 		idx := int(atomic.AddUint32(&lb.serverlessNext, 1) % uint32(len(lb.serverlessConn)))
-		return lb.serverlessConn[idx], -1
+		return lb.serverlessConn[idx]
 	}
 
 	// no serverless connection
 	if len(lb.serverlessConn) == 0 {
 		// select vm connection regradless of degradation
 		idx := int(atomic.AddUint32(&lb.vmNext, 1) % uint32(len(lb.vmConn)))
-		return lb.vmConn[idx], idx
+		return lb.vmConn[idx]
 	}
 
 	// portion of request go to serverless
-	r := float64(atomic.LoadInt32(&lb.numDegradConn)) / float64(len(lb.vmConn))
+	r := float64(atomic.LoadInt32(&lb.numDegradedConn)) / float64(len(lb.vmConn))
 	log.Printf("degrade portion: %v", r)
 	if rand.Float64() < r {
 		log.Printf("select serverless connection")
 		idx := int(atomic.AddUint32(&lb.serverlessNext, 1) % uint32(len(lb.serverlessConn)))
-		return lb.serverlessConn[idx], -1
+		return lb.serverlessConn[idx]
 	}
 
 	// select vm connection
 	for i := 0; i < len(lb.vmConn); i++ {
 		idx := int(atomic.AddUint32(&lb.vmNext, 1) % uint32(len(lb.vmConn)))
-		if atomic.LoadUint32(&lb.degradeConn[idx]) == 0 {
+		if lb.degradeConn[idx] == 0 {
 			log.Printf("select vm connection")
-			return lb.vmConn[idx], idx
+			return lb.vmConn[idx]
 		}
 	}
 
 	// all vm connections are degraded
 	idx := int(atomic.AddUint32(&lb.serverlessNext, 1) % uint32(len(lb.serverlessConn)))
-	return lb.serverlessConn[idx], -1
+	return lb.serverlessConn[idx]
 }
 
-func (lb *ClientLB) updateConnDegrade(idx int, overload bool) {
-	lb.mu.RLock()
-	defer lb.mu.RUnlock()
+func (lb *ClientLB) setConnDegraded(conn *grpc.ClientConn, when time.Time) {
+	lb.mu.Lock()
+	defer lb.mu.Unlock()
 
-	// serverless connection or not overloaded, no need to degrade
-	if idx < 0 || !overload {
-		return
-	}
-
-	for {
-		old := atomic.LoadUint32(&lb.degradeConn[idx])
-		if atomic.CompareAndSwapUint32(&lb.degradeConn[idx], old, uint32(lb.degradeInterval)) {
-			if old == 0 {
-				atomic.AddInt32(&lb.numDegradConn, 1)
-			}
+	// find the index of conn in lb.vmConn
+	idx := -1
+	for i, c := range lb.vmConn {
+		if c == conn {
+			idx = i
 			break
 		}
 	}
+	// conn is a serverless connection or the target has been removed
+	if idx == -1 {
+		return
+	}
+
+	elasped := uint32(time.Since(when).Milliseconds())
+	if elasped >= lb.degradeInterval {
+		// wait too long for lock
+		return
+	}
+	interval := lb.degradeInterval - elasped
+
+	// conn changed from undegraded to degraded
+	if lb.degradeConn[idx] == 0 {
+		lb.numDegradedConn++
+	}
+	lb.degradeConn[idx] = interval
 }
 
-func (lb *ClientLB) updateDegrade() {
+func (lb *ClientLB) updateDegradedLoop() {
 	ticker := time.NewTicker(UpdateInterval * time.Millisecond)
 	for {
 		<-ticker.C
-		lb.mu.RLock()
-		for i := range lb.degradeConn {
-			for {
-				oldi := atomic.LoadUint32(&lb.degradeConn[i])
-				if oldi == 0 {
-					break
-				}
-
-				newi := oldi
-				if newi < UpdateInterval {
-					newi = 0
-				} else {
-					newi -= UpdateInterval
-				}
-				if atomic.CompareAndSwapUint32(&lb.degradeConn[i], oldi, newi) {
-					if newi == 0 {
-						atomic.AddInt32(&lb.numDegradConn, -1)
-					}
-					break
-				}
-			}
-		}
-		lb.mu.RUnlock()
+		lb.updateDegraded()
 	}
+}
+
+func (lb *ClientLB) updateDegraded() {
+	lb.mu.Lock()
+	defer lb.mu.Unlock()
+
+	for i, v := range lb.degradeConn {
+		if v == 0 {
+			continue
+		}
+
+		if v < UpdateInterval {
+			lb.degradeConn[i] = 0
+			lb.numDegradedConn--
+		} else {
+			lb.degradeConn[i] -= UpdateInterval
+		}
+	}
+
 }
 
 func (lb *ClientLB) UnaryClientInterceptor() grpc.UnaryClientInterceptor {
@@ -247,7 +255,7 @@ func (lb *ClientLB) UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 			return invoker(ctx, method, req, reply, lb.conn, opts...)
 		}
 
-		conn, idx := lb.selectConn()
+		conn := lb.selectConn()
 		if conn == nil {
 			log.Fatal("no available connection")
 		}
@@ -257,7 +265,9 @@ func (lb *ClientLB) UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 		err := invoker(ctx, method, req, reply, conn, opts...)
 
 		overload, ok := header[OverloadHeaderKey]
-		go lb.updateConnDegrade(idx, ok && overload[0] == "true")
+		if ok && overload[0] == "true" {
+			go lb.setConnDegraded(conn, time.Now())
+		}
 
 		return err
 	}
