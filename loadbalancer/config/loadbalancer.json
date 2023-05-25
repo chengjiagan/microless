@@ -16,7 +16,8 @@
     "local_services": {
       "home-timeline": "8080",
       "post-storage": "8081"
-    }
+    },
+    "retry": 3
   },
   "serverless": {
     "enable": true,

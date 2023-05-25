@@ -11,7 +11,9 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -20,6 +22,7 @@ type ClientLB struct {
 	serverless      string
 	port            string
 	degradeInterval uint32
+	retry           int
 
 	// for local service connection
 	local bool
@@ -76,6 +79,7 @@ func NewClientLB(addr string) *ClientLB {
 		vm:              vmServiceName,
 		serverless:      serverlessServiceName,
 		degradeInterval: uint32(config.DegradeInterval * 1000), // seconds to milliseconds
+		retry:           config.Retry,
 		kubeClient:      kubeClient,
 		vmNext:          rand.Uint32(),
 		serverlessNext:  rand.Uint32(),
@@ -262,7 +266,20 @@ func (lb *ClientLB) UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 
 		var header metadata.MD
 		opts = append(opts, grpc.Header(&header))
-		err := invoker(ctx, method, req, reply, conn, opts...)
+		var err error
+		for i := 0; i < lb.retry; i++ {
+			conn := lb.selectConn()
+			if conn == nil {
+				return status.Error(codes.Unavailable, "no available connection")
+			}
+
+			err = invoker(ctx, method, req, reply, conn, opts...)
+			// serverless connection may return with error ResourceExhausted
+			// in this case, we should retry with another connection
+			if status.Code(err) != codes.ResourceExhausted {
+				break
+			}
+		}
 
 		overload, ok := header[OverloadHeaderKey]
 		if ok && overload[0] == "true" {

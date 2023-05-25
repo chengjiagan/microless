@@ -29,6 +29,7 @@ type ClientConfig struct {
 	ServerlessPostfix string            `json:"serverless_postfix"`
 	DegradeInterval   int               `json:"degrade_interval"`
 	LocalServices     map[string]string `json:"local_services"`
+	Retry             int               `json:"retry"`
 }
 
 type ServerlessConfig struct {

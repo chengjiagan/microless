@@ -14,12 +14,15 @@ import (
 )
 
 type ServerLB struct {
+	// params from config
 	reject   bool
-	tokens   int32
 	max      int32
 	fill     int32
 	interval time.Duration
-	stats    *serverStats
+
+	tokens int32
+
+	stats *serverStats
 }
 
 type serverStats struct {
