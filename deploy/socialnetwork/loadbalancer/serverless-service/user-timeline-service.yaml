@@ -8,6 +8,10 @@ spec:
   selector:
     app: user-timeline
     type: serverless
+  ports:
+  - name: grpc
+    port: 8080
+    targetPort: grpc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -15,6 +19,7 @@ metadata:
   name: user-timeline-serverless
   namespace: social-network
 spec:
+  replicas: 0
   selector:
     matchLabels:
       app: user-timeline
@@ -27,12 +32,16 @@ spec:
       name: user-timeline-serverless
       namespace: social-network
     spec:
+      nodeSelector:
+        type: serverless
       containers:
       - name: usertimeline
-        image: waterlemongan/microless-socialnetwork-usertimeline:0.2.0
+        image: waterlemongan/microless-socialnetwork-usertimeline:0.2.3
         ports:
         - name: grpc
           containerPort: 8080
+        - name: stats
+          containerPort: 9000
         env:
         - name: SERVICE_CONFIG
           value: "/config/config.json"
@@ -42,6 +51,13 @@ spec:
         - name: config
           mountPath: "/config"
           readOnly: true
+        resources:
+          limits:
+            cpu: 250m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
       volumes:
         - name: config
           configMap:

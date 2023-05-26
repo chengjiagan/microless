@@ -1,19 +1,20 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: home-timeline-hpa
+  name: user-timeline-serverless-hpa
   namespace: social-network
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: home-timeline-vm
+    name: user-timeline-serverless
   minReplicas: 1
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
+  - type: Pods
+    pods:
+      metric:
+        name: serverless_task_total
       target:
-        type: Utilization
-        averageUtilization: 80
+        type: AverageValue
+        averageValue: "1"

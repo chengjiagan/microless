@@ -28,6 +28,8 @@ spec:
       name: gateway
       namespace: social-network
     spec:
+      nodeSelector:
+        type: system
       containers:
       - name: server
         image: waterlemongan/microless-socialnetwork-gateway:0.2.0
@@ -46,8 +48,10 @@ spec:
         resources:
           limits:
             cpu: "1"
+            memory: 512Mi
           requests:
             cpu: "1"
+            memory: 512Mi
       volumes:
         - name: config
           configMap:

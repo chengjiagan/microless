@@ -11,7 +11,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["endpoints"]
-  verbs: ["get", "watch", "list"]
+  verbs: ["get", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -26,18 +26,3 @@ subjects:
 - kind: ServiceAccount
   name: default
   namespace: social-network
----
-apiVersion: v1
-kind: LimitRange
-metadata:
-  name: default-cpu-mem-limit
-  namespace: social-network
-spec:
-  limits:
-  - default:
-      cpu: "0.5"
-      memory: 128Mi
-    defaultRequest:
-      cpu: "0.5"
-      memory: 128Mi
-    type: Container

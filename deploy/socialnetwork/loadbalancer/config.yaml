@@ -36,17 +36,20 @@ data:
     }
   lb.json: |
     {
+      "metric_addr": ":9000",
       "server": {
         "enable": true,
-        "max_tokens": 1,
-        "tokens_per_fill": 1,
-        "fill_interval": 10
+        "reject": false,
+        "max_tokens": 500,
+        "tokens_per_fill": 100,
+        "fill_interval": 1
       },
       "client": {
         "enable": true,
-        "degrade_interval": 10,
+        "degrade_interval": 1,
         "vm_postfix": "-vm",
-        "serverless_postfix": "-kn.social-network.svc.cluster.local"
+        "serverless_postfix": "-serverless",
+        "retry": 3
       },
       "serverless": {
         "enable": false
@@ -54,29 +57,35 @@ data:
     }
   lb-serverless.json: |
     {
+      "metric_addr": ":9000",
       "server": {
         "enable": false
       },
       "client": {
         "enable": true,
-        "degrade_interval": 10,
+        "degrade_interval": 1,
         "vm_postfix": "-vm",
-        "serverless_postfix": "-kn.social-network.svc.cluster.local"
+        "serverless_postfix": "-serverless",
+        "retry": 3
       },
       "serverless": {
-        "enable": false
+        "enable": true,
+        "max_concurrency": 1,
+        "max_capacity": 10
       }
     }
   lb-gateway.json: |
     {
+      "metric_addr": "",
       "server": {
         "enable": false
       },
       "client": {
         "enable": true,
-        "degrade_interval": 10,
+        "degrade_interval": 1,
         "vm_postfix": "-vm",
-        "serverless_postfix": "-kn.social-network.svc.cluster.local"
+        "serverless_postfix": "-serverless",
+        "retry": 3
       },
       "serverless": {
         "enable": false

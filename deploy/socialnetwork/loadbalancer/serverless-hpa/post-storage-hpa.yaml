@@ -1,19 +1,20 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: text-hpa
+  name: post-storage-serverless-hpa
   namespace: social-network
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: text-vm
+    name: post-storage-serverless
   minReplicas: 1
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
+  - type: Pods
+    pods:
+      metric:
+        name: serverless_task_total
       target:
-        type: Utilization
-        averageUtilization: 80
+        type: AverageValue
+        averageValue: "1"

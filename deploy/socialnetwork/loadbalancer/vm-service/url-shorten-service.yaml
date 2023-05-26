@@ -8,6 +8,10 @@ spec:
   selector:
     app: url-shorten
     type: vm
+  ports:
+  - name: grpc
+    port: 8080
+    targetPort: grpc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -27,12 +31,16 @@ spec:
       name: url-shorten-vm
       namespace: social-network
     spec:
+      nodeSelector:
+        type: vm
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-urlshorten:0.2.0
+        image: waterlemongan/microless-socialnetwork-urlshorten:0.2.3
         ports:
         - name: grpc
           containerPort: 8080
+        - name: stats
+          containerPort: 9000
         env:
         - name: SERVICE_CONFIG
           value: "/config/config.json"
@@ -42,6 +50,13 @@ spec:
         - name: config
           mountPath: "/config"
           readOnly: true
+        resources:
+          limits:
+            cpu: "1"
+            memory: 50Mi
+          requests:
+            cpu: "1"
+            memory: 50Mi
       volumes:
         - name: config
           configMap:
