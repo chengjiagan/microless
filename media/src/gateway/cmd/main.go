@@ -96,7 +96,7 @@ func main() {
 	}
 
 	logger.Info("start server")
-	err = http.ListenAndServe(config.Rest, mux)
+	err = http.ListenAndServe(config.Grpc, mux)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}

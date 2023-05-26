@@ -7,7 +7,6 @@ import (
 
 type Config struct {
 	Grpc      string      `json:"grpc"`
-	Rest      string      `json:"rest"`
 	Otel      string      `json:"otel"`
 	MongoDB   MongoConfig `json:"mongodb"`
 	Memcached struct {

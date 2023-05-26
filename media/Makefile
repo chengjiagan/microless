@@ -68,6 +68,8 @@ proto-test: proto-test-data $(foreach s, $(SERVICES), proto-test-$(s))
 
 # prefix of image name
 DOCKER_PREFIX = waterlemongan/microless-media-
+# name for base build image
+BASE_IMAGE = waterlemongan/microless-loadbalancer-base
 # name for build image
 BUILD_IMAGE = $(DOCKER_PREFIX)build
 # tag for image
@@ -77,12 +79,9 @@ docker-build: docker-build-gateway docker-build-test $(foreach s, $(SERVICES), d
 
 docker-build-build: docker/Dockerfile.build
 	docker build \
-		--build-arg SERVICES="$(SERVICES)" \
+		--build-arg BASE_IMAGE="$(BASE_IMAGE)" \
+		--build-arg SERVICES="gateway $(SERVICES)" \
 		-t $(BUILD_IMAGE) -f $< src
-
-docker-build-gateway: docker/Dockerfile.gateway
-	docker build \
-		-t $(DOCKER_PREFIX)gateway -f $< src
 
 docker-build-test: test/Dockerfile
 	docker build \
@@ -103,7 +102,3 @@ docker-push: docker-push-gateway docker-push-test $(foreach s, $(SERVICES), dock
 
 docker-push-%:
 	docker push $(DOCKER_PREFIX)$*:$(VERSION)
-
-.PHONY init:
-	cd src && go mod download && cd ..
-	cd test && pipenv install --dev --system && cd ..

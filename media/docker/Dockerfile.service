@@ -7,8 +7,10 @@ FROM gcr.io/distroless/static-debian11
 ARG SERVICE
 # path to the config file
 ENV SERVICE_CONFIG="/config.json"
+ENV LB_CONFIG="/lb.json"
 
 COPY --from=build /go/bin/${SERVICE} /server
 
 EXPOSE 8080
+EXPOSE 9000
 CMD [ "/server" ]
