@@ -9,9 +9,16 @@ metadata:
   name: knative-serving
   namespace: knative-serving
 spec:
-  version: 1.7.1
+  version: 1.10.1
   config:
-    tracing:
-      backend: zipkin
-      zipkin-endpoint: "http://jaeger.jaeger.svc.cluster.local:9411/api/v2/spans"
-      debug: "true"
+    # tracing:
+    #   backend: zipkin
+    #   zipkin-endpoint: "http://jaeger.jaeger.svc.cluster.local:9411/api/v2/spans"
+    #   debug: "true"
+    features:
+       kubernetes.podspec-nodeselector: "enabled"
+    network:
+      ingress-class: "kourier.ingress.networking.knative.dev"
+  ingress:
+    kourier:
+      enabled: true
