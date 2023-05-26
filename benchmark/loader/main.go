@@ -1,25 +1,29 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
+	"microless/loader/generator"
+	"microless/loader/generator/media"
+	"microless/loader/generator/socialnetwork"
 	"net/http"
 	"os"
-	"strconv"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
 // required by all modes
 var addr = flag.String("addr", "", "address to the gateway service")
-var pathUserIds = flag.String("userid", "", "path to json file that contains user ids")
+var service = flag.String("service", "", "kind of service to test: social-network, media")
 var mode = flag.String("mode", "", "load test mode: close for close-loop, open for open-loop, prewarm for pre-warming")
+
+// required by social-network and media
+var pathUserIds = flag.String("userid", "", "path to json file that contains user ids")
+var pathMovieIds = flag.String("movieid", "", "path to json file that contains movie ids")
 
 // required by pre-warming
 var nThread = flag.Int("nthread", 1, "number of threads sending requests")
@@ -36,19 +40,15 @@ var wThread = flag.Int("wthread", 0, "number of threads sending write requests")
 var ratio = flag.Float64("ratio", 0, "ratio of read requests")
 var rate = flag.Int("rate", 0, "request rate in QPS, 0 if rate is unlimited")
 
-var users []struct {
-	UserId   string `json:"user_id"`
-	NumPost  int    `json:"num_post"`
-	HomePost int    `json:"home_post"`
-}
-
 var client *http.Client
+var gen generator.Generator
 
 // record a test sample
 type sample struct {
 	start time.Time
 	end   time.Time
 	t     string
+	code  int
 }
 
 func main() {
@@ -62,11 +62,18 @@ func main() {
 		Timeout: time.Minute,
 	}
 
-	// get user ids in dataset
-	data, err := os.ReadFile(*pathUserIds)
-	check(err)
-	err = json.Unmarshal(data, &users)
-	check(err)
+	// init generator
+	gen = newGenerator(
+		*service,
+		&generator.Config{
+			Address:     *addr,
+			UserIdPath:  *pathUserIds,
+			MovieIdPath: *pathMovieIds,
+		},
+	)
+	if gen == nil {
+		log.Fatal("unknown service")
+	}
 
 	// start test
 	switch *mode {
@@ -77,8 +84,7 @@ func main() {
 	case "prewarm":
 		prewarm()
 	default:
-		fmt.Println("unknown mode")
-		os.Exit(1)
+		log.Fatal("unknown mode")
 	}
 }
 
@@ -95,6 +101,17 @@ func checkParams() {
 		(*mode == "close" && (*rThread == 0 && *wThread == 0)) ||
 		(*mode == "open" && *rate == 0) {
 		os.Exit(0)
+	}
+}
+
+func newGenerator(service string, config *generator.Config) generator.Generator {
+	switch service {
+	case "socialnetwork":
+		return socialnetwork.NewSocialnetworkGenerator(config)
+	case "media":
+		return media.NewMediaGenerator(config)
+	default:
+		return nil
 	}
 }
 
@@ -151,21 +168,19 @@ func openLoop() {
 
 func prewarm() {
 	var wg sync.WaitGroup
-	ctx := context.Background()
-	cnt := int32(0)
-
 	wg.Add(*nThread)
 	for t := 0; t < *nThread; t++ {
 		go func(t int) {
-			for i := t; i < len(users); i += *nThread {
-				for j := 0; j < users[i].NumPost; j += 100 {
-					if j+100 < users[i].NumPost {
-						sendRead(ctx, users[i].UserId, j, j+100)
-					} else {
-						sendRead(ctx, users[i].UserId, j, users[i].NumPost)
-					}
+			ctx := context.Background()
+			for {
+				req := gen.GenPrewarm(t)
+				if req == nil {
+					break
 				}
-				atomic.AddInt32(&cnt, 1)
+				code := sendRequest(ctx, req)
+				if code != http.StatusOK {
+					log.Fatalf("prewarm failed: %v", code)
+				}
 			}
 			wg.Done()
 		}(t)
@@ -173,7 +188,8 @@ func prewarm() {
 
 	go func() {
 		for {
-			fmt.Printf("\r%d/%d", atomic.LoadInt32(&cnt), len(users))
+			cur, total := gen.GetPrewarmStatus()
+			fmt.Printf("\r%d/%d", cur, total)
 			time.Sleep(time.Second)
 		}
 	}()
@@ -203,10 +219,10 @@ func save(ss []sample) {
 	check(err)
 	defer fp.Close()
 	// write
-	_, err = fp.WriteString("start,end,type\n")
+	_, err = fp.WriteString("start,end,type,code\n")
 	check(err)
 	for _, s := range ss {
-		_, err = fp.WriteString(fmt.Sprintf("%v,%v,%v\n", s.start.UnixMilli(), s.end.UnixMilli(), s.t))
+		_, err = fp.WriteString(fmt.Sprintf("%v,%v,%v,%v\n", s.start.UnixMilli(), s.end.UnixMilli(), s.t, s.code))
 		check(err)
 	}
 }
@@ -224,9 +240,9 @@ func load(ctx context.Context) []chan sample {
 			for ctx.Err() == nil {
 				var s sample
 				if i < *rThread {
-					s = send(ctx, loadRead, "read")
+					s = send(ctx, gen.GenRead(), "read")
 				} else {
-					s = send(ctx, sendWrite, "write")
+					s = send(ctx, gen.GenWrite(), "write")
 				}
 				ss = append(ss, s)
 			}
@@ -239,11 +255,6 @@ func load(ctx context.Context) []chan sample {
 	}
 
 	return out
-}
-
-func loadRead(ctx context.Context) {
-	userid, start, stop := randHomeTimeline()
-	sendRead(ctx, userid, start, stop)
 }
 
 // open-loop load test
@@ -260,9 +271,9 @@ func loadWithRate(ctx context.Context) chan sample {
 				p := rand.Float64()
 				var s sample
 				if p < *ratio {
-					s = send(ctx, loadRead, "read")
+					s = send(ctx, gen.GenRead(), "read")
 				} else {
-					s = send(ctx, sendWrite, "write")
+					s = send(ctx, gen.GenWrite(), "write")
 				}
 				ch <- s
 				wg.Done()
@@ -275,98 +286,20 @@ func loadWithRate(ctx context.Context) chan sample {
 	return ch
 }
 
-func send(ctx context.Context, sendfunc func(context.Context), t string) sample {
+func send(ctx context.Context, req *http.Request, t string) sample {
 	start := time.Now()
-	sendfunc(ctx)
+	code := sendRequest(ctx, req)
 	end := time.Now()
 	return sample{
 		start: start,
 		end:   end,
 		t:     t,
+		code:  code,
 	}
-}
-
-func sendWrite(ctx context.Context) {
-	url := "http://" + *addr + "/api/v1/composepost"
-	val := randComposePost()
-
-	// serialize value in JSON format
-	data, err := json.Marshal(val)
-	check(err)
-	// generate request
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
-	check(err)
-
-	sendRequest(ctx, url, req)
-}
-
-type ComposePostRequest struct {
-	Username   string   `json:"username"`
-	UserId     string   `json:"user_id"`
-	Text       string   `json:"text"`
-	MediaIds   []int64  `json:"media_ids"`
-	MediaTypes []string `json:"media_types"`
-	PostType   string   `json:"post_type"`
-}
-
-func randComposePost() *ComposePostRequest {
-	// randomly select a user
-	user := rand.Intn(len(users))
-	userId := users[user].UserId
-	username := strconv.FormatInt(int64(user), 10)
-
-	// randomly generate a post
-	mention := rand.Intn(len(users))
-	text := fmt.Sprintf(
-		"%s\nhttp://url_%d.com\n@%d\n",
-		randString(rand.Intn(10)),
-		user,
-		mention,
-	)
-
-	return &ComposePostRequest{
-		Username:   username,
-		UserId:     userId,
-		Text:       text,
-		MediaIds:   []int64{1},
-		MediaTypes: []string{"png"},
-		PostType:   "POST",
-	}
-}
-
-// send read home timeline request
-func sendRead(ctx context.Context, userid string, start, stop int) {
-	// generate request
-	url := fmt.Sprintf("http://%s/api/v1/hometimeline/%s?start=%d&stop=%d", *addr, userid, start, stop)
-	req, err := http.NewRequest("GET", url, nil)
-	check(err)
-	// send
-	sendRequest(ctx, url, req)
-}
-
-// randomly generate a home timeline request
-// return userid, start, stop
-func randHomeTimeline() (string, int, int) {
-	// randomly select a user
-	user := rand.Intn(len(users))
-	userid := users[user].UserId
-	n := users[user].HomePost
-
-	// randomly select some posts if user have more than 10 posts
-	var start, stop int
-	if n <= 10 {
-		start = 0
-		stop = n
-	} else {
-		start = rand.Intn(n - 10)
-		stop = start + 10
-	}
-
-	return userid, start, stop
 }
 
 // send a http request
-func sendRequest(ctx context.Context, url string, req *http.Request) {
+func sendRequest(ctx context.Context, req *http.Request) int {
 	// send request
 	resp, err := client.Do(req)
 	check(err)
@@ -376,6 +309,8 @@ func sendRequest(ctx context.Context, url string, req *http.Request) {
 	check(err)
 	err = resp.Body.Close()
 	check(err)
+
+	return resp.StatusCode
 }
 
 // panic if encounter error
@@ -383,14 +318,4 @@ func check(err error) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-var alphanum = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-
-func randString(n int) string {
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = alphanum[rand.Intn(len(alphanum))]
-	}
-	return string(b)
 }
