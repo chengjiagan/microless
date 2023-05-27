@@ -27,14 +27,17 @@ func NewConn(address string) (*grpc.ClientConn, error) {
 }
 
 func NewGRPCServer() *grpc.Server {
+	stats := loadbalancer.NewStats()
 	serverLB := loadbalancer.NewServerLB()
-	serverlessLB := loadbalancer.NewServerlessLB()
+	serverlessLB := loadbalancer.NewServerlessLB(stats)
+	go stats.StartMetricServer()
 
 	return grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			serverLB.UnaryServerInterceptor(),
 			serverlessLB.UnaryServerInterceptor(),
 			otelgrpc.UnaryServerInterceptor(),
+			stats.UnaryServerInterceptor(),
 		),
 	)
 }
