@@ -5,7 +5,6 @@ import (
 	"microless/loadbalancer/internal/queue"
 	"microless/loadbalancer/internal/utils"
 	"sync"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
@@ -14,11 +13,10 @@ import (
 )
 
 type ServerlessLB struct {
+	// params from config
 	totalResources     int
 	maxCapacity        int
 	methodRequirements map[string]int
-
-	stats *serverlessStats
 
 	mu               sync.Mutex
 	concurrency      int
@@ -26,13 +24,7 @@ type ServerlessLB struct {
 	tasks            *queue.TaskQueue
 }
 
-type serverlessStats struct {
-	reg            *prometheus.Registry
-	totalRequests  *prometheus.CounterVec
-	requestLatency *prometheus.SummaryVec
-}
-
-func NewServerlessLB() *ServerlessLB {
+func NewServerlessLB(stats *Stats) *ServerlessLB {
 	config := utils.GetServerlessConfig()
 	if !config.Enable {
 		return nil
@@ -44,62 +36,33 @@ func NewServerlessLB() *ServerlessLB {
 		methodRequirements: config.MethodReqirements,
 		tasks:              queue.NewTaskQueue(config.MaxCapacity),
 	}
-	sl.stats = newServerlessStats(sl)
-	go utils.StartMetricServer(config.MetricAddr, sl.stats.reg)
+
+	stats.reg.MustRegister(
+		prometheus.NewGaugeFunc(
+			prometheus.GaugeOpts{
+				Name: NameServerlessTaskTotal,
+				Help: HelpServerlessTaskTotal,
+			},
+			func() float64 {
+				sl.mu.Lock()
+				defer sl.mu.Unlock()
+				return float64(sl.tasks.Len() + sl.concurrency)
+			},
+		),
+		prometheus.NewGaugeFunc(
+			prometheus.GaugeOpts{
+				Name: NameServerlessTaskRunning,
+				Help: HelpServerlessTaskRunning,
+			},
+			func() float64 {
+				sl.mu.Lock()
+				defer sl.mu.Unlock()
+				return float64(sl.concurrency)
+			},
+		),
+	)
 
 	return sl
-}
-
-func newServerlessStats(lb *ServerlessLB) *serverlessStats {
-	total := prometheus.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: NameRequestTotal,
-			Help: HelpRequestTotal,
-		},
-		[]string{"grpc_service", "grpc_method", "grpc_code"},
-	)
-	latency := prometheus.NewSummaryVec(
-		prometheus.SummaryOpts{
-			Name:       NameRequestLatency,
-			Help:       HelpRequestLatency,
-			Objectives: map[float64]float64{0.95: 0.005, 0.99: 0.001},
-		},
-		[]string{"grpc_service", "grpc_method", "grpc_code"},
-	)
-	tasksTotal := prometheus.NewGaugeFunc(
-		prometheus.GaugeOpts{
-			Name: NameServerlessTaskTotal,
-			Help: HelpServerlessTaskTotal,
-		},
-		func() float64 {
-			lb.mu.Lock()
-			defer lb.mu.Unlock()
-			return float64(lb.tasks.Len() + lb.concurrency)
-		},
-	)
-	taskRunning := prometheus.NewGaugeFunc(
-		prometheus.GaugeOpts{
-			Name: NameServerlessTaskRunning,
-			Help: HelpServerlessTaskRunning,
-		},
-		func() float64 {
-			lb.mu.Lock()
-			defer lb.mu.Unlock()
-			return float64(lb.concurrency)
-		},
-	)
-
-	reg := prometheus.NewRegistry()
-	prometheus.WrapRegistererWith(
-		prometheus.Labels{"type": "serverless"},
-		reg,
-	).MustRegister(total, latency, tasksTotal, taskRunning)
-
-	return &serverlessStats{
-		reg:            reg,
-		totalRequests:  total,
-		requestLatency: latency,
-	}
 }
 
 func (lb *ServerlessLB) UnaryServerInterceptor() grpc.UnaryServerInterceptor {
@@ -113,56 +76,63 @@ func (lb *ServerlessLB) UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 			return handler(ctx, req)
 		}
 
-		service, method := utils.GetServiceAndMethod(info)
-		methodRequirement := 100
-		if v, ok := lb.methodRequirements[method]; ok {
-			methodRequirement = v
+		_, method := utils.GetServiceAndMethod(info)
+		methodRequirement := lb.getMethodRequirement(method)
+		err = lb.requestResource(methodRequirement)
+		if err != nil {
+			return
 		}
 
-		lb.mu.Lock()
-		// check if the request can be processed
-		if lb.currentResources+methodRequirement > lb.totalResources {
-			// check if the queue is full
-			if lb.tasks.Len() >= lb.maxCapacity {
-				lb.mu.Unlock()
-				return nil, status.Error(codes.ResourceExhausted, "Serverless queue is full")
-			}
-
-			task := make(queue.Task)
-			lb.tasks.Push(task)
-			// wait for the previous task to finish
-			for lb.currentResources+methodRequirement > lb.totalResources {
-				lb.mu.Unlock()
-				<-task
-				lb.mu.Lock()
-			}
-			// the previous task has finished
-			lb.tasks.Pop()
-			close(task)
-		}
-		lb.currentResources += methodRequirement
-		lb.concurrency++
-		lb.mu.Unlock()
-
-		start := time.Now()
 		resp, err = handler(ctx, req)
-		elapsed := time.Since(start)
+		lb.releaseResource(methodRequirement)
+		return
+	}
+}
 
-		// inform the next task to start
-		lb.mu.Lock()
-		lb.currentResources -= methodRequirement
-		lb.concurrency--
-		if lb.tasks.Len() > 0 {
-			next := lb.tasks.Front()
-			next <- struct{}{}
+func (lb *ServerlessLB) getMethodRequirement(method string) int {
+	if v, ok := lb.methodRequirements[method]; ok {
+		return v
+	}
+	return 100
+}
+
+func (lb *ServerlessLB) requestResource(amount int) error {
+	lb.mu.Lock()
+	defer lb.mu.Unlock()
+
+	// check if the request can be processed
+	if lb.currentResources+amount > lb.totalResources {
+		// check if the queue is full
+		if lb.tasks.Len() >= lb.maxCapacity {
+			return status.Error(codes.ResourceExhausted, "Serverless queue is full")
 		}
-		lb.mu.Unlock()
 
-		// update stats
-		code := status.Code(err).String()
-		lb.stats.totalRequests.WithLabelValues(service, method, code).Inc()
-		lb.stats.requestLatency.WithLabelValues(service, method, code).Observe(elapsed.Seconds())
+		task := make(queue.Task)
+		lb.tasks.Push(task)
+		// wait for the previous task to finish
+		for lb.currentResources+amount > lb.totalResources {
+			lb.mu.Unlock()
+			<-task
+			lb.mu.Lock()
+		}
+		// the previous task has finished
+		lb.tasks.Pop()
+		close(task)
+	}
+	lb.currentResources += amount
+	lb.concurrency++
 
-		return resp, err
+	return nil
+}
+
+func (lb *ServerlessLB) releaseResource(amount int) {
+	lb.mu.Lock()
+	defer lb.mu.Unlock()
+
+	lb.currentResources -= amount
+	lb.concurrency--
+	if lb.tasks.Len() > 0 {
+		next := lb.tasks.Front()
+		next <- struct{}{}
 	}
 }

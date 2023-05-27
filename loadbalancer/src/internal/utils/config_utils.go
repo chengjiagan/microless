@@ -2,12 +2,12 @@ package utils
 
 import (
 	"encoding/json"
+	"flag"
 	"log"
 	"os"
 )
 
 type Config struct {
-	MetricAddr string           `json:"metric_addr"`
 	Server     ServerConfig     `json:"server"`
 	Client     ClientConfig     `json:"client"`
 	Serverless ServerlessConfig `json:"serverless"`
@@ -19,8 +19,6 @@ type ServerConfig struct {
 	MaxTokens     int  `json:"max_tokens"`
 	TokensPerFill int  `json:"tokens_per_fill"`
 	FillInterval  int  `json:"fill_interval"`
-
-	MetricAddr string
 }
 
 type ClientConfig struct {
@@ -37,19 +35,17 @@ type ServerlessConfig struct {
 	MaxConcurrency    int            `json:"max_concurrency"`
 	MaxCapacity       int            `json:"max_capacity"`
 	MethodReqirements map[string]int `json:"method_requirements"` // if method requires a full CPU core, then its requirement is 100
-
-	MetricAddr string
 }
 
-var configPath = os.Getenv("LB_CONFIG")
+var configPath = flag.String("lb_config", os.Getenv("LB_CONFIG"), "path to loadbalancer config file")
 var config *Config
 
-func getConfig() *Config {
+func GetConfig() *Config {
 	if config != nil {
 		return config
 	}
 
-	data, err := os.ReadFile(configPath)
+	data, err := os.ReadFile(*configPath)
 	if err != nil {
 		log.Fatalf("Failed to read config file: %v", err)
 	}
@@ -61,24 +57,20 @@ func getConfig() *Config {
 		log.Fatalf("Failed to parse config file: %v", err)
 	}
 
-	// set metric address
-	config.Server.MetricAddr = config.MetricAddr
-	config.Serverless.MetricAddr = config.MetricAddr
-
 	return config
 }
 
 func GetServerConfig() *ServerConfig {
-	config := getConfig()
+	config := GetConfig()
 	return &config.Server
 }
 
 func GetClientConfig() *ClientConfig {
-	config := getConfig()
+	config := GetConfig()
 	return &config.Client
 }
 
 func GetServerlessConfig() *ServerlessConfig {
-	config := getConfig()
+	config := GetConfig()
 	return &config.Serverless
 }
