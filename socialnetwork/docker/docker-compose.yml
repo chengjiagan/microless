@@ -36,10 +36,10 @@ services:
       - 16686:16686
 
   gateway:
-    image: envoyproxy/envoy:v1.26-latest
+    image: waterlemongan/microless-socialnetwork-gateway:latest
     volumes:
-      - ../config/gateway.yaml:/etc/envoy/envoy.yaml:ro
-      - ../descriptor/rest.desc:/descriptor/rest.desc:ro
+      - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
     depends_on:
       - compose-post
       - home-timeline
@@ -48,7 +48,6 @@ services:
       - user-timeline
     ports:
       - 8080:8080
-      - 9901:9901
 
   post-storage:
     image: waterlemongan/microless-socialnetwork-poststorage:latest

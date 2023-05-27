@@ -66,16 +66,8 @@ proto: proto-data $(foreach s, $(SERVICES), proto-$(s)) $(foreach s, $(REST_SERV
 proto-test: proto-test-data $(foreach s, $(SERVICES), proto-test-$(s))
 	touch test/proto/__init__.py
 
-.PHONY descriptor: $(foreach s, $(REST_SERVICES), $(PROTO_DIR)/$(s).proto)
-	protoc --proto_path=. --proto_path=proto \
-		--include_imports \
-		--descriptor_set_out=descriptor/rest.desc \
-		$^
-	base64 -w 0 descriptor/rest.desc > descriptor/rest.desc.b64
-
 # prefix of image name
 DOCKER_PREFIX = waterlemongan/microless-socialnetwork-
-DOCKER_PREFIX_TEST = dev.local/microless-socialnetwork-
 # name for base build image
 BASE_IMAGE = waterlemongan/microless-loadbalancer-base
 # name for build image
