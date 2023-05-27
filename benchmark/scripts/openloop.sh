@@ -3,7 +3,7 @@ set -ex
 
 timestamp=$(date +%m%d%H%M)
 mkdir ../data/$timestamp
-qps=(30 60 90 120 150 180)
+qps=(50 80 100 130 150 180 200)
 ratio=1
 service="socialnetwork"
 
@@ -24,7 +24,7 @@ for n in ${qps[@]}; do
     sleep 5
     # actual load test
     output="../data/${timestamp}/load_q${n}.csv"
-    $load -service $service -addr $gateway -userid $userid -movieid $mvoieid -mode $mode -time $duration -rate $n -ratio $ratio -output $output
+    $load -service $service -addr $gateway -userid $userid -movieid $movieid -mode $mode -time $duration -rate $n -ratio $ratio -output $output
     sleep 60
 done
 rm $load
