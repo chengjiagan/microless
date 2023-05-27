@@ -71,7 +71,8 @@ func (g *socialnetworkGenerator) GenPrewarm(threadId int) *http.Request {
 	}
 
 	if postIdxStart >= g.users[userIdx].NumPost {
-		userIdx++
+		userIdx += g.nThread
+		g.curUserIdx[threadId] = userIdx
 		postIdxStart = 0
 		atomic.AddInt32(&g.cnt, 1)
 	}
@@ -84,6 +85,7 @@ func (g *socialnetworkGenerator) GenPrewarm(threadId int) *http.Request {
 	if postIdxEnd > g.users[userIdx].NumPost {
 		postIdxEnd = g.users[userIdx].NumPost
 	}
+	g.curPostIdx[threadId] = postIdxEnd
 
 	// generate request
 	url := fmt.Sprintf("http://%s/api/v1/hometimeline/%s?start=%d&stop=%d", g.addr, g.users[userIdx].UserId, postIdxStart, postIdxEnd)

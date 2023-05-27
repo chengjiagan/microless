@@ -116,6 +116,8 @@ func newGenerator(service string, config *generator.Config) generator.Generator 
 }
 
 func closeLoop() {
+	gen.InitCloseLoop(*rThread, *wThread)
+
 	// start load test
 	ctx, cancel := context.WithCancel(context.Background())
 	out := load(ctx)
@@ -142,6 +144,8 @@ func closeLoop() {
 }
 
 func openLoop() {
+	gen.InitOpenLoop(*ratio, *rate)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	out := loadWithRate(ctx)
 
@@ -167,6 +171,8 @@ func openLoop() {
 }
 
 func prewarm() {
+	gen.InitPrewarm(*nThread)
+
 	var wg sync.WaitGroup
 	wg.Add(*nThread)
 	for t := 0; t < *nThread; t++ {
