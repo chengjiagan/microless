@@ -4,12 +4,13 @@ metadata:
   name: text
   namespace: social-network
 spec:
-  ports:
-  - port: 8080
-    name: grpc
-    targetPort: grpc
+  clusterIP: None
   selector:
     app: text
+  ports:
+  - name: grpc
+    port: 8080
+    targetPort: grpc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -29,17 +30,32 @@ spec:
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-text:0.1.8
+        image: waterlemongan/microless-socialnetwork-text:0.3.0
         ports:
         - name: grpc
           containerPort: 8080
+        - name: stats
+          containerPort: 9000
         env:
         - name: SERVICE_CONFIG
           value: "/config/config.json"
+        - name: LB_CONFIG
+          value: "/config/lb.json"
+        - name: SERVICE_ADDR
+          value: ":8080"
+        - name: STATS_ADDR
+          value: ":9000"
         volumeMounts:
         - name: config
           mountPath: "/config"
           readOnly: true
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: 50Mi
+          requests:
+            cpu: "0.5"
+            memory: 50Mi
       volumes:
         - name: config
           configMap:
@@ -47,3 +63,5 @@ spec:
             items:
             - key: config.json
               path: config.json
+            - key: lb.json
+              path: lb.json

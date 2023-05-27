@@ -11,9 +11,14 @@ spec:
   minReplicas: 1
   maxReplicas: 10
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
+  - type: Object
+    object:
+      describedObject:
+        apiVersion: v1
+        kind: Service
+        name: post-storage
+      metric:
+        name: grpc_server_request_per_second
       target:
-        type: Utilization
-        averageUtilization: 80
+        type: AverageValue
+        value: "90"

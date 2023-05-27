@@ -20,9 +20,8 @@ kubectl create -f service/user-mention-service.yaml
 kubectl create -f service/text-service.yaml
 kubectl create -f service/compose-post-service.yaml
 
-# Install ingress
-kubectl create -f envoy.yaml
-kubectl create -f ingress.yaml
+# Install gateway
+kubectl create -f gateway.yaml
 
 # Install HPA objects
 kubectl create -f hpa/post-storage-hpa.yaml

@@ -11,7 +11,6 @@ metadata:
 data:
   config.json: |
     {
-      "grpc": ":8080",
       "otel": "jaeger.jaeger:4317",
       "mongodb": {
         "url": "mongodb://mongodb.mongodb:27017",
@@ -37,7 +36,7 @@ data:
         "text": "text.social-network:8080",
         "composepost": "compose-post.social-network:8080"
       },
-      "gateway": "10.2.64.8:80",
+      "gateway": "gateway.social-network:8080",
       "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
     }
 ---
@@ -51,7 +50,7 @@ spec:
     spec:
       containers:
       - name: test
-        image: waterlemongan/microless-socialnetwork-test:0.1.8
+        image: waterlemongan/microless-socialnetwork-test:0.3.0
         env:
         - name: TEST_CONFIG
           value: "/config/config.json"

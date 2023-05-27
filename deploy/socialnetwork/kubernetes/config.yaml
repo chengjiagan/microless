@@ -6,7 +6,6 @@ metadata:
 data:
   config.json: |
     {
-      "grpc": ":8080",
       "otel": "jaeger.jaeger:4317",
       "mongodb": {
         "url": "mongodb://mongodb.mongodb:27017",
@@ -33,4 +32,16 @@ data:
         "composepost": "compose-post:8080"
       },
       "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
+    }
+  lb.json: |
+    {
+      "server": {
+        "enable": false
+      },
+      "client": {
+        "enable": false
+      },
+      "serverless": {
+        "enable": false
+      }
     }
