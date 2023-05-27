@@ -17,6 +17,7 @@ func StartMetricServer(addr string, reg *prometheus.Registry) {
 		promhttp.HandlerFor(reg, promhttp.HandlerOpts{}),
 	)
 	server := &http.Server{Addr: addr, Handler: mux}
+	log.Printf("Start stats server at %s", addr)
 	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatalf("Failed to start metric server: %v", err)
