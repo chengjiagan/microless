@@ -36,6 +36,9 @@ services:
       - 16686:16686
 
   gateway:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
     image: waterlemongan/microless-socialnetwork-gateway:latest
     volumes:
       - ../config/dev.json:/config.json:ro
@@ -50,6 +53,9 @@ services:
       - 8080:8080
 
   post-storage:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
     image: waterlemongan/microless-socialnetwork-poststorage:latest
     volumes:
       - ../config/dev.json:/config.json:ro
@@ -60,6 +66,9 @@ services:
       - jaeger
 
   user-timeline:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
     image: waterlemongan/microless-socialnetwork-usertimeline:latest
     volumes:
       - ../config/dev.json:/config.json:ro
@@ -71,6 +80,9 @@ services:
       - jaeger
 
   user:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
     image: waterlemongan/microless-socialnetwork-user:latest
     volumes:
       - ../config/dev.json:/config.json:ro
@@ -81,6 +93,9 @@ services:
       - jaeger
 
   social-graph:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
     image: waterlemongan/microless-socialnetwork-socialgraph:latest
     volumes:
       - ../config/dev.json:/config.json:ro
@@ -92,6 +107,9 @@ services:
       - jaeger
 
   home-timeline:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
     image: waterlemongan/microless-socialnetwork-hometimeline:latest
     volumes:
       - ../config/dev.json:/config.json:ro
@@ -103,6 +121,9 @@ services:
       - jaeger
 
   media:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
     image: waterlemongan/microless-socialnetwork-media:latest
     volumes:
       - ../config/dev.json:/config.json:ro
@@ -111,6 +132,9 @@ services:
       - jaeger
 
   url-shorten:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
     image: waterlemongan/microless-socialnetwork-urlshorten:latest
     volumes:
       - ../config/dev.json:/config.json:ro
@@ -121,6 +145,9 @@ services:
       - jaeger
 
   user-mention:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
     image: waterlemongan/microless-socialnetwork-usermention:latest
     volumes:
       - ../config/dev.json:/config.json:ro
@@ -130,6 +157,9 @@ services:
       - jaeger
 
   text:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
     image: waterlemongan/microless-socialnetwork-text:latest
     volumes:
       - ../config/dev.json:/config.json:ro
@@ -140,6 +170,9 @@ services:
       - jaeger
 
   compose-post:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
     image: waterlemongan/microless-socialnetwork-composepost:latest
     volumes:
       - ../config/dev.json:/config.json:ro
