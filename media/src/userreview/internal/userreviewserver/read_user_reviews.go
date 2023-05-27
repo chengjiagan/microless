@@ -18,7 +18,7 @@ import (
 
 func (s *UserReviewService) ReadUserReviews(ctx context.Context, req *pb.ReadUserReviewsRequest) (*pb.ReadUserReviewsRespond, error) {
 	if req.Stop <= req.Start || req.Start < 0 {
-		s.logger.Errorw("Invalid arguments", "user_id", req.UserId, "start", req.Start, "stop", req.Stop)
+		s.logger.Warnw("Invalid arguments", "user_id", req.UserId, "start", req.Start, "stop", req.Stop)
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid arguments for ReadUserReviews")
 	}
 
@@ -34,7 +34,7 @@ func (s *UserReviewService) ReadUserReviews(ctx context.Context, req *pb.ReadUse
 			reviewReq := &reviewstorage.ReadReviewsRequest{ReviewIds: reviewIds}
 			reviewResp, err := s.reviewstorageClient.ReadReviews(ctx, reviewReq)
 			if err != nil {
-				s.logger.Errorw("Failed to get reviews from review-storage-service", "err", err)
+				s.logger.Warnw("Failed to get reviews from review-storage-service", "err", err)
 				return nil, err
 			}
 			return &pb.ReadUserReviewsRespond{Reviews: reviewResp.Reviews}, nil
@@ -56,7 +56,7 @@ func (s *UserReviewService) ReadUserReviews(ctx context.Context, req *pb.ReadUse
 		if err == mongo.ErrNoDocuments {
 			return nil, status.Errorf(codes.NotFound, "user_id: %v doesn't exit in MongoDB", req.UserId)
 		} else {
-			s.logger.Errorw("Failed to get user reviews from MongoDB", "user_id", req.UserId, "err", err)
+			s.logger.Warnw("Failed to get user reviews from MongoDB", "user_id", req.UserId, "err", err)
 			return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}
@@ -80,7 +80,7 @@ func (s *UserReviewService) ReadUserReviews(ctx context.Context, req *pb.ReadUse
 			return nil
 		})
 		if err != nil {
-			s.logger.Errorw("Failed to update user reviews in Redis", "err", err)
+			s.logger.Warnw("Failed to update user reviews in Redis", "err", err)
 		}
 		return nil
 	})

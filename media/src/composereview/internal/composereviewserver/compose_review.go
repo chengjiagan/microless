@@ -23,7 +23,7 @@ func (s *ComposeReviewService) ComposeReview(ctx context.Context, req *pb.Compos
 	}
 	reviewResp, err := s.reviewstorageClient.StoreReview(ctx, reviewReq)
 	if err != nil {
-		s.logger.Errorw("Failed to store review to review-storage-service", "err", err)
+		s.logger.Warnw("Failed to store review to review-storage-service", "err", err)
 		return nil, err
 	}
 
@@ -38,7 +38,7 @@ func (s *ComposeReviewService) ComposeReview(ctx context.Context, req *pb.Compos
 		}
 		_, err := s.userreviewClient.UploadUserReview(ctx, userReq)
 		if err != nil {
-			s.logger.Errorw("Failed to add review to user-review-service", "err", err)
+			s.logger.Warnw("Failed to add review to user-review-service", "err", err)
 			return err
 		}
 		return nil
@@ -54,7 +54,7 @@ func (s *ComposeReviewService) ComposeReview(ctx context.Context, req *pb.Compos
 		}
 		_, err := s.moviereviewClient.UploadMovieReview(ctx, movieReq)
 		if err != nil {
-			s.logger.Errorw("Failed to add review to movie-review-service", "err", err)
+			s.logger.Warnw("Failed to add review to movie-review-service", "err", err)
 			return err
 		}
 		return nil
@@ -69,7 +69,7 @@ func (s *ComposeReviewService) ComposeReview(ctx context.Context, req *pb.Compos
 		}
 		_, err := s.ratingClient.UploadRating(ctx, ratingReq)
 		if err != nil {
-			s.logger.Errorw("Failed to upload rating in rating-service", "err", err)
+			s.logger.Warnw("Failed to upload rating in rating-service", "err", err)
 			return err
 		}
 		return nil

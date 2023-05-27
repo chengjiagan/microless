@@ -30,7 +30,7 @@ func (s *ProfileService) GetRoomNumber(ctx context.Context, req *pb.GetRoomNumbe
 	query := bson.M{"_id": hotelOid}
 	err = s.mongodb.FindOne(ctx, query).Decode(hotel)
 	if err != nil {
-		s.logger.Errorw("Failed to find hotel from MongoDB")
+		s.logger.Warnw("Failed to find hotel from MongoDB")
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 

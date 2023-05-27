@@ -20,7 +20,7 @@ func (s *CustomerService) PutCustomer(ctx context.Context, req *pb.PutCustomerRe
 	query := bson.M{"_id": customerOid}
 	res, err := s.mongodb.ReplaceOne(ctx, query, customer)
 	if err != nil {
-		s.logger.Errorw("Failed to update customer to MongoDB", "customer_id", req.CustomerId, "err", err)
+		s.logger.Warnw("Failed to update customer to MongoDB", "customer_id", req.CustomerId, "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB err: %v", err)
 	}
 	if res.MatchedCount == 0 {

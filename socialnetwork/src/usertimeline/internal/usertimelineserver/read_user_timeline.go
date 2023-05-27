@@ -20,7 +20,7 @@ import (
 
 func (s *UserTimelineService) ReadUserTimeline(ctx context.Context, req *pb.ReadUserTimelineRequest) (*pb.ReadUserTimelineRespond, error) {
 	if req.Stop <= req.Start || req.Start < 0 {
-		s.logger.Errorw("Invalid arguments", "user_id", req.UserId, "start", req.Start, "stop", req.Stop)
+		s.logger.Warnw("Invalid arguments", "user_id", req.UserId, "start", req.Start, "stop", req.Stop)
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid arguments for ReadUserTimeline")
 	}
 
@@ -55,7 +55,7 @@ func (s *UserTimelineService) ReadUserTimeline(ctx context.Context, req *pb.Read
 		if err == mongo.ErrNoDocuments {
 			return nil, status.Errorf(codes.NotFound, "user_id: %v doesn't exit in MongoDB", req.UserId)
 		} else {
-			s.logger.Errorw("Failed to get user timeline from MongoDB", "user_id", req.UserId, "err", err)
+			s.logger.Warnw("Failed to get user timeline from MongoDB", "user_id", req.UserId, "err", err)
 			return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}
@@ -78,7 +78,7 @@ func (s *UserTimelineService) ReadUserTimeline(ctx context.Context, req *pb.Read
 			return nil
 		})
 		if err != nil {
-			s.logger.Errorw("Failed to update user timeline in Redis", "err", err)
+			s.logger.Warnw("Failed to update user timeline in Redis", "err", err)
 		}
 		return nil
 	})

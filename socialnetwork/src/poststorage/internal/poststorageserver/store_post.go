@@ -19,7 +19,7 @@ func (s *PostStorageService) StorePost(ctx context.Context, req *pb.StorePostReq
 
 	result, err := s.mongodb.InsertOne(ctx, postFromProto(req.Post))
 	if err != nil {
-		s.logger.Errorw("Failed to insert post to MongoDB", "err", err)
+		s.logger.Warnw("Failed to insert post to MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 

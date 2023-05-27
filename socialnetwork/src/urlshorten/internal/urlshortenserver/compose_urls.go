@@ -38,7 +38,7 @@ func (s *UrlShortenService) ComposeUrls(ctx context.Context, req *pb.ComposeUrls
 		query := bson.M{"shortened_url": url.ShortenedUrl}
 		_, err := s.mongodb.ReplaceOne(ctx, query, url, opts)
 		if err != nil {
-			s.logger.Errorw("Failed to insert shortened urls to MongoDB", "err", err)
+			s.logger.Warnw("Failed to insert shortened urls to MongoDB", "err", err)
 			return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}

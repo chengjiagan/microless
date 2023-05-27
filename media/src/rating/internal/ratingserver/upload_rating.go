@@ -17,7 +17,7 @@ func (s *RatingService) UploadRating(ctx context.Context, req *pb.UploadRatingRe
 	}
 	_, err := s.movieinfoClient.UpdateRating(ctx, infoReq)
 	if err != nil {
-		s.logger.Errorw("Failed to update rating in movie-info-service", "err", err)
+		s.logger.Warnw("Failed to update rating in movie-info-service", "err", err)
 		return nil, err
 	}
 	return &emptypb.Empty{}, nil

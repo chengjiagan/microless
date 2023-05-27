@@ -24,7 +24,7 @@ func (s *GeoService) AddHotel(ctx context.Context, req *pb.AddHotelRequest) (*em
 	}
 	_, err := s.mongodb.InsertOne(ctx, hotel)
 	if err != nil {
-		s.logger.Errorw("Failed to insert new hotel location to MongoDB", "err", err)
+		s.logger.Warnw("Failed to insert new hotel location to MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 

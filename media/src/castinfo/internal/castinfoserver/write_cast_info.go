@@ -18,7 +18,7 @@ func (s *CastInfoService) WriteCastInfo(ctx context.Context, req *pb.WriteCastIn
 
 	result, err := s.mongodb.InsertOne(ctx, info)
 	if err != nil {
-		s.logger.Errorw("Failed to insert cast info to MongoDB", "err", err)
+		s.logger.Warnw("Failed to insert cast info to MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 

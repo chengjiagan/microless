@@ -55,14 +55,14 @@ func (s *ProfileService) GetProfiles(ctx context.Context, req *pb.GetProfilesReq
 	query := bson.M{"_id": bson.M{"$in": oids}}
 	cur, err := s.mongodb.Find(ctx, query)
 	if err != nil {
-		s.logger.Errorw("Failed to find hotels from MongoDB")
+		s.logger.Warnw("Failed to find hotels from MongoDB")
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	// decode from cursor
 	var hotelsMongo []*Hotel
 	err = cur.All(ctx, &hotelsMongo)
 	if err != nil {
-		s.logger.Errorw("Failed to find hotels from MongoDB")
+		s.logger.Warnw("Failed to find hotels from MongoDB")
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	for _, h := range hotelsMongo {

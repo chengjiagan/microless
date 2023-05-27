@@ -66,7 +66,7 @@ func (s *UserService) getUser(ctx context.Context, username string) (*User, erro
 			s.logger.Warnw("User doesn't exist in MongoDB", "username", username)
 			return nil, status.Errorf(codes.NotFound, "username: %v doesn't exist in MongoDB", username)
 		} else {
-			s.logger.Errorw("Failed to find user from MongoDB", "err", err)
+			s.logger.Warnw("Failed to find user from MongoDB", "err", err)
 			return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}
@@ -75,7 +75,7 @@ func (s *UserService) getUser(ctx context.Context, username string) (*User, erro
 	userJson, _ := json.Marshal(user)
 	_, err = s.rdb.Set(ctx, keyMc, userJson, 0).Result()
 	if err != nil {
-		s.logger.Errorw("Failed to set to Redis", "err", err)
+		s.logger.Warnw("Failed to set to Redis", "err", err)
 	}
 
 	return user, nil

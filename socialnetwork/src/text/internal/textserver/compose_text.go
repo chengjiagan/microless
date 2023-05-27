@@ -30,7 +30,7 @@ func (s *TextService) ComposeText(ctx context.Context, req *pb.ComposeTextReques
 		mentionReq := &usermention.ComposeUserMentionsRequest{Usernames: usernames}
 		mentionResp, err := s.usermentionClient.ComposeUserMentions(ctx, mentionReq)
 		if err != nil {
-			s.logger.Errorw("Failed to compose user mentions from UserMention service", "err", err)
+			s.logger.Warnw("Failed to compose user mentions from UserMention service", "err", err)
 			return err
 		}
 		resp.UserMention = mentionResp.UserMentions
@@ -49,7 +49,7 @@ func (s *TextService) ComposeText(ctx context.Context, req *pb.ComposeTextReques
 		urlReq := &urlshorten.ComposeUrlsRequest{Urls: urls}
 		urlResp, err := s.urlshortenClient.ComposeUrls(ctx, urlReq)
 		if err != nil {
-			s.logger.Errorw("Failed to shorten urls from UrlShorten service", "err", err)
+			s.logger.Warnw("Failed to shorten urls from UrlShorten service", "err", err)
 			return err
 		}
 		resp.Urls = urlResp.Urls

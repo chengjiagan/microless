@@ -35,7 +35,7 @@ func (s *SocialGraphService) GetFollowers(ctx context.Context, req *pb.GetFollow
 		if err == mongo.ErrNoDocuments {
 			return nil, status.Errorf(codes.NotFound, "user_id: %v doesn't exit in MongoDB", req.UserId)
 		} else {
-			s.logger.Errorw("Failed to get user social graph from MongoDB", "user_id", req.UserId, "err", err)
+			s.logger.Warnw("Failed to get user social graph from MongoDB", "user_id", req.UserId, "err", err)
 			return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}
@@ -75,7 +75,7 @@ func (s *SocialGraphService) GetFollowees(ctx context.Context, req *pb.GetFollow
 		if err == mongo.ErrNoDocuments {
 			return nil, status.Errorf(codes.NotFound, "user_id: %v doesn't exit in MongoDB", req.UserId)
 		} else {
-			s.logger.Errorw("Failed to get user social graph from MongoDB", "user_id", req.UserId, "err", err)
+			s.logger.Warnw("Failed to get user social graph from MongoDB", "user_id", req.UserId, "err", err)
 			return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}

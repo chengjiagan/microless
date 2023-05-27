@@ -34,7 +34,7 @@ func (s *FlightsService) GetFlightById(ctx context.Context, req *pb.GetFlightByI
 	query := bson.M{"_id": flightOid}
 	err = s.mongodb.FindOne(ctx, query).Decode(flight)
 	if err != nil {
-		s.logger.Errorw("Failed to get flight from MongoDB", "err", err)
+		s.logger.Warnw("Failed to get flight from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB err: %v", err)
 	}
 

@@ -72,12 +72,12 @@ func (s *FlightsService) getFlightByPort(ctx context.Context, origPort, destPort
 	}
 	cur, err := s.mongodb.Find(ctx, query)
 	if err != nil {
-		s.logger.Errorw("Failed to get flights by port from MongoDB", "err", err)
+		s.logger.Warnw("Failed to get flights by port from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB err: %v", err)
 	}
 	err = cur.All(ctx, &flights)
 	if err != nil {
-		s.logger.Errorw("Failed to get flights by port from MongoDB", "err", err)
+		s.logger.Warnw("Failed to get flights by port from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB err: %v", err)
 	}
 

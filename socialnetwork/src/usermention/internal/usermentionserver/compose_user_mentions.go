@@ -18,7 +18,7 @@ func (s *UserMentionService) ComposeUserMentions(ctx context.Context, req *pb.Co
 			userReq := &user.GetUserIdRequest{Username: name}
 			userResp, err := s.userClient.GetUserId(ctx, userReq)
 			if err != nil {
-				s.logger.Errorw("Failed to get user_id from User service", "username", name, "err", err)
+				s.logger.Warnw("Failed to get user_id from User service", "username", name, "err", err)
 				return err
 			}
 			mentions[i] = &proto.UserMention{

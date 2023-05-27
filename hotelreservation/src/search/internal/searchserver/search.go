@@ -21,7 +21,7 @@ func (s *SearchService) Search(ctx context.Context, req *pb.SearchRequest) (*pb.
 	}
 	geoRespond, err := s.geoClient.Nearby(ctx, geoRequest)
 	if err != nil {
-		s.logger.Errorw("Failed to get nearby hotels from geo-service", "err", err)
+		s.logger.Warnw("Failed to get nearby hotels from geo-service", "err", err)
 		return nil, err
 	}
 
@@ -34,7 +34,7 @@ func (s *SearchService) Search(ctx context.Context, req *pb.SearchRequest) (*pb.
 	}
 	reservationRespond, err := s.reservationClient.CheckAvailability(ctx, reservationRequest)
 	if err != nil {
-		s.logger.Errorw("Failed to check availability from reservation-service", "err", err)
+		s.logger.Warnw("Failed to check availability from reservation-service", "err", err)
 		return nil, err
 	}
 
@@ -47,7 +47,7 @@ func (s *SearchService) Search(ctx context.Context, req *pb.SearchRequest) (*pb.
 		rateRequest := &rate.GetRatesRequest{HotelIds: reservationRespond.HotelIds}
 		rateRespond, err := s.rateClient.GetRates(ctx, rateRequest)
 		if err != nil {
-			s.logger.Errorw("Failed to get rates from rate-service", "err", err)
+			s.logger.Warnw("Failed to get rates from rate-service", "err", err)
 			return err
 		}
 
@@ -66,7 +66,7 @@ func (s *SearchService) Search(ctx context.Context, req *pb.SearchRequest) (*pb.
 		profileRequest := &profile.GetProfilesRequest{HotelIds: reservationRespond.HotelIds}
 		profileRespond, err := s.profileClient.GetProfiles(ctx, profileRequest)
 		if err != nil {
-			s.logger.Errorw("Failed to get hotels from profile-service", "err", err)
+			s.logger.Warnw("Failed to get hotels from profile-service", "err", err)
 			return err
 		}
 

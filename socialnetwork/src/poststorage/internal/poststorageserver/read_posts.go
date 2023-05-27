@@ -52,14 +52,14 @@ func (s *PostStorageService) ReadPosts(ctx context.Context, req *pb.ReadPostsReq
 	query := bson.M{"_id": bson.M{"$in": oids}}
 	cursor, err := s.mongodb.Find(ctx, query)
 	if err != nil {
-		s.logger.Errorw("Failed to find posts from MongoDB", "err", err)
+		s.logger.Warnw("Failed to find posts from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	// decode
 	var mongoPosts []*Post
 	err = cursor.All(ctx, &mongoPosts)
 	if err != nil {
-		s.logger.Errorw("Failed to find posts from MongoDB", "err", err)
+		s.logger.Warnw("Failed to find posts from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	// update redis
@@ -72,12 +72,12 @@ func (s *PostStorageService) ReadPosts(ctx context.Context, req *pb.ReadPostsReq
 	}
 	_, err = s.rdb.MSet(ctx, postsMiss...).Result()
 	if err != nil {
-		s.logger.Errorw("Failed to set post to Redis", "err", err)
+		s.logger.Warnw("Failed to set post to Redis", "err", err)
 	}
 
 	// still unknown post_id exists
 	if len(posts) != len(req.PostIds) {
-		s.logger.Errorw("Unknown post_id")
+		s.logger.Warnw("Unknown post_id")
 		return nil, status.Error(codes.NotFound, "Unknown post_id")
 	}
 

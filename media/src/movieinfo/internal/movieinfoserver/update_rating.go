@@ -32,7 +32,7 @@ func (s *MovieInfoServer) UpdateRating(ctx context.Context, req *pb.UpdateRating
 	}
 	_, err = s.mongodb.UpdateByID(ctx, oid, update)
 	if err != nil {
-		s.logger.Errorw("Failed to update rating in MongoDB", "movie_id", req.MovieId, "err", err)
+		s.logger.Warnw("Failed to update rating in MongoDB", "movie_id", req.MovieId, "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 
@@ -40,7 +40,7 @@ func (s *MovieInfoServer) UpdateRating(ctx context.Context, req *pb.UpdateRating
 	s.logger.Info("Delete cache in Memcached")
 	err = s.memcached.WithContext(ctx).Delete(req.MovieId)
 	if err != nil {
-		s.logger.Errorw("Failed to delete in Memcached", "movie_id", req.MovieId, "err", err)
+		s.logger.Warnw("Failed to delete in Memcached", "movie_id", req.MovieId, "err", err)
 	}
 
 	return &emptypb.Empty{}, nil

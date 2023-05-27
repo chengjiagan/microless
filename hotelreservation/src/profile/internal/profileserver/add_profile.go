@@ -16,7 +16,7 @@ func (s *ProfileService) AddProfile(ctx context.Context, req *pb.AddProfileReque
 	hotel := hotelFromProto(req.Hotel)
 	res, err := s.mongodb.InsertOne(ctx, hotel)
 	if err != nil {
-		s.logger.Errorw("Failed to insert new hotel profile to MongoDB", "error", err)
+		s.logger.Warnw("Failed to insert new hotel profile to MongoDB", "error", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	hotelId := res.InsertedID.(primitive.ObjectID).Hex()
@@ -30,7 +30,7 @@ func (s *ProfileService) AddProfile(ctx context.Context, req *pb.AddProfileReque
 	}
 	_, err = s.geoClient.AddHotel(ctx, geoRequest)
 	if err != nil {
-		s.logger.Errorw("Failed to add hotel location to geo database", "err", err)
+		s.logger.Warnw("Failed to add hotel location to geo database", "err", err)
 		return nil, err
 	}
 

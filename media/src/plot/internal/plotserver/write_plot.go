@@ -14,7 +14,7 @@ func (s *PlotService) WritePlot(ctx context.Context, req *pb.WritePlotRequest) (
 	plot := &Plot{Plot: req.Plot}
 	result, err := s.mongodb.InsertOne(ctx, plot)
 	if err != nil {
-		s.logger.Errorw("Failed to insert plot into MongoDB", "err", err)
+		s.logger.Warnw("Failed to insert plot into MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	s.logger.Info("Insert new plot")

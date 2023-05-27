@@ -37,7 +37,7 @@ func (s *SocialGraphService) getUserId(ctx context.Context, username string, use
 	userReq := &user.GetUserIdRequest{Username: username}
 	resp, err := s.userClient.GetUserId(ctx, userReq)
 	if err != nil {
-		s.logger.Errorw("Failed to get user_id from user-service", "username", username, "err", err)
+		s.logger.Warnw("Failed to get user_id from user-service", "username", username, "err", err)
 		return err
 	}
 	*userId = resp.UserId

@@ -18,7 +18,7 @@ import (
 
 func (s *MovieReviewService) ReadMovieReviews(ctx context.Context, req *pb.ReadMovieReviewsRequest) (*pb.ReadMovieReviewsRespond, error) {
 	if req.Stop <= req.Start || req.Start < 0 {
-		s.logger.Errorw("Invalid arguments", "movie_id", req.MovieId, "start", req.Start, "stop", req.Stop)
+		s.logger.Warnw("Invalid arguments", "movie_id", req.MovieId, "start", req.Start, "stop", req.Stop)
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid arguments for ReadMovieReviews")
 	}
 
@@ -34,7 +34,7 @@ func (s *MovieReviewService) ReadMovieReviews(ctx context.Context, req *pb.ReadM
 			reviewReq := &reviewstorage.ReadReviewsRequest{ReviewIds: reviewIds}
 			reviewResp, err := s.reviewstorageClient.ReadReviews(ctx, reviewReq)
 			if err != nil {
-				s.logger.Errorw("Failed to get reviews from review-storage-service", "err", err)
+				s.logger.Warnw("Failed to get reviews from review-storage-service", "err", err)
 				return nil, err
 			}
 			return &pb.ReadMovieReviewsRespond{Reviews: reviewResp.Reviews}, nil
@@ -56,7 +56,7 @@ func (s *MovieReviewService) ReadMovieReviews(ctx context.Context, req *pb.ReadM
 		if err == mongo.ErrNoDocuments {
 			return nil, status.Errorf(codes.NotFound, "movie_id: %v doesn't exit in MongoDB", req.MovieId)
 		} else {
-			s.logger.Errorw("Failed to get movie reviews from MongoDB", "movie_id", req.MovieId, "err", err)
+			s.logger.Warnw("Failed to get movie reviews from MongoDB", "movie_id", req.MovieId, "err", err)
 			return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}
@@ -80,7 +80,7 @@ func (s *MovieReviewService) ReadMovieReviews(ctx context.Context, req *pb.ReadM
 			return nil
 		})
 		if err != nil {
-			s.logger.Errorw("Failed to update movie reviews in Redis", "err", err)
+			s.logger.Warnw("Failed to update movie reviews in Redis", "err", err)
 		}
 		return nil
 	})

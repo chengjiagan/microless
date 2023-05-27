@@ -41,7 +41,7 @@ func (s *UserService) getUserId(ctx context.Context, username string) (string, e
 			s.logger.Warnw("User doesn't exist in MongoDB", "username", username)
 			return "", status.Errorf(codes.NotFound, "username: %v doesn't exist in MongoDB", username)
 		} else {
-			s.logger.Errorw("Failed to find user from MongoDB", "err", err)
+			s.logger.Warnw("Failed to find user from MongoDB", "err", err)
 			return "", status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}
@@ -50,7 +50,7 @@ func (s *UserService) getUserId(ctx context.Context, username string) (string, e
 	userId := result.UserOid.Hex()
 	_, err = s.rdb.Set(ctx, keyMc, userId, 0).Result()
 	if err != nil {
-		s.logger.Errorw("Failed to set to Redis", "err", err)
+		s.logger.Warnw("Failed to set to Redis", "err", err)
 	}
 
 	return userId, nil

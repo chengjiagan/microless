@@ -18,7 +18,7 @@ import (
 func (s *UserService) RegisterUser(ctx context.Context, req *pb.RegisterUserRequest) (*pb.RegisterUserRespond, error) {
 	count, err := s.mongodb.CountDocuments(ctx, bson.M{"username": req.Username})
 	if err != nil {
-		s.logger.Errorw("Failed to count users", "err", err, "username", req.Username)
+		s.logger.Warnw("Failed to count users", "err", err, "username", req.Username)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	if count != 0 {
@@ -41,7 +41,7 @@ func (s *UserService) RegisterUser(ctx context.Context, req *pb.RegisterUserRequ
 	}
 	result, err := s.mongodb.InsertOne(ctx, user)
 	if err != nil {
-		s.logger.Errorw("Failed to insert new user to MongoDB", "err", err)
+		s.logger.Warnw("Failed to insert new user to MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	userId := result.InsertedID.(primitive.ObjectID).Hex()

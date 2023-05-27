@@ -20,7 +20,7 @@ func (s *BookingsService) CancelBookingById(ctx context.Context, req *pb.CancelB
 	query := bson.M{"_id": bookingOid}
 	res, err := s.mongodb.DeleteOne(ctx, query)
 	if err != nil {
-		s.logger.Errorw("Failed to delete booking from MongoDB", "err", err)
+		s.logger.Warnw("Failed to delete booking from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	if res.DeletedCount == 0 {

@@ -24,7 +24,7 @@ func (s *ReviewStorageService) StoreReview(ctx context.Context, req *pb.StoreRev
 	// insert new review into mongodb
 	result, err := s.mongodb.InsertOne(ctx, review)
 	if err != nil {
-		s.logger.Errorw("Failed to insert review into MongoDB", "err", err)
+		s.logger.Warnw("Failed to insert review into MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 

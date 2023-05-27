@@ -21,7 +21,7 @@ func (s *BookingsService) BookFlights(ctx context.Context, req *pb.BookFlightsRe
 	}
 	customerResp, err := s.customerClient.GetCustomer(ctx, customerReq)
 	if err != nil {
-		s.logger.Errorw("Failed to get customer info from customer-service", "err", err)
+		s.logger.Warnw("Failed to get customer info from customer-service", "err", err)
 		return nil, err
 	}
 
@@ -31,7 +31,7 @@ func (s *BookingsService) BookFlights(ctx context.Context, req *pb.BookFlightsRe
 	}
 	toFlightResp, err := s.flightsClient.GetFlightById(ctx, toFlightReq)
 	if err != nil {
-		s.logger.Errorw("Failed to get to flight info from flights-service", "err", err)
+		s.logger.Warnw("Failed to get to flight info from flights-service", "err", err)
 		return nil, err
 	}
 
@@ -44,7 +44,7 @@ func (s *BookingsService) BookFlights(ctx context.Context, req *pb.BookFlightsRe
 		}
 		retFlightResp, err = s.flightsClient.GetFlightById(ctx, retFlightReq)
 		if err != nil {
-			s.logger.Errorw("Failed to get return flight info from flights-service", "err", err)
+			s.logger.Warnw("Failed to get return flight info from flights-service", "err", err)
 			return nil, err
 		}
 	}
@@ -64,7 +64,7 @@ func (s *BookingsService) BookFlights(ctx context.Context, req *pb.BookFlightsRe
 	// insert booking into mongodb
 	res, err := s.mongodb.InsertOne(ctx, booking)
 	if err != nil {
-		s.logger.Errorw("Failed to insert booking", "err", err)
+		s.logger.Warnw("Failed to insert booking", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	bookingOid := res.InsertedID.(primitive.ObjectID)

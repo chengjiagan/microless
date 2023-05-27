@@ -18,7 +18,7 @@ func (s *HomeTimelineService) WriteHomeTimeline(ctx context.Context, req *pb.Wri
 	userReq := &socialgraph.GetFollowersRequest{UserId: req.UserId}
 	userResp, err := s.socialgraphClient.GetFollowers(ctx, userReq)
 	if err != nil {
-		s.logger.Errorw("Failed to get followers from SocialGraph Service", "err", err)
+		s.logger.Warnw("Failed to get followers from SocialGraph Service", "err", err)
 		return nil, err
 	}
 	followers := userResp.FollowersId
@@ -54,7 +54,7 @@ func (s *HomeTimelineService) WriteHomeTimeline(ctx context.Context, req *pb.Wri
 	// send request to mongodb
 	_, err = s.mongodb.UpdateMany(ctx, query, update)
 	if err != nil {
-		s.logger.Errorw("Failed to update home timeline", "err", err)
+		s.logger.Warnw("Failed to update home timeline", "err", err)
 		return nil, status.Errorf(codes.Internal, "Mongo Err: %v", err)
 	}
 

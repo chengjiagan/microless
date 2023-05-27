@@ -54,14 +54,14 @@ func (s *CastInfoService) ReadCastInfo(ctx context.Context, req *pb.ReadCastInfo
 	query := bson.M{"_id": bson.M{"$in": oids}}
 	cursor, err := s.mongodb.Find(ctx, query)
 	if err != nil {
-		s.logger.Errorw("Failed to find CastInfo from MongoDB", "err", err)
+		s.logger.Warnw("Failed to find CastInfo from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	// decode from mongodb
 	var infosMongo []*CastInfo
 	err = cursor.All(ctx, &infosMongo)
 	if err != nil {
-		s.logger.Errorw("Failed to find CastInfo from MongoDB", "err", err)
+		s.logger.Warnw("Failed to find CastInfo from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	for _, info := range infosMongo {
@@ -75,7 +75,7 @@ func (s *CastInfoService) ReadCastInfo(ctx context.Context, req *pb.ReadCastInfo
 			Value: infoJson,
 		})
 		if err != nil {
-			s.logger.Errorw("Failed to update Memcached", "cast_info_id", id, "err", err)
+			s.logger.Warnw("Failed to update Memcached", "cast_info_id", id, "err", err)
 		}
 	}
 

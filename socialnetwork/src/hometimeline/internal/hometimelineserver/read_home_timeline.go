@@ -19,7 +19,7 @@ import (
 func (s *HomeTimelineService) ReadHomeTimeline(ctx context.Context, req *pb.ReadHomeTimelineRequest) (*pb.ReadHomeTimelineRespond, error) {
 	// check arguments
 	if req.Stop <= req.Start || req.Start < 0 {
-		s.logger.Errorw("Invalid indices", "user_id", req.UserId, "start", req.Start, "stop", req.Stop)
+		s.logger.Warnw("Invalid indices", "user_id", req.UserId, "start", req.Start, "stop", req.Stop)
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid arguments for ReadHomeTimeline")
 	}
 
@@ -54,7 +54,7 @@ func (s *HomeTimelineService) ReadHomeTimeline(ctx context.Context, req *pb.Read
 		if err == mongo.ErrNoDocuments {
 			return nil, status.Errorf(codes.NotFound, "user_id: %v doesn't exit in MongoDB", req.UserId)
 		} else {
-			s.logger.Errorw("Failed to get home timeline from MongoDB", "user_id", req.UserId, "err", err)
+			s.logger.Warnw("Failed to get home timeline from MongoDB", "user_id", req.UserId, "err", err)
 			return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}
@@ -77,7 +77,7 @@ func (s *HomeTimelineService) ReadHomeTimeline(ctx context.Context, req *pb.Read
 			return nil
 		})
 		if err != nil {
-			s.logger.Errorw("Failed to update home timeline in Redis", "err", err)
+			s.logger.Warnw("Failed to update home timeline in Redis", "err", err)
 		}
 		return nil
 	})

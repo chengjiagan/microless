@@ -33,7 +33,7 @@ func (s *MovieInfoServer) WriteMovieInfo(ctx context.Context, req *pb.WriteMovie
 	s.logger.Info("Insert new movie info")
 	result, err := s.mongodb.InsertOne(ctx, info)
 	if err != nil {
-		s.logger.Errorw("Failed to insert movie info into MongoDB", "err", err)
+		s.logger.Warnw("Failed to insert movie info into MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	oid := result.InsertedID.(primitive.ObjectID)
@@ -45,7 +45,7 @@ func (s *MovieInfoServer) WriteMovieInfo(ctx context.Context, req *pb.WriteMovie
 	}
 	_, err = s.moviereviewClient.CreateMovie(ctx, reviewReq)
 	if err != nil {
-		s.logger.Errorw("Failed to create movie in movie-review-service", "err", err)
+		s.logger.Warnw("Failed to create movie in movie-review-service", "err", err)
 		return nil, err
 	}
 

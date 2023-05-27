@@ -42,13 +42,13 @@ func (s *GeoService) Nearby(ctx context.Context, req *pb.NearbyRequest) (*pb.Nea
 	opts := options.Find().SetLimit(maxSearchResults)
 	cur, err := s.mongodb.Find(ctx, query, opts)
 	if err != nil {
-		s.logger.Errorw("Failed to get nearby hotels from MongoDB", "err", err)
+		s.logger.Warnw("Failed to get nearby hotels from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	hotels := make([]*HotelLocation, 0)
 	err = cur.All(ctx, &hotels)
 	if err != nil {
-		s.logger.Errorw("Failed to get nearby hotels from MongoDB", "err", err)
+		s.logger.Warnw("Failed to get nearby hotels from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 

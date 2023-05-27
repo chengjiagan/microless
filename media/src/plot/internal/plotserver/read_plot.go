@@ -34,10 +34,10 @@ func (s *PlotService) ReadPlot(ctx context.Context, req *pb.ReadPlotRequest) (*p
 	err = s.mongodb.FindOne(ctx, query).Decode(plot)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			s.logger.Errorw("Plot not found", "plot_id", req.PlotId)
+			s.logger.Warnw("Plot not found", "plot_id", req.PlotId)
 			return nil, status.Errorf(codes.NotFound, "Plot %v not found", req.PlotId)
 		} else {
-			s.logger.Errorw("Failed to get plot from MongoDB", "plot_id", req.PlotId, "err", err)
+			s.logger.Warnw("Failed to get plot from MongoDB", "plot_id", req.PlotId, "err", err)
 			return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}
@@ -50,7 +50,7 @@ func (s *PlotService) ReadPlot(ctx context.Context, req *pb.ReadPlotRequest) (*p
 		Value: plotJson,
 	})
 	if err != nil {
-		s.logger.Errorw("Failed to update plot in Memcached", "plot_id", req.PlotId, "err", err)
+		s.logger.Warnw("Failed to update plot in Memcached", "plot_id", req.PlotId, "err", err)
 	}
 
 	return &pb.ReadPlotRespond{Plot: plot.Plot}, nil

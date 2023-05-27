@@ -33,7 +33,7 @@ func (s *ComposePostService) ComposePost(ctx context.Context, req *pb.ComposePos
 	postReq := &poststorage.StorePostRequest{Post: post}
 	postResp, err := s.poststorageClient.StorePost(ctx, postReq)
 	if err != nil {
-		s.logger.Errorw("Failed to upload post to PostStorage service", "err", err)
+		s.logger.Warnw("Failed to upload post to PostStorage service", "err", err)
 		return nil, err
 	}
 
@@ -62,7 +62,7 @@ func (s *ComposePostService) composeText(ctx context.Context, postText string, p
 	req := &text.ComposeTextRequest{Text: postText}
 	resp, err := s.textClient.ComposeText(ctx, req)
 	if err != nil {
-		s.logger.Errorw("Failed to compose text from Text service", "err", err)
+		s.logger.Warnw("Failed to compose text from Text service", "err", err)
 		return err
 	}
 
@@ -76,7 +76,7 @@ func (s *ComposePostService) composeCreator(ctx context.Context, userId string, 
 	req := &user.ComposeCreatorWithUserIdRequest{UserId: userId, Username: username}
 	resp, err := s.userClient.ComposeCreatorWithUserId(ctx, req)
 	if err != nil {
-		s.logger.Errorw("Failed to compose creator from User service", "err", err)
+		s.logger.Warnw("Failed to compose creator from User service", "err", err)
 		return err
 	}
 
@@ -88,7 +88,7 @@ func (s *ComposePostService) composeMedia(ctx context.Context, mediaTypes []stri
 	req := &media.ComposeMediaRequest{MediaTypes: mediaTypes, MediaIds: mediaIds}
 	resp, err := s.mediaClient.ComposeMedia(ctx, req)
 	if err != nil {
-		s.logger.Errorw("Failed to compose media from Media service", "err", err)
+		s.logger.Warnw("Failed to compose media from Media service", "err", err)
 		return err
 	}
 
@@ -100,7 +100,7 @@ func (s *ComposePostService) uploadUserTimeline(ctx context.Context, postId, use
 	req := &usertimeline.WriteUserTimelineRequest{PostId: postId, UserId: userId, Timestamp: timestamp}
 	_, err := s.usertimelineClient.WriteUserTimeline(ctx, req)
 	if err != nil {
-		s.logger.Errorw("Failed to upload post to UserTimeline service", "err", err)
+		s.logger.Warnw("Failed to upload post to UserTimeline service", "err", err)
 		return err
 	}
 	return nil
@@ -115,7 +115,7 @@ func (s *ComposePostService) uploadHomeTimeline(ctx context.Context, postId, use
 	}
 	_, err := s.hometimelineClient.WriteHomeTimeline(ctx, req)
 	if err != nil {
-		s.logger.Errorw("Failed to upload post to HomeTimeline service", "err", err)
+		s.logger.Warnw("Failed to upload post to HomeTimeline service", "err", err)
 		return err
 	}
 	return nil

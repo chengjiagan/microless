@@ -63,7 +63,7 @@ func (s *ReservationService) getNumberOfRoom(ctx context.Context, hotelId string
 	profileRequest := &profile.GetRoomNumberRequest{HotelId: hotelId}
 	profileRespond, err := s.profileClient.GetRoomNumber(ctx, profileRequest)
 	if err != nil {
-		s.logger.Errorw("Failed to get number of room from profile-service", "err", err)
+		s.logger.Warnw("Failed to get number of room from profile-service", "err", err)
 		return 0, err
 	}
 	return int(profileRespond.RoomNumber), nil
@@ -91,12 +91,12 @@ func (s *ReservationService) getReservationCount(ctx context.Context, hotelId st
 	}
 	cur, err := s.mongodb.Find(ctx, query)
 	if err != nil {
-		s.logger.Errorw("Failed to get reservations from MongoDB", "err", err)
+		s.logger.Warnw("Failed to get reservations from MongoDB", "err", err)
 		return 0, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	var reservations []*Reservation
 	if err := cur.All(ctx, &reservations); err != nil {
-		s.logger.Errorw("Failed to decode reservations from MongoDB", "err", err)
+		s.logger.Warnw("Failed to decode reservations from MongoDB", "err", err)
 		return 0, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 

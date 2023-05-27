@@ -19,7 +19,7 @@ func (s *SocialGraphService) InsertUser(ctx context.Context, req *pb.InsertUserR
 		Followees: make([]primitive.ObjectID, 0),
 	})
 	if err != nil {
-		s.logger.Errorw("Failed to insert user to MongoDB", "err", err)
+		s.logger.Warnw("Failed to insert user to MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 

@@ -19,7 +19,7 @@ func (s *UserReviewService) CreateUser(ctx context.Context, req *pb.CreateUserRe
 	}
 	_, err := s.mongodb.InsertOne(ctx, doc)
 	if err != nil {
-		s.logger.Errorw("Failed to insert new user into MongoDB", "err", err)
+		s.logger.Warnw("Failed to insert new user into MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	return &emptypb.Empty{}, nil

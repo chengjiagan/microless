@@ -55,13 +55,13 @@ func (s *RateService) GetRates(ctx context.Context, req *pb.GetRatesRequest) (*p
 	query := bson.M{"hotel_id": bson.M{"$in": oids}}
 	cur, err := s.hotelRateDb.Find(ctx, query)
 	if err != nil {
-		s.logger.Errorw("Failed to find rates from MongoDB")
+		s.logger.Warnw("Failed to find rates from MongoDB")
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	// decode from cursor
 	var ratesMongo []*HotelRate
 	if err := cur.All(ctx, &ratesMongo); err != nil {
-		s.logger.Errorw("Failed to decode rates from MongoDB")
+		s.logger.Warnw("Failed to decode rates from MongoDB")
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	for _, r := range ratesMongo {

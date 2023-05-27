@@ -32,7 +32,7 @@ func (s *CustomerService) GetCustomer(ctx context.Context, req *pb.GetCustomerRe
 	query := bson.M{"_id": customerOid}
 	err = s.mongodb.FindOne(ctx, query).Decode(customer)
 	if err != nil {
-		s.logger.Errorw("Failed to get customer from MongoDB", "customer_id", req.CustomerId, "err", err)
+		s.logger.Warnw("Failed to get customer from MongoDB", "customer_id", req.CustomerId, "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB err: %v", err)
 	}
 

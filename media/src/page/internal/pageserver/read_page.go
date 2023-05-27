@@ -26,7 +26,7 @@ func (s *PageService) ReadPage(ctx context.Context, req *pb.ReadPageRequest) (*p
 		}
 		reviewResp, err := s.moviereviewClient.ReadMovieReviews(ctx, reviewReq)
 		if err != nil {
-			s.logger.Errorw("Failed to get movie reviews from movie-review-service", "err", err)
+			s.logger.Warnw("Failed to get movie reviews from movie-review-service", "err", err)
 			return err
 		}
 		reviews = reviewResp.Reviews
@@ -38,7 +38,7 @@ func (s *PageService) ReadPage(ctx context.Context, req *pb.ReadPageRequest) (*p
 	infoReq := &movieinfo.ReadMovieInfoRequest{MovieId: req.MovieId}
 	info, err := s.movieinfoClient.ReadMovieInfo(ctx, infoReq)
 	if err != nil {
-		s.logger.Errorw("Failed to get movie info from movie-info-service", "err", err)
+		s.logger.Warnw("Failed to get movie info from movie-info-service", "err", err)
 		return nil, err
 	}
 
@@ -55,7 +55,7 @@ func (s *PageService) ReadPage(ctx context.Context, req *pb.ReadPageRequest) (*p
 
 		castResp, err := s.castinfoClient.ReadCastInfo(ctx, castReq)
 		if err != nil {
-			s.logger.Errorw("Failed to get cast infos from cast-info-service", "err", err)
+			s.logger.Warnw("Failed to get cast infos from cast-info-service", "err", err)
 			return err
 		}
 
@@ -70,7 +70,7 @@ func (s *PageService) ReadPage(ctx context.Context, req *pb.ReadPageRequest) (*p
 		plotReq := &plot.ReadPlotRequest{PlotId: info.PlotId}
 		plotResp, err := s.plotClient.ReadPlot(ctx, plotReq)
 		if err != nil {
-			s.logger.Errorw("Failed to get plot from plot-service", "err", err)
+			s.logger.Warnw("Failed to get plot from plot-service", "err", err)
 			return err
 		}
 		moviePlot = plotResp.Plot

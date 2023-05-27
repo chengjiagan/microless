@@ -42,7 +42,7 @@ func (s *UrlShortenService) GetExtendedUrls(ctx context.Context, req *pb.GetExte
 	query := bson.M{"shortened_url": bson.M{"$in": mongoUrls}}
 	cursor, err := s.mongodb.Find(ctx, query)
 	if err != nil {
-		s.logger.Errorw("Failed to get extened urls from MongoDB", "err", err)
+		s.logger.Warnw("Failed to get extened urls from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	var mongoResult []Url

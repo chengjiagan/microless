@@ -28,7 +28,7 @@ func (s *MovieInfoServer) ReadMovieInfo(ctx context.Context, req *pb.ReadMovieIn
 		Value: infoJson,
 	})
 	if err != nil {
-		s.logger.Errorw("Failed to update Memcached", "movie_id", req.MovieId, "err", err)
+		s.logger.Warnw("Failed to update Memcached", "movie_id", req.MovieId, "err", err)
 	}
 
 	return movie.toProto(), nil
@@ -55,10 +55,10 @@ func (s *MovieInfoServer) getMovieInfo(ctx context.Context, movieId string) (*Mo
 	err = s.mongodb.FindOne(ctx, query).Decode(movie)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			s.logger.Errorw("Movie info not found", "movie_id", movieId, "err", err)
+			s.logger.Warnw("Movie info not found", "movie_id", movieId, "err", err)
 			return nil, status.Errorf(codes.NotFound, "Movie info %v not found", movieId)
 		} else {
-			s.logger.Errorw("Failed to get movie info from MongoDB", "movie_id", movieId, "err", err)
+			s.logger.Warnw("Failed to get movie info from MongoDB", "movie_id", movieId, "err", err)
 			return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}

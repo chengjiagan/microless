@@ -28,11 +28,11 @@ func (s *MovieReviewService) UploadMovieReview(ctx context.Context, req *pb.Uplo
 	}
 	res, err := s.mongodb.UpdateOne(ctx, query, update)
 	if err != nil {
-		s.logger.Errorw("Failed to update movie reviews", "movie_id", req.MovieId, "err", err)
+		s.logger.Warnw("Failed to update movie reviews", "movie_id", req.MovieId, "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	if res.MatchedCount < 1 {
-		s.logger.Errorw("Unknown movie", "movie_id", req.MovieId)
+		s.logger.Warnw("Unknown movie", "movie_id", req.MovieId)
 		return nil, status.Errorf(codes.NotFound, "movie_id: %v doesn't exist", req.MovieId)
 	}
 

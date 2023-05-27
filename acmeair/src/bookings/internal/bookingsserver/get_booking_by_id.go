@@ -42,7 +42,7 @@ func (s *BookingsService) GetBookingById(ctx context.Context, req *pb.GetBooking
 	query := bson.M{"_id": bookingOid}
 	err = s.mongodb.FindOne(ctx, query).Decode(booking)
 	if err != nil {
-		s.logger.Errorw("Failed to get booking from MongoDB", "err", err)
+		s.logger.Warnw("Failed to get booking from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 
@@ -73,7 +73,7 @@ func (s *BookingsService) getBookingInfoFromBooking(ctx context.Context, booking
 	}
 	customerResp, err := s.customerClient.GetCustomer(ctx, customerReq)
 	if err != nil {
-		s.logger.Errorw("Failed to get customer info from customer-service", "err", err)
+		s.logger.Warnw("Failed to get customer info from customer-service", "err", err)
 		return nil, err
 	}
 
@@ -83,7 +83,7 @@ func (s *BookingsService) getBookingInfoFromBooking(ctx context.Context, booking
 	}
 	toFlightResp, err := s.flightsClient.GetFlightById(ctx, toFlightReq)
 	if err != nil {
-		s.logger.Errorw("Failed to get to flight info from flights-service", "err", err)
+		s.logger.Warnw("Failed to get to flight info from flights-service", "err", err)
 		return nil, err
 	}
 
@@ -103,7 +103,7 @@ func (s *BookingsService) getBookingInfoFromBooking(ctx context.Context, booking
 	}
 	retFlightResp, err := s.flightsClient.GetFlightById(ctx, retFlightReq)
 	if err != nil {
-		s.logger.Errorw("Failed to get return flight info from flights-service", "err", err)
+		s.logger.Warnw("Failed to get return flight info from flights-service", "err", err)
 		return nil, err
 	}
 

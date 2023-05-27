@@ -36,7 +36,7 @@ func (s *ReservationService) MakeReservation(ctx context.Context, req *pb.MakeRe
 	}
 	_, err = s.mongodb.InsertOne(ctx, reservation)
 	if err != nil {
-		s.logger.Errorw("Failed to insert reservation into MongoDB", "err", err)
+		s.logger.Warnw("Failed to insert reservation into MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 

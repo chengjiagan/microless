@@ -42,12 +42,12 @@ func (s *BookingsService) GetBookingByUser(ctx context.Context, req *pb.GetBooki
 	query := bson.M{"customer_id": customerOid}
 	cur, err := s.mongodb.Find(ctx, query)
 	if err != nil {
-		s.logger.Errorw("Failed to get bookings from MongoDB", "err", err)
+		s.logger.Warnw("Failed to get bookings from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	err = cur.All(ctx, &bookings)
 	if err != nil {
-		s.logger.Errorw("Failed to get bookings from MongoDB", "err", err)
+		s.logger.Warnw("Failed to get bookings from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 

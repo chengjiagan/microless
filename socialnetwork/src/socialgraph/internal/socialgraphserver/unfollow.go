@@ -57,11 +57,11 @@ func (s *SocialGraphService) unfollow(ctx context.Context, userId, followeeId st
 
 		res, err := s.mongodb.UpdateOne(ctx, query, update)
 		if err != nil {
-			s.logger.Errorw("Failed to update user social graph in MongoDB", "user_id", userId, "err", err)
+			s.logger.Warnw("Failed to update user social graph in MongoDB", "user_id", userId, "err", err)
 			return status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 		if res.MatchedCount < 1 {
-			s.logger.Errorw("Unknown user", "user_id", userId)
+			s.logger.Warnw("Unknown user", "user_id", userId)
 			return status.Errorf(codes.NotFound, "user_id: %v doesn't exist", userId)
 		}
 		return nil
@@ -78,11 +78,11 @@ func (s *SocialGraphService) unfollow(ctx context.Context, userId, followeeId st
 
 		res, err := s.mongodb.UpdateOne(ctx, query, update)
 		if err != nil {
-			s.logger.Errorw("Failed to update user social graph in MongoDB", "user_id", followeeId, "err", err)
+			s.logger.Warnw("Failed to update user social graph in MongoDB", "user_id", followeeId, "err", err)
 			return status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 		if res.MatchedCount < 1 {
-			s.logger.Errorw("Unknown user", "user_id", followeeId)
+			s.logger.Warnw("Unknown user", "user_id", followeeId)
 			return status.Errorf(codes.NotFound, "user_id: %v doesn't exist", followeeId)
 		}
 		return nil
@@ -96,7 +96,7 @@ func (s *SocialGraphService) unfollow(ctx context.Context, userId, followeeId st
 			return nil
 		})
 		if err != nil {
-			s.logger.Errorw("Failed to update user social graph in Redis", "err", err)
+			s.logger.Warnw("Failed to update user social graph in Redis", "err", err)
 		}
 		return nil
 	})

@@ -55,14 +55,14 @@ func (s *ReviewStorageService) ReadReviews(ctx context.Context, req *pb.ReadRevi
 	query := bson.M{"_id": bson.M{"$in": oids}}
 	cursor, err := s.mongodb.Find(ctx, query)
 	if err != nil {
-		s.logger.Errorw("Failed to find reviews from MongoDB", "err", err)
+		s.logger.Warnw("Failed to find reviews from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	// decode from mongodb
 	var reviewsMongo []*Review
 	err = cursor.All(ctx, &reviewsMongo)
 	if err != nil {
-		s.logger.Errorw("Failed to find reviews from MongoDB", "err", err)
+		s.logger.Warnw("Failed to find reviews from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	for _, review := range reviewsMongo {
@@ -76,7 +76,7 @@ func (s *ReviewStorageService) ReadReviews(ctx context.Context, req *pb.ReadRevi
 			Value: reviewJson,
 		})
 		if err != nil {
-			s.logger.Errorw("Failed to update Memcached", "review_id", id, "err", err)
+			s.logger.Warnw("Failed to update Memcached", "review_id", id, "err", err)
 		}
 	}
 

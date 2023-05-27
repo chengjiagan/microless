@@ -31,7 +31,7 @@ func (s *RateService) AddRate(ctx context.Context, req *pb.AddRateRequest) (*emp
 	s.logger.Info("Insert rate plan into MongoDB")
 	_, err := s.ratePlanDb.InsertOne(ctx, ratePlan)
 	if err != nil {
-		s.logger.Errorw("Failed to insert rate plan into database", "err", err)
+		s.logger.Warnw("Failed to insert rate plan into database", "err", err)
 		return nil, err
 	}
 
@@ -46,11 +46,11 @@ func (s *RateService) AddRate(ctx context.Context, req *pb.AddRateRequest) (*emp
 	}
 	res, err := s.hotelRateDb.UpdateOne(ctx, query, update)
 	if err != nil {
-		s.logger.Errorw("Failed to update hotel rate", "err", err)
+		s.logger.Warnw("Failed to update hotel rate", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 	if res.MatchedCount == 0 {
-		s.logger.Errorw("Unknown hotel_id", "hotel_id", req.HotelId)
+		s.logger.Warnw("Unknown hotel_id", "hotel_id", req.HotelId)
 		return nil, status.Errorf(codes.NotFound, "Hotel %v not found", req.HotelId)
 	}
 
