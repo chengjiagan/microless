@@ -73,7 +73,7 @@ BASE_IMAGE = waterlemongan/microless-loadbalancer-base
 # name for build image
 BUILD_IMAGE = $(DOCKER_PREFIX)build
 # tag for image
-VERSION = 0.2.3
+VERSION = 0.3.0
 
 docker-build: docker-build-test docker-build-gateway $(foreach s, $(SERVICES), docker-build-$(s))
 
