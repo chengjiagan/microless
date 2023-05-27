@@ -19,6 +19,7 @@ import (
 )
 
 var configPath = flag.String("config", os.Getenv("SERVICE_CONFIG"), "path to config file")
+var addr = flag.String("addr", os.Getenv("SERVICE_ADDR"), "address for grpc server to listen")
 
 func main() {
 	// setup logger
@@ -100,7 +101,7 @@ func main() {
 	handler := otelhttp.NewHandler(mux, "gateway")
 
 	logger.Info("start server")
-	err = http.ListenAndServe(config.Grpc, handler)
+	err = http.ListenAndServe(*addr, handler)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}

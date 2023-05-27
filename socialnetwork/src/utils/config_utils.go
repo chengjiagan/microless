@@ -6,7 +6,6 @@ import (
 )
 
 type Config struct {
-	Grpc    string      `json:"grpc"`
 	Otel    string      `json:"otel"`
 	MongoDB MongoConfig `json:"mongodb"`
 	Redis   struct {

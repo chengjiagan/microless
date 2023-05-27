@@ -1,5 +1,4 @@
 {
-    "grpc": ":8080",
     "otel": "jaeger:4317",
     "mongodb": {
         "url": "mongodb://mongodb:27017",
