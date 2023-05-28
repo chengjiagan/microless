@@ -7,9 +7,7 @@ qps=(50 80 100 130 150 180 200)
 ratio=1
 service="socialnetwork"
 
-src="../loader/main.go"
-load="./main"
-go build -o $load $src
+load="../loader/main"
 
 gateway="gateway.social-network-kn.example.com"
 userid="../dataset/$service/user_ids.json"
@@ -27,4 +25,3 @@ for n in ${qps[@]}; do
     $load -service $service -addr $gateway -userid $userid -movieid $movieid -mode $mode -time $duration -rate $n -ratio $ratio -output $output
     sleep 60
 done
-rm $load

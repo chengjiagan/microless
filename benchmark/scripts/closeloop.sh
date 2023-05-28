@@ -6,10 +6,7 @@ mkdir ../data/$timestamp
 rthread=(0 1 2 3 4)
 wthread=(0)
 service="socialnetwork"
-
-src="../loader/main.go"
-load="./main"
-go build -o $load $src
+load="../loader/main"
 
 gateway="127.0.0.1:80"
 userid="../dataset/$service/user_ids.json"
@@ -29,4 +26,3 @@ for r in ${rthread[@]}; do
         sleep 60
     done
 done
-rm $load
