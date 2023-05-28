@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"microless/loader/generator"
 	"microless/loader/generator/media"
+	"microless/loader/generator/pingpong"
 	"microless/loader/generator/socialnetwork"
 	"net/http"
 	"os"
@@ -18,7 +19,7 @@ import (
 
 // required by all modes
 var addr = flag.String("addr", "", "address to the gateway service")
-var service = flag.String("service", "", "kind of service to test: social-network, media")
+var service = flag.String("service", "", "kind of service to test: social-network, media, pingpong")
 var mode = flag.String("mode", "", "load test mode: close for close-loop, open for open-loop, prewarm for pre-warming")
 
 // required by social-network and media
@@ -110,6 +111,8 @@ func newGenerator(service string, config *generator.Config) generator.Generator 
 		return socialnetwork.NewSocialnetworkGenerator(config)
 	case "media":
 		return media.NewMediaGenerator(config)
+	case "pingpong":
+		return pingpong.NewPingpongGenerator(config)
 	default:
 		return nil
 	}
