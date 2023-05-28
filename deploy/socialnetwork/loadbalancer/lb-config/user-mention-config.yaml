@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-mention-lb-config
+  namespace: social-network
+data:
+  lb.json: |
+    {
+      "server": {
+        "enable": true,
+        "reject": false,
+        "max_tokens": 10000,
+        "tokens_per_fill": 10000,
+        "fill_interval": 1
+      },
+      "client": {
+        "enable": true,
+        "degrade_interval": 1,
+        "update_interval": 5,
+        "vm_postfix": "-vm",
+        "serverless_postfix": "-serverless",
+        "local_services": {},
+        "retry": 3
+      },
+      "serverless": {
+        "enable": false
+      }
+    }
+  lb-serverless.json: |
+    {
+      "metric_add": ":9000",
+      "server": {
+        "enable": false
+      },
+      "client": {
+        "enable": true,
+        "degrade_interval": 1,
+        "update_interval": 5,
+        "vm_postfix": "-vm",
+        "serverless_postfix": "-serverless",
+        "local_services": {},
+        "retry": 3
+      },
+      "serverless": {
+        "enable": true,
+        "max_concurrency": 1,
+        "max_capacity": 10,
+        "method_requirements": {}
+      }
+    }

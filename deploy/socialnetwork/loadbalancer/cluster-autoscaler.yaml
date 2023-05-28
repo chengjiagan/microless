@@ -94,4 +94,3 @@ spec:
       items:
       - key: cas.json
         path: cas.json
-

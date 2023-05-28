@@ -3,7 +3,7 @@ kind: ServiceMonitor
 metadata:
   name: social-network-stats
   labels:
-    release: prometheus-stack
+    release: prom
   namespace: social-network
 spec:
   selector:
