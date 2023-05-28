@@ -6,7 +6,6 @@ metadata:
     microless: social-network
   namespace: social-network
 spec:
-  clusterIP: None
   selector:
     app: post-storage
   ports:
@@ -23,7 +22,6 @@ metadata:
   name: post-storage
   namespace: social-network
 spec:
-  replicas: 5
   selector:
     matchLabels:
       app: post-storage
@@ -36,7 +34,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-poststorage:0.3.0
+        image: waterlemongan/microless-socialnetwork-poststorage:0.3.1
         ports:
         - name: grpc
           containerPort: 8080

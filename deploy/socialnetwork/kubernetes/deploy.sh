@@ -24,16 +24,16 @@ kubectl create -f service/compose-post-service.yaml
 kubectl create -f gateway.yaml
 
 # Install HPA objects
-# kubectl create -f hpa/post-storage-hpa.yaml
-# kubectl create -f hpa/user-timeline-hpa.yaml
-# kubectl create -f hpa/user-hpa.yaml
-# kubectl create -f hpa/social-graph-hpa.yaml
-# kubectl create -f hpa/home-timeline-hpa.yaml
-# kubectl create -f hpa/media-hpa.yaml
-# kubectl create -f hpa/url-shorten-hpa.yaml
-# kubectl create -f hpa/user-mention-hpa.yaml
-# kubectl create -f hpa/text-hpa.yaml
-# kubectl create -f hpa/compose-post-hpa.yaml
+kubectl create -f hpa/post-storage-hpa.yaml
+kubectl create -f hpa/user-timeline-hpa.yaml
+kubectl create -f hpa/user-hpa.yaml
+kubectl create -f hpa/social-graph-hpa.yaml
+kubectl create -f hpa/home-timeline-hpa.yaml
+kubectl create -f hpa/media-hpa.yaml
+kubectl create -f hpa/url-shorten-hpa.yaml
+kubectl create -f hpa/user-mention-hpa.yaml
+kubectl create -f hpa/text-hpa.yaml
+kubectl create -f hpa/compose-post-hpa.yaml
 
 # Install ServiceMonitor
 kubectl create -f stats.yaml

@@ -6,7 +6,6 @@ metadata:
     microless: social-network
   namespace: social-network
 spec:
-  clusterIP: None
   selector:
     app: user-mention
   ports:
@@ -35,7 +34,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-usermention:0.3.0
+        image: waterlemongan/microless-socialnetwork-usermention:0.3.1
         ports:
         - name: grpc
           containerPort: 8080
