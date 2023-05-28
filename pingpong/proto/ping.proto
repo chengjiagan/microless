@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package microless.pingpong.ping;
+option go_package = "microless/pingpong/proto/ping";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+service PingService {
+    rpc Ping (google.protobuf.Empty) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            post: "/api/v1/ping"
+            body: "*"
+        };
+    }
+}

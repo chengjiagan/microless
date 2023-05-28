@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package microless.pingpong.pong;
+option go_package = "microless/pingpong/proto/pong";
+
+import "google/protobuf/empty.proto";
+
+service PongService {
+    rpc Pong (google.protobuf.Empty) returns (google.protobuf.Empty);
+}

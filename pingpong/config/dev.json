@@ -1,0 +1,6 @@
+{
+  "service": {
+    "ping": "ping:8080",
+    "pong": "pong:8080"
+  }
+}

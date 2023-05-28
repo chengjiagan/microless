@@ -1,0 +1,16 @@
+# image where binary stays
+ARG BUILD_IMAGE="microless/build"
+FROM ${BUILD_IMAGE} as build
+
+FROM gcr.io/distroless/static-debian11
+# service name
+ARG SERVICE
+# path to the config file
+ENV SERVICE_CONFIG="/config.json"
+ENV LB_CONFIG="/lb.json"
+
+COPY --from=build /go/bin/${SERVICE} /server
+
+EXPOSE 8080
+EXPOSE 9000
+CMD [ "/server" ]

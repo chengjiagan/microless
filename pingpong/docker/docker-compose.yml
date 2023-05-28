@@ -1,0 +1,34 @@
+# docker compose for development
+version: '3'
+
+services:
+  gateway:
+    environment:
+      - SERVICE_ADDR=:8080
+    image: waterlemongan/microless-pingpong-gateway:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
+    depends_on:
+      - ping
+      - pong
+    ports:
+      - 8080:8080
+
+  ping:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
+    image: waterlemongan/microless-pingpong-ping:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
+
+  pong:
+    environment:
+      - SERVICE_ADDR=:8080
+      - STATS_ADDR=:9000
+    image: waterlemongan/microless-pingpong-pong:latest
+    volumes:
+      - ../config/dev.json:/config.json:ro
+      - ../config/loadbalancer.json:/lb.json:ro
