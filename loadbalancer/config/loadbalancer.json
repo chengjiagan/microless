@@ -1,6 +1,5 @@
 {
   "_comment": "for testing only",
-  "metric_addr": ":9000",
   "server": {
     "enable": true,
     "reject": false,
