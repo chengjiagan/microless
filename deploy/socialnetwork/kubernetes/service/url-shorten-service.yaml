@@ -2,6 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: url-shorten
+  labels:
+    microless: social-network
   namespace: social-network
 spec:
   clusterIP: None
@@ -11,6 +13,9 @@ spec:
   - name: grpc
     port: 8080
     targetPort: grpc
+  - name: stats
+    port: 9000
+    targetPort: stats
 ---
 apiVersion: apps/v1
 kind: Deployment

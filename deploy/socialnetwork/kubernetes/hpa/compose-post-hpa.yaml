@@ -21,4 +21,4 @@ spec:
         name: grpc_server_request_per_second
       target:
         type: AverageValue
-        value: "90"
+        averageValue: "90"
