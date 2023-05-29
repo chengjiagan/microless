@@ -21,7 +21,7 @@ var addr = flag.String("addr", os.Getenv("SERVICE_ADDR"), "address for grpc serv
 
 func main() {
 	// setup logger
-	logger, err := zap.NewDevelopment()
+	logger, err := zap.NewProduction()
 	if err != nil {
 		log.Fatal(err)
 	}
