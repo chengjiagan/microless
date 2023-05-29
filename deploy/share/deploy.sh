@@ -5,11 +5,12 @@
 
 # Install prometheus and grafana
 # grafana user: admin password: prom-operator
-helm install prometheus-stack kube-prometheus-stack \
+helm install prom kube-prometheus-stack \
   --repo https://prometheus-community.github.io/helm-charts \
-  --namespace monitoring --create-namespace
+  --namespace monitoring --create-namespace \
+  --values prom.yaml
 
-helm install prometheus-adapter prometheus-adapter \
+helm install prom-adapter prometheus-adapter \
   --repo https://prometheus-community.github.io/helm-charts \
   --namespace monitoring \
   --values adapter.yaml
@@ -32,4 +33,4 @@ kubectl create -f mongodb.yaml
 kubectl create -f redis.yaml
 
 # Install istio
-# istioctl install --set meshConfig.defaultConfig.holdApplicationUntilProxyStarts=true -y
+istioctl install --set meshConfig.defaultConfig.holdApplicationUntilProxyStarts=true -y
