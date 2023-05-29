@@ -163,17 +163,11 @@ func openLoop() {
 	}()
 
 	// get result
-	ch := make(chan sample)
-	for _, c := range out {
-		go func(c <-chan sample) {
-			for s := range c {
-				ch <- s
-			}
-		}(c)
-	}
 	ss := make([]sample, 0)
-	for s := range ch {
-		ss = append(ss, s)
+	for _, ch := range out {
+		for s := range ch {
+			ss = append(ss, s)
+		}
 	}
 
 	// print metrics and save raw data
@@ -287,7 +281,19 @@ func loadWithRate(ctx context.Context) []chan sample {
 			r = *rate - t
 		}
 
-		go func(r int, ch chan sample) {
+		go func(r int, out chan sample) {
+			ch := make(chan sample)
+			go func() {
+				ss := make([]sample, 0)
+				for s := range ch {
+					ss = append(ss, s)
+				}
+				for _, s := range ss {
+					out <- s
+				}
+				close(out)
+			}()
+
 			var wg sync.WaitGroup
 			timer := time.Tick(time.Second / time.Duration(r))
 			for ctx.Err() == nil {
