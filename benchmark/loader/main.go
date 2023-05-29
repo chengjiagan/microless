@@ -163,8 +163,16 @@ func openLoop() {
 	}()
 
 	// get result
+	ch := make(chan sample)
+	for _, c := range out {
+		go func(c <-chan sample) {
+			for s := range c {
+				ch <- s
+			}
+		}(c)
+	}
 	ss := make([]sample, 0)
-	for s := range out {
+	for s := range ch {
 		ss = append(ss, s)
 	}
 
@@ -267,32 +275,42 @@ func load(ctx context.Context) []chan sample {
 }
 
 // open-loop load test
-func loadWithRate(ctx context.Context) chan sample {
-	ch := make(chan sample)
-	var wg sync.WaitGroup
+func loadWithRate(ctx context.Context) []chan sample {
+	out := make([]chan sample, 0)
 
-	go func() {
-		timer := time.Tick(time.Second / time.Duration(*rate))
-		for ctx.Err() == nil {
-			<-timer
-			wg.Add(1)
-			go func() {
-				p := rand.Float64()
-				var s sample
-				if p < *ratio {
-					s = send(ctx, gen.GenRead(), "read")
-				} else {
-					s = send(ctx, gen.GenWrite(), "write")
-				}
-				ch <- s
-				wg.Done()
-			}()
+	for t := 0; t < *rate; t += 400 {
+		ch := make(chan sample)
+		out = append(out, ch)
+
+		r := 400
+		if t+r > *rate {
+			r = *rate - t
 		}
-		wg.Wait()
-		close(ch)
-	}()
 
-	return ch
+		go func(r int, ch chan sample) {
+			var wg sync.WaitGroup
+			timer := time.Tick(time.Second / time.Duration(r))
+			for ctx.Err() == nil {
+				<-timer
+				wg.Add(1)
+				go func() {
+					p := rand.Float64()
+					var s sample
+					if p < *ratio {
+						s = send(ctx, gen.GenRead(), "read")
+					} else {
+						s = send(ctx, gen.GenWrite(), "write")
+					}
+					ch <- s
+					wg.Done()
+				}()
+			}
+			wg.Wait()
+			close(ch)
+		}(r, ch)
+	}
+
+	return out
 }
 
 func send(ctx context.Context, req *http.Request, t string) sample {
