@@ -6,6 +6,8 @@ import (
 	"microless/serverless-autoscaler/internal/utils"
 	"time"
 
+	"github.com/go-redis/redis/v8"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -19,11 +21,13 @@ const (
 )
 
 type ServerlessAutoscaler struct {
+	// params from config
 	interval  time.Duration
 	namespace string
 	apps      []string
 
-	c *kubernetes.Clientset
+	rdb *redis.Client
+	c   *kubernetes.Clientset
 }
 
 func NewServerlessAutoscaler(config *utils.Config) (*ServerlessAutoscaler, error) {
@@ -32,10 +36,17 @@ func NewServerlessAutoscaler(config *utils.Config) (*ServerlessAutoscaler, error
 		return nil, fmt.Errorf("failed to create k8s client: %v", err)
 	}
 
+	opts, err := redis.ParseURL(config.RedisAddr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse redis addr: %v", err)
+	}
+	rdb := redis.NewClient(opts)
+
 	return &ServerlessAutoscaler{
 		interval:  time.Duration(config.Interval) * time.Second,
 		namespace: config.Namespace,
 		apps:      config.Apps,
+		rdb:       rdb,
 		c:         c,
 	}, nil
 }
@@ -73,11 +84,11 @@ func (sa *ServerlessAutoscaler) runApp(app string) error {
 	if err != nil {
 		return fmt.Errorf("failed to check if serverless HPA is enabled: %v", err)
 	}
-	klog.Infof("app %s: unscheduled=%v, replicas=%d", app, unscheduled, replicas)
 
 	// if there are unscheduled pods and serverless HPA is disabled
 	if unscheduled && replicas == 0 {
 		// scale up and enable serverless HPA
+		klog.Infof("enable serverless HPA for %s", app)
 		err := sa.enableHPA(ctx, app)
 		if err != nil {
 			return fmt.Errorf("failed to enable serverless HPA: %v", err)
@@ -87,6 +98,7 @@ func (sa *ServerlessAutoscaler) runApp(app string) error {
 	// if there are no unscheduled pods and number of serverless pods drops to 1
 	if !unscheduled && replicas == 1 {
 		// scale down and disable serverless HPA
+		klog.Infof("disable serverless HPA for %s", app)
 		err := sa.disableHPA(ctx, app)
 		if err != nil {
 			return fmt.Errorf("failed to disable serverless HPA: %v", err)
@@ -98,6 +110,9 @@ func (sa *ServerlessAutoscaler) runApp(app string) error {
 }
 
 func (sa *ServerlessAutoscaler) checkUnscheduled(ctx context.Context, app string) (bool, error) {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
 	podList, err := sa.c.CoreV1().Pods(sa.namespace).List(
 		ctx,
 		metav1.ListOptions{
@@ -120,6 +135,9 @@ func (sa *ServerlessAutoscaler) checkUnscheduled(ctx context.Context, app string
 }
 
 func (sa *ServerlessAutoscaler) getReplicas(ctx context.Context, app string) (int, error) {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
 	name := app + "-serverless"
 	scale, err := sa.c.AppsV1().Deployments(sa.namespace).GetScale(ctx, name, metav1.GetOptions{})
 	if err != nil {
@@ -129,9 +147,11 @@ func (sa *ServerlessAutoscaler) getReplicas(ctx context.Context, app string) (in
 }
 
 func (sa *ServerlessAutoscaler) enableHPA(ctx context.Context, app string) error {
+	pCtx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
 	name := app + "-serverless"
 	_, err := sa.c.AppsV1().Deployments(sa.namespace).Patch(
-		ctx,
+		pCtx,
 		name,
 		types.MergePatchType,
 		[]byte(`{"spec":{"replicas":1}}`),
@@ -140,10 +160,56 @@ func (sa *ServerlessAutoscaler) enableHPA(ctx context.Context, app string) error
 	if err != nil {
 		return fmt.Errorf("failed to patch scale of %s: %v", name, err)
 	}
+
+	// notify serverless HPA is enabled after the first pod is ready
+	go sa.notifyEnable(ctx, app)
+
 	return nil
 }
 
+func (sa *ServerlessAutoscaler) notifyEnable(ctx context.Context, app string) {
+	// watch deployment
+	name := app + "-serverless"
+	watcher, err := sa.c.AppsV1().Deployments(sa.namespace).Watch(
+		ctx,
+		metav1.ListOptions{
+			FieldSelector: "metadata.name=" + name,
+		},
+	)
+	if err != nil {
+		klog.Errorf("failed to watch %s: %v", name, err)
+		return
+	}
+	go func() {
+		time.Sleep(1 * time.Minute)
+		watcher.Stop()
+	}()
+
+	// wait for the first pod is ready
+	for e := range watcher.ResultChan() {
+		dep, ok := e.Object.(*appsv1.Deployment)
+		if !ok {
+			continue
+		}
+
+		if dep.Status.ReadyReplicas > 0 {
+			err = sa.rdb.Publish(ctx, app, "true").Err()
+			if err != nil {
+				klog.Errorf("failed to publish %s in redis: %v", app, err)
+			}
+			klog.Infof("notify serverless HPA enabled for %s", app)
+			return
+		}
+	}
+
+	// timeout
+	klog.Infof("timeout to notify serverless HPA enabled for %s", app)
+}
+
 func (sa *ServerlessAutoscaler) disableHPA(ctx context.Context, app string) error {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
 	name := app + "-serverless"
 	_, err := sa.c.AppsV1().Deployments(sa.namespace).Patch(
 		ctx,
@@ -155,5 +221,11 @@ func (sa *ServerlessAutoscaler) disableHPA(ctx context.Context, app string) erro
 	if err != nil {
 		return fmt.Errorf("failed to patch scale of %s: %v", name, err)
 	}
+
+	err = sa.rdb.Publish(ctx, app, "false").Err()
+	if err != nil {
+		return fmt.Errorf("failed to set redis key: %v", err)
+	}
+	klog.Infof("notify serverless HPA disabled for %s", app)
 	return nil
 }

@@ -12,5 +12,6 @@
         "user-mention",
         "text",
         "compose-post"
-    ]
+    ],
+    "redis_addr": "redis://redis:6379/0"
 }

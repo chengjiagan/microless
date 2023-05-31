@@ -9,6 +9,7 @@ type Config struct {
 	Interval  int      `json:"interval"` // check interval in seconds
 	Namespace string   `json:"namespace"`
 	Apps      []string `json:"apps"`
+	RedisAddr string   `json:"redis_addr"`
 }
 
 func ParseConfig(filename string) (*Config, error) {
