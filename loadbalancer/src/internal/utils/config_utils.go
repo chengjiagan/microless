@@ -14,27 +14,27 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Enable        bool `json:"enable"`
-	Reject        bool `json:"reject"`
-	MaxTokens     int  `json:"max_tokens"`
-	TokensPerFill int  `json:"tokens_per_fill"`
-	FillInterval  int  `json:"fill_interval"`
+	Enable         bool    `json:"enable"`
+	UpdateInterval int     `json:"update_interval"`
+	UpdateRatio    float64 `json:"update_ratio"`
 }
 
 type ClientConfig struct {
 	Enable            bool              `json:"enable"`
 	VmPostfix         string            `json:"vm_postfix"`
 	ServerlessPostfix string            `json:"serverless_postfix"`
-	DegradeInterval   int               `json:"degrade_interval"`
-	LocalServices     map[string]string `json:"local_services"`
+	UpdateInterval    int               `json:"update_interval"`
 	Retry             int               `json:"retry"`
+	ServiceRateLimit  map[string]int    `json:"service_rate_limit"`
+	LocalServices     map[string]string `json:"local_services"`
+	RedisAddr         string            `json:"redis_addr"`
 }
 
 type ServerlessConfig struct {
-	Enable            bool           `json:"enable"`
-	MaxConcurrency    int            `json:"max_concurrency"`
-	MaxCapacity       int            `json:"max_capacity"`
-	MethodReqirements map[string]int `json:"method_requirements"` // if method requires a full CPU core, then its requirement is 100
+	Enable            bool               `json:"enable"`
+	MaxConcurrency    int                `json:"max_concurrency"`
+	MaxCapacity       int                `json:"max_capacity"`
+	MethodReqirements map[string]float64 `json:"method_requirements"`
 }
 
 var configPath = flag.String("lb_config", os.Getenv("LB_CONFIG"), "path to loadbalancer config file")

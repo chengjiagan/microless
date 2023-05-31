@@ -5,4 +5,4 @@ ARG GOPROXY="https://goproxy.cn"
 
 WORKDIR /go/src/loadbalancer
 COPY . .
-RUN go mod download
+# RUN go mod download

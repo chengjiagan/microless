@@ -1,10 +1,11 @@
 package loadbalancer
 
 const (
-	OverloadHeaderKey = "microless-server-overload"
-	UpdateInterval    = 100 // in milliseconds
+	// for server
+	ServerHeaderKey = "upstream"
+	RateHeaderKey   = "rate"
 
-	// for statistics
+	// for stat
 	NameRequestTotal          = "grpc_server_request_total"
 	HelpRequestTotal          = "Total number of RPCs handled on the server."
 	NameRequestLatency        = "grpc_server_request_latency_seconds"

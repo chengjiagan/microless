@@ -5,40 +5,48 @@ import (
 	"log"
 	"math/rand"
 	"microless/loadbalancer/internal/utils"
+	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"k8s.io/client-go/kubernetes"
+)
+
+type selectT string
+
+const (
+	// selectT is used to indicate which connection to select
+	vm         selectT = "vm"
+	serverless selectT = "serverless"
 )
 
 type ClientLB struct {
-	vm              string
-	serverless      string
-	port            string
-	degradeInterval uint32
-	retry           int
+	// params from config
+	updateInterval time.Duration
+	retry          int
+	vmRateLimit    int
+
+	// params from NewClientLB() args
+	service string
 
 	// for local service connection
 	local bool
 	conn  *grpc.ClientConn
 
-	kubeClient *kubernetes.Clientset
-
-	mu sync.RWMutex
-	// mu protects the following fields
-	vmConn          []*grpc.ClientConn
-	serverlessConn  []*grpc.ClientConn
-	degradeConn     []uint32 // time left being degraded, >0: degraded, 0: normal
-	numDegradedConn int32
-	// use atomic to update vmNext and serverlessNext, when mu read lock is held
-	vmNext         uint32
-	serverlessNext uint32
+	// used for load balancing
+	vmConn         *grpc.ClientConn
+	serverlessConn *grpc.ClientConn
+	rdb            *redis.Client
+	// protected by mu
+	mu                  sync.Mutex
+	serverlessAvailable bool
+	vmRatio             float64
+	upstreamRate        map[string]int
 }
 
 func splitAddr(addr string) (string, string) {
@@ -46,199 +54,140 @@ func splitAddr(addr string) (string, string) {
 	return splits[0], splits[1]
 }
 
-func NewClientLB(addr string) *ClientLB {
+func NewClientLB(addr string) (*ClientLB, error) {
 	config := utils.GetClientConfig()
 	if !config.Enable {
-		return nil
+		return nil, nil
 	}
 
 	service, port := splitAddr(addr)
+	// check if the service is local
 	if localPort, ok := config.LocalServices[service]; ok {
-		localAddr := "localhost:" + localPort
-		conn, err := utils.NewConn(localAddr)
+		log.Printf("create local connection for %s", service)
+		conn, err := utils.NewConn("localhost:" + localPort)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
+
 		return &ClientLB{
 			local: true,
 			conn:  conn,
-		}
+		}, nil
 	}
 
-	vmServiceName := service + config.VmPostfix
-	serverlessServiceName := service + config.ServerlessPostfix
-
-	kubeClient, err := utils.NewKubeClient()
+	// create remote connections
+	vm := service + config.VmPostfix + ":" + port
+	vmConn, err := utils.NewConn(vm)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
+	serverless := service + config.ServerlessPostfix + ":" + port
+	serverlessConn, err := utils.NewConn(serverless)
+	if err != nil {
+		return nil, err
+	}
+
+	// create redis client
+	opt, err := redis.ParseURL(config.RedisAddr)
+	if err != nil {
+		return nil, err
+	}
+	rdb := redis.NewClient(opt)
 
 	lb := &ClientLB{
-		local:           false,
-		port:            port,
-		vm:              vmServiceName,
-		serverless:      serverlessServiceName,
-		degradeInterval: uint32(config.DegradeInterval * 1000), // seconds to milliseconds
-		retry:           config.Retry,
-		kubeClient:      kubeClient,
-		vmNext:          rand.Uint32(),
-		serverlessNext:  rand.Uint32(),
+		updateInterval: time.Duration(config.UpdateInterval) * time.Second,
+		retry:          config.Retry,
+		vmRateLimit:    config.ServiceRateLimit[service],
+		service:        service,
+		rdb:            rdb,
+		vmConn:         vmConn,
+		serverlessConn: serverlessConn,
+		vmRatio:        1.0,
+		upstreamRate:   make(map[string]int),
 	}
-	go lb.watchService()
-	go lb.updateDegradedLoop()
+	go lb.updateLoop()
+	go lb.watchServerless()
 
-	return lb
+	return lb, nil
 }
 
-func closeConn(conn []*grpc.ClientConn) {
-	for _, c := range conn {
-		err := c.Close()
-		if err != nil {
-			log.Printf("Failed to close conn: %v", err)
-		}
+func (lb *ClientLB) watchServerless() {
+	ctx := context.Background()
+	pubsub := lb.rdb.Subscribe(ctx, lb.service)
+	defer pubsub.Close()
+
+	ch := pubsub.Channel()
+	for msg := range ch {
+		lb.mu.Lock()
+		lb.serverlessAvailable, _ = strconv.ParseBool(msg.Payload)
+		log.Printf("%s serverless available: %t", lb.service, lb.serverlessAvailable)
+		lb.mu.Unlock()
 	}
 }
 
-func (lb *ClientLB) updateVmConn(conn []*grpc.ClientConn) {
+func (lb *ClientLB) updateLoop() {
+	ticker := time.NewTicker(lb.updateInterval)
+	for range ticker.C {
+		lb.updateRatio()
+	}
+}
+
+func (lb *ClientLB) updateRatio() {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
 
-	go closeConn(lb.vmConn)
-	lb.vmConn = conn
-	lb.vmNext = rand.Uint32()
-
-	// reset degradation when vmConn changes
-	lb.degradeConn = make([]uint32, len(conn))
-	lb.numDegradedConn = 0
-}
-
-func (lb *ClientLB) updateServerlessConn(conn []*grpc.ClientConn) {
-	lb.mu.Lock()
-	defer lb.mu.Unlock()
-
-	go closeConn(lb.serverlessConn)
-	lb.serverlessConn = conn
-	lb.serverlessNext = rand.Uint32()
-}
-
-func (lb *ClientLB) watchService() {
-	// watch
-	vmCh := utils.WatchEndpointConns(lb.kubeClient, lb.vm, lb.port)
-	serverlessCh := utils.WatchEndpointConns(lb.kubeClient, lb.serverless, lb.port)
-	for {
-		select {
-		case vmConn := <-vmCh:
-			log.Printf("%s conn: %v", lb.vm, len(vmConn))
-			lb.updateVmConn(vmConn)
-		case serverlessConn := <-serverlessCh:
-			log.Printf("%s conn: %v", lb.serverless, len(serverlessConn))
-			lb.updateServerlessConn(serverlessConn)
-		}
-	}
-}
-
-func (lb *ClientLB) selectConn() *grpc.ClientConn {
-	lb.mu.RLock()
-	defer lb.mu.RUnlock()
-
-	// no vm connection
-	if len(lb.vmConn) == 0 {
-		if len(lb.serverlessConn) == 0 {
-			// no available connection
-			return nil
-		}
-
-		// select serverless connection
-		idx := int(atomic.AddUint32(&lb.serverlessNext, 1) % uint32(len(lb.serverlessConn)))
-		return lb.serverlessConn[idx]
-	}
-
-	// no serverless connection
-	if len(lb.serverlessConn) == 0 {
-		// select vm connection regradless of degradation
-		idx := int(atomic.AddUint32(&lb.vmNext, 1) % uint32(len(lb.vmConn)))
-		return lb.vmConn[idx]
-	}
-
-	// portion of request go to serverless
-	r := float64(atomic.LoadInt32(&lb.numDegradedConn)) / float64(len(lb.vmConn))
-	log.Printf("degrade portion: %v", r)
-	if rand.Float64() < r {
-		log.Printf("select serverless connection")
-		idx := int(atomic.AddUint32(&lb.serverlessNext, 1) % uint32(len(lb.serverlessConn)))
-		return lb.serverlessConn[idx]
-	}
-
-	// select vm connection
-	for i := 0; i < len(lb.vmConn); i++ {
-		idx := int(atomic.AddUint32(&lb.vmNext, 1) % uint32(len(lb.vmConn)))
-		if lb.degradeConn[idx] == 0 {
-			log.Printf("select vm connection")
-			return lb.vmConn[idx]
-		}
-	}
-
-	// all vm connections are degraded
-	idx := int(atomic.AddUint32(&lb.serverlessNext, 1) % uint32(len(lb.serverlessConn)))
-	return lb.serverlessConn[idx]
-}
-
-func (lb *ClientLB) setConnDegraded(conn *grpc.ClientConn, when time.Time) {
-	lb.mu.Lock()
-	defer lb.mu.Unlock()
-
-	// find the index of conn in lb.vmConn
-	idx := -1
-	for i, c := range lb.vmConn {
-		if c == conn {
-			idx = i
-			break
-		}
-	}
-	// conn is a serverless connection or the target has been removed
-	if idx == -1 {
+	if len(lb.upstreamRate) == 0 {
+		lb.vmRatio = 1.0
 		return
 	}
 
-	elasped := uint32(time.Since(when).Milliseconds())
-	if elasped >= lb.degradeInterval {
-		// wait too long for lock
-		return
+	avg := 0.0
+	for _, rate := range lb.upstreamRate {
+		avg += float64(rate)
 	}
-	interval := lb.degradeInterval - elasped
+	avg /= float64(len(lb.upstreamRate))
+	lb.upstreamRate = make(map[string]int)
 
-	// conn changed from undegraded to degraded
-	if lb.degradeConn[idx] == 0 {
-		lb.numDegradedConn++
-	}
-	lb.degradeConn[idx] = interval
-}
-
-func (lb *ClientLB) updateDegradedLoop() {
-	ticker := time.NewTicker(UpdateInterval * time.Millisecond)
-	for {
-		<-ticker.C
-		lb.updateDegraded()
-	}
-}
-
-func (lb *ClientLB) updateDegraded() {
-	lb.mu.Lock()
-	defer lb.mu.Unlock()
-
-	for i, v := range lb.degradeConn {
-		if v == 0 {
-			continue
-		}
-
-		if v < UpdateInterval {
-			lb.degradeConn[i] = 0
-			lb.numDegradedConn--
+	if avg < 0.1 {
+		// prevent divide by zero
+		lb.vmRatio = 1.0
+	} else {
+		if lb.serverlessAvailable {
+			lb.vmRatio *= float64(lb.vmRateLimit) / avg
 		} else {
-			lb.degradeConn[i] -= UpdateInterval
+			// when serverless is not available, the previous ratio is not representative,
+			// therefore, we do not update ratio based on the previous ratio,
+			// but use the current average rate instead
+			lb.vmRatio = float64(lb.vmRateLimit) / avg
+		}
+		if lb.vmRatio > 1.0 {
+			lb.vmRatio = 1.0
 		}
 	}
 
+	log.Printf("update ratio for %s: %f", lb.service, lb.vmRatio)
+}
+
+func (lb *ClientLB) selectConnection() selectT {
+	lb.mu.Lock()
+	defer lb.mu.Unlock()
+
+	if !lb.serverlessAvailable {
+		return vm
+	}
+
+	r := rand.Float64()
+	if r < lb.vmRatio {
+		return vm
+	} else {
+		return serverless
+	}
+}
+
+func (lb *ClientLB) updateUpstream(upstream string, rate int) {
+	lb.mu.Lock()
+	defer lb.mu.Unlock()
+	lb.upstreamRate[upstream] = rate
 }
 
 func (lb *ClientLB) UnaryClientInterceptor() grpc.UnaryClientInterceptor {
@@ -249,7 +198,7 @@ func (lb *ClientLB) UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 		cc *grpc.ClientConn,
 		invoker grpc.UnaryInvoker,
 		opts ...grpc.CallOption,
-	) error {
+	) (err error) {
 		if lb == nil {
 			return invoker(ctx, method, req, reply, cc, opts...)
 		}
@@ -259,33 +208,43 @@ func (lb *ClientLB) UnaryClientInterceptor() grpc.UnaryClientInterceptor {
 			return invoker(ctx, method, req, reply, lb.conn, opts...)
 		}
 
-		conn := lb.selectConn()
-		if conn == nil {
-			log.Fatal("no available connection")
+		sel := lb.selectConnection()
+		switch sel {
+		case vm:
+			err = lb.sendVm(ctx, method, req, reply, invoker, opts)
+		case serverless:
+			err = lb.sendServerless(ctx, method, req, reply, invoker, opts)
 		}
 
-		var header metadata.MD
-		opts = append(opts, grpc.Header(&header))
-		var err error
-		for i := 0; i < lb.retry; i++ {
-			conn := lb.selectConn()
-			if conn == nil {
-				return status.Error(codes.Unavailable, "no available connection")
-			}
-
-			err = invoker(ctx, method, req, reply, conn, opts...)
-			// serverless connection may return with error ResourceExhausted
-			// in this case, we should retry with another connection
-			if status.Code(err) != codes.ResourceExhausted {
-				break
-			}
-		}
-
-		overload, ok := header[OverloadHeaderKey]
-		if ok && overload[0] == "true" {
-			go lb.setConnDegraded(conn, time.Now())
-		}
-
-		return err
+		return
 	}
+}
+
+func (lb *ClientLB) sendVm(ctx context.Context, method string, req, reply interface{}, invoker grpc.UnaryInvoker, opts []grpc.CallOption) (err error) {
+	// send request
+	var header metadata.MD
+	opts = append(opts, grpc.Header(&header))
+	err = invoker(ctx, method, req, reply, lb.vmConn, opts...)
+
+	// update upstream rate
+	val, ok := header[ServerHeaderKey]
+	if ok && len(val) > 0 {
+		upstream := val[0]
+		rate, _ := strconv.Atoi(header[RateHeaderKey][0])
+		lb.updateUpstream(upstream, rate)
+	}
+	return
+}
+
+func (lb *ClientLB) sendServerless(ctx context.Context, method string, req, reply interface{}, invoker grpc.UnaryInvoker, opts []grpc.CallOption) (err error) {
+	for i := 0; i < lb.retry; i++ {
+		err = invoker(ctx, method, req, reply, lb.serverlessConn, opts...)
+		// serverless connection may return with error ResourceExhausted
+		// in this case, we should retry with another connection
+		if status.Code(err) != codes.ResourceExhausted {
+			return err
+		}
+	}
+	// if all retries failed, we should try to send to vm
+	return lb.sendVm(ctx, method, req, reply, invoker, opts)
 }

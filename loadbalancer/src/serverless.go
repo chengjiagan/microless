@@ -14,13 +14,13 @@ import (
 
 type ServerlessLB struct {
 	// params from config
-	totalResources     int
+	totalResources     float64
 	maxCapacity        int
-	methodRequirements map[string]int
+	methodRequirements map[string]float64
 
 	mu               sync.Mutex
 	concurrency      int
-	currentResources int
+	currentResources float64
 	tasks            *queue.TaskQueue
 }
 
@@ -31,7 +31,7 @@ func NewServerlessLB(stats *Stats) *ServerlessLB {
 	}
 
 	sl := &ServerlessLB{
-		totalResources:     config.MaxConcurrency * 100,
+		totalResources:     float64(config.MaxConcurrency),
 		maxCapacity:        config.MaxCapacity,
 		methodRequirements: config.MethodReqirements,
 		tasks:              queue.NewTaskQueue(config.MaxCapacity),
@@ -89,14 +89,14 @@ func (lb *ServerlessLB) UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	}
 }
 
-func (lb *ServerlessLB) getMethodRequirement(method string) int {
+func (lb *ServerlessLB) getMethodRequirement(method string) float64 {
 	if v, ok := lb.methodRequirements[method]; ok {
 		return v
 	}
-	return 100
+	return 1.0
 }
 
-func (lb *ServerlessLB) requestResource(amount int) error {
+func (lb *ServerlessLB) requestResource(amount float64) error {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
 
@@ -125,7 +125,7 @@ func (lb *ServerlessLB) requestResource(amount int) error {
 	return nil
 }
 
-func (lb *ServerlessLB) releaseResource(amount int) {
+func (lb *ServerlessLB) releaseResource(amount float64) {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
 
