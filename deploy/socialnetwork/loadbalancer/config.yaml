@@ -6,7 +6,6 @@ metadata:
 data:
   config.json: |
     {
-      "grpc": ":8080",
       "otel": "jaeger.jaeger:4317",
       "mongodb": {
         "url": "mongodb://mongodb.mongodb:27017",
@@ -33,4 +32,66 @@ data:
         "composepost": "compose-post:8080"
       },
       "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
+    }
+  lb.json: |
+    {
+      "server": {
+        "enable": true,
+        "update_interval": 1,
+        "update_ratio": 0.5
+      },
+      "client": {
+        "enable": true,
+        "vm_postfix": "-vm",
+        "serverless_postfix": "-serverless",
+        "update_interval": 1,
+        "retry": 3,
+        "service_rate_limit": {
+          "post-storage": 100,
+          "user-timeline": 100,
+          "user": 100,
+          "social-graph": 100,
+          "home-timeline": 100,
+          "media": 100,
+          "url-shorten": 100,
+          "user-mention": 100,
+          "text": 100,
+          "compose-post": 100
+        },
+        "local_services": {},
+        "redis_addr": "redis://redis.redis:6379/7"
+      },
+      "serverless": {
+        "enable": false
+      }
+    }
+  lb-gateway.json: |
+    {
+      "server": {
+        "enable": false
+      },
+      "client": {
+        "enable": true,
+        "vm_postfix": "-vm",
+        "serverless_postfix": "-serverless",
+        "update_interval": 1,
+        "retry": 3,
+        "service_rate_limit": {
+          "post-storage": 100,
+          "user-timeline": 100,
+          "user": 100,
+          "social-graph": 100,
+          "home-timeline": 100,
+          "media": 100,
+          "url-shorten": 100,
+          "user-mention": 100,
+          "text": 100,
+          "compose-post": 100
+        },
+        "local_services": {},
+        "redis_addr": "redis://redis.redis:6379/7"
+      },
+      "serverless": {
+        "enable": false
+      }
     }

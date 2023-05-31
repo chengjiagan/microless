@@ -19,7 +19,8 @@ data:
           "user-mention",
           "text",
           "compose-post"
-      ]
+      ],
+      "redis_addr": "redis://redis.redis:6379/7"
     }
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -36,7 +37,7 @@ rules:
   verbs: ["get"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
-  verbs: ["patch"]
+  verbs: ["patch", "watch"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -69,7 +70,7 @@ spec:
     type: system
   containers:
   - name: sas
-    image: waterlemongan/microless-serverless-autoscaler:0.1.0
+    image: waterlemongan/microless-serverless-autoscaler:0.1.1
     env:
     - name: SERVERLESS_AUTOSCALER_CONFIG
       value: "/config/sas.json"

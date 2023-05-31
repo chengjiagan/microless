@@ -4,7 +4,6 @@ metadata:
   name: home-timeline-serverless
   namespace: social-network
 spec:
-  clusterIP: None
   selector:
     app: home-timeline
     type: serverless
@@ -36,7 +35,7 @@ spec:
         type: serverless
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-hometimeline:0.3.1
+        image: waterlemongan/microless-socialnetwork-hometimeline:0.3.2
         ports:
         - name: grpc
           containerPort: 8080
@@ -46,7 +45,7 @@ spec:
         - name: SERVICE_CONFIG
           value: "/config/config.json"
         - name: LB_CONFIG
-          value: "/config/lb.json"
+          value: "/lb/config.json"
         - name: SERVICE_ADDR
           value: ":8080"
         - name: STATS_ADDR
@@ -55,19 +54,26 @@ spec:
         - name: config
           mountPath: "/config"
           readOnly: true
+        - name: lb-config
+          mountPath: "/lb"
+          readOnly: true
         resources:
           limits:
-            cpu: 250m
-            memory: 512Mi
+            cpu: 500m
+            memory: 50Mi
           requests:
-            cpu: 250m
-            memory: 512Mi
+            cpu: 500m
+            memory: 50Mi
       volumes:
-        - name: config
-          configMap:
-            name: config
-            items:
-            - key: config.json
-              path: config.json
-            - key: lb-serverless.json
-              path: lb.json
+      - name: config
+        configMap:
+          name: config
+          items:
+          - key: config.json
+            path: config.json
+      - name: lb-config
+        configMap:
+          name: home-timeline-lb-config
+          items:
+          - key: lb-serverless.json
+            path: config.json

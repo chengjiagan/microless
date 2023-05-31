@@ -12,30 +12,6 @@ spec:
   selector:
     app: gateway
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: gateway-lb-config
-  namespace: social-network
-data:
-  lb-gateway.json: |
-    {
-      "server": {
-        "enable": false
-      },
-      "client": {
-        "enable": true,
-        "degrade_interval": 1,
-        "update_interval": 5,
-        "vm_postfix": "-vm",
-        "serverless_postfix": "-serverless",
-        "retry": 3
-      },
-      "serverless": {
-        "enable": false
-      }
-    }
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -56,7 +32,7 @@ spec:
         type: system
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-gateway:0.3.1
+        image: waterlemongan/microless-socialnetwork-gateway:0.3.2
         ports:
         - name: http
           containerPort: 8080
@@ -64,15 +40,12 @@ spec:
         - name: SERVICE_CONFIG
           value: "/config/config.json"
         - name: LB_CONFIG
-          value: "/lb/config.json"
+          value: "/config/lb.json"
         - name: SERVICE_ADDR
           value: ":8080"
         volumeMounts:
         - name: config
           mountPath: "/config"
-          readOnly: true
-        - name: lb-config
-          mountPath: "/lb"
           readOnly: true
         resources:
           limits:
@@ -88,9 +61,5 @@ spec:
           items:
           - key: config.json
             path: config.json
-      - name: lb-config
-        configMap:
-          name: gateway-lb-config
-          items:
           - key: lb-gateway.json
-            path: config.json
+            path: lb.json

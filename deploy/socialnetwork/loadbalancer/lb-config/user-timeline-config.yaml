@@ -4,42 +4,31 @@ metadata:
   name: user-timeline-lb-config
   namespace: social-network
 data:
-  lb.json: |
-    {
-      "server": {
-        "enable": true,
-        "reject": false,
-        "max_tokens": 10000,
-        "tokens_per_fill": 10000,
-        "fill_interval": 1
-      },
-      "client": {
-        "enable": true,
-        "degrade_interval": 1,
-        "update_interval": 5,
-        "vm_postfix": "-vm",
-        "serverless_postfix": "-serverless",
-        "local_services": {},
-        "retry": 3
-      },
-      "serverless": {
-        "enable": false
-      }
-    }
   lb-serverless.json: |
     {
-      "metric_add": ":9000",
       "server": {
         "enable": false
       },
       "client": {
         "enable": true,
-        "degrade_interval": 1,
-        "update_interval": 5,
         "vm_postfix": "-vm",
         "serverless_postfix": "-serverless",
+        "update_interval": 1,
+        "retry": 3,
+        "service_rate_limit": {
+          "post-storage": 100,
+          "user-timeline": 100,
+          "user": 100,
+          "social-graph": 100,
+          "home-timeline": 100,
+          "media": 100,
+          "url-shorten": 100,
+          "user-mention": 100,
+          "text": 100,
+          "compose-post": 100
+        },
         "local_services": {},
-        "retry": 3
+        "redis_addr": "redis://redis.redis:6379/7"
       },
       "serverless": {
         "enable": true,

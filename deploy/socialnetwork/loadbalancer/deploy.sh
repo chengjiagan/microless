@@ -40,6 +40,3 @@ kubectl apply -f stats.yaml
 
 # Install serverless autoscaler
 kubectl apply -f serverless-autoscaler.yaml
-
-# Install cluster autoscaler
-# kubectl apply -f cluster-autoscaler.yaml
