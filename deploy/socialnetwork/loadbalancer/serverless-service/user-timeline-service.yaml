@@ -34,7 +34,7 @@ spec:
       nodeSelector:
         type: serverless
       containers:
-      - name: usertimeline
+      - name: server
         image: waterlemongan/microless-socialnetwork-usertimeline:0.3.2
         ports:
         - name: grpc

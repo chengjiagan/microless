@@ -33,7 +33,7 @@ spec:
       namespace: social-network
     spec:
       containers:
-      - name: usertimeline
+      - name: server
         image: waterlemongan/microless-socialnetwork-usertimeline:0.3.1
         ports:
         - name: grpc
