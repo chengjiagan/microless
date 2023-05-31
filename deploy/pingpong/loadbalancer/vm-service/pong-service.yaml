@@ -1,40 +1,40 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ping
-  labels:
-    microless: pingpong
+  name: pong-vm
   namespace: pingpong
 spec:
   selector:
-    app: ping
+    app: pong
+    type: vm
   ports:
   - name: grpc
     port: 8080
     targetPort: grpc
-  - name: stats
-    port: 9000
-    targetPort: stats
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ping
+  name: pong-vm
   namespace: pingpong
 spec:
   selector:
     matchLabels:
-      app: ping
+      app: pong
+      type: vm
   template:
     metadata:
       labels:
-        app: ping
-      name: ping
+        app: pong
+        type: vm
+      name: pong-vm
       namespace: pingpong
     spec:
+      nodeSelector:
+        type: vm
       containers:
       - name: server
-        image: waterlemongan/microless-pingpong-ping:0.1.1
+        image: waterlemongan/microless-pingpong-pong:0.1.1
         ports:
         - name: grpc
           containerPort: 8080
@@ -49,6 +49,11 @@ spec:
           value: ":8080"
         - name: STATS_ADDR
           value: ":9000"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
         volumeMounts:
         - name: config
           mountPath: "/config"
@@ -66,4 +71,3 @@ spec:
             path: config.json
           - key: lb.json
             path: lb.json
-

@@ -22,7 +22,6 @@ metadata:
   name: pong
   namespace: pingpong
 spec:
-  replicas: 5
   selector:
     matchLabels:
       app: pong
@@ -35,7 +34,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-pingpong-pong:0.1.0
+        image: waterlemongan/microless-pingpong-pong:0.1.1
         ports:
         - name: grpc
           containerPort: 8080

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pong-lb-config
+  namespace: pingpong
+data:
+  lb-serverless.json: |
+    {
+      "server": {
+        "enable": false
+      },
+      "client": {
+        "enable": true,
+        "vm_postfix": "-vm",
+        "serverless_postfix": "-serverless",
+        "update_interval": 1,
+        "retry": 3,
+        "service_rate_limit": {
+          "ping": 10,
+          "pong": 10
+        },
+        "local_services": {},
+        "redis_addr": "redis://redis.redis:6379/7"
+      },
+      "serverless": {
+        "enable": true,
+        "max_concurrency": 1,
+        "max_capacity": 10,
+        "method_requirements": {}
+      }
+    }

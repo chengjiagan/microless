@@ -28,6 +28,8 @@ spec:
       name: gateway
       namespace: pingpong
     spec:
+      nodeSelector:
+        type: system
       containers:
       - name: server
         image: waterlemongan/microless-pingpong-gateway:0.1.1
@@ -53,11 +55,11 @@ spec:
             cpu: "1"
             memory: 512Mi
       volumes:
-        - name: config
-          configMap:
-            name: config
-            items:
-            - key: config.json
-              path: config.json
-            - key: lb.json
-              path: lb.json
+      - name: config
+        configMap:
+          name: config
+          items:
+          - key: config.json
+            path: config.json
+          - key: lb-gateway.json
+            path: lb.json

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ping
+  labels:
+    app: ping
+    type: stats
+  namespace: pingpong
+spec:
+  clusterIP: None
+  selector:
+    app: ping
+  ports:
+  - name: stats
+    port: 9000
+    targetPort: stats
