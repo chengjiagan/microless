@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -8,17 +10,20 @@ import (
 )
 
 func NewConn(address string) (*grpc.ClientConn, error) {
-	// lb := loadbalancer.NewClientLB(address)
+	lb, err := loadbalancer.NewClientLB(address)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create client load balancer: %v", err)
+	}
 
 	conn, err := grpc.Dial(
 		address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		// grpc.WithChainUnaryInterceptor(
-		// lb.UnaryClientInterceptor(),
-		// ),
+		grpc.WithChainUnaryInterceptor(
+			lb.UnaryClientInterceptor(),
+		),
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to dial: %v", err)
 	}
 
 	return conn, nil
@@ -26,14 +31,14 @@ func NewConn(address string) (*grpc.ClientConn, error) {
 
 func NewGRPCServer() *grpc.Server {
 	stats := loadbalancer.NewStats()
-	// serverLB := loadbalancer.NewServerLB()
-	// serverlessLB := loadbalancer.NewServerlessLB(stats)
+	serverLB := loadbalancer.NewServerLB()
+	serverlessLB := loadbalancer.NewServerlessLB(stats)
 	go stats.StartMetricServer()
 
 	return grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			// serverLB.UnaryServerInterceptor(),
-			// serverlessLB.UnaryServerInterceptor(),
+			serverLB.UnaryServerInterceptor(),
+			serverlessLB.UnaryServerInterceptor(),
 			stats.UnaryServerInterceptor(),
 		),
 	)
