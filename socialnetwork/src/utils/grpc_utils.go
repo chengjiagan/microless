@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -9,7 +11,10 @@ import (
 )
 
 func NewConn(address string) (*grpc.ClientConn, error) {
-	lb := loadbalancer.NewClientLB(address)
+	lb, err := loadbalancer.NewClientLB(address)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create client load balancer: %v", err)
+	}
 
 	conn, err := grpc.Dial(
 		address,
@@ -20,7 +25,7 @@ func NewConn(address string) (*grpc.ClientConn, error) {
 		),
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to dial: %v", err)
 	}
 
 	return conn, nil
