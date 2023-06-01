@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"context"
 	"net/http"
 )
 
@@ -9,10 +10,10 @@ type Generator interface {
 	InitOpenLoop(ratio float64, rate int)
 	InitCloseLoop(rThread int, wThread int)
 
-	GenPrewarm(threadId int) *http.Request
+	GenPrewarm(ctx context.Context, threadId int) *http.Request
 	GetPrewarmStatus() (int, int)
-	GenRead() *http.Request
-	GenWrite() *http.Request
+	GenRead(ctx context.Context) *http.Request
+	GenWrite(ctx context.Context) *http.Request
 }
 
 type Config struct {

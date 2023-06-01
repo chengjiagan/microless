@@ -2,6 +2,7 @@ package media
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -60,7 +61,7 @@ func (g *mediaGenerator) InitCloseLoop(rThread int, wThread int) {
 	// do nothing
 }
 
-func (g *mediaGenerator) GenPrewarm(threadId int) *http.Request {
+func (g *mediaGenerator) GenPrewarm(ctx context.Context, threadId int) *http.Request {
 	return nil
 }
 
@@ -68,7 +69,7 @@ func (g *mediaGenerator) GetPrewarmStatus() (int, int) {
 	return 0, 0
 }
 
-func (g *mediaGenerator) GenRead() *http.Request {
+func (g *mediaGenerator) GenRead(ctx context.Context) *http.Request {
 	var url string
 	p := rand.Float64()
 	if p < 0.5 {
@@ -104,13 +105,13 @@ func (g *mediaGenerator) GenRead() *http.Request {
 	}
 
 	// generate request
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	utils.Check(err)
 
 	return req
 }
 
-func (g *mediaGenerator) GenWrite() *http.Request {
+func (g *mediaGenerator) GenWrite(ctx context.Context) *http.Request {
 	url := "http://" + g.addr + "/api/v1/composereview"
 	val := g.randComposeReview()
 
@@ -118,7 +119,7 @@ func (g *mediaGenerator) GenWrite() *http.Request {
 	data, err := json.Marshal(val)
 	utils.Check(err)
 	// generate request
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(data))
 	utils.Check(err)
 
 	return req

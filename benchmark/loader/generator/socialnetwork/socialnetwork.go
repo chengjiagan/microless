@@ -2,6 +2,7 @@ package socialnetwork
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -64,7 +65,7 @@ func (g *socialnetworkGenerator) InitCloseLoop(rThread int, wThread int) {
 	// do nothing
 }
 
-func (g *socialnetworkGenerator) GenPrewarm(threadId int) *http.Request {
+func (g *socialnetworkGenerator) GenPrewarm(ctx context.Context, threadId int) *http.Request {
 	userIdx := g.curUserIdx[threadId]
 	postIdxStart := g.curPostIdx[threadId]
 
@@ -112,7 +113,7 @@ func (g *socialnetworkGenerator) GenPrewarm(threadId int) *http.Request {
 
 	// generate request
 	url := fmt.Sprintf("http://%s/api/v1/%s/%s?start=%d&stop=%d", g.addr, function, g.users[userIdx].UserId, postIdxStart, postIdxEnd)
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	utils.Check(err)
 
 	return req
@@ -173,7 +174,7 @@ func (g *socialnetworkGenerator) GetPrewarmStatus() (int, int) {
 // }
 
 // mix version
-func (g *socialnetworkGenerator) GenRead() *http.Request {
+func (g *socialnetworkGenerator) GenRead(ctx context.Context) *http.Request {
 	// randomly select a user
 	user := rand.Intn(len(g.users))
 	userid := g.users[user].UserId
@@ -200,13 +201,13 @@ func (g *socialnetworkGenerator) GenRead() *http.Request {
 
 	// generate request
 	url := fmt.Sprintf("http://%s/api/v1/%s/%s?start=%d&stop=%d", g.addr, function, userid, start, stop)
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	utils.Check(err)
 
 	return req
 }
 
-func (g *socialnetworkGenerator) GenWrite() *http.Request {
+func (g *socialnetworkGenerator) GenWrite(ctx context.Context) *http.Request {
 	url := "http://" + g.addr + "/api/v1/composepost"
 	val := g.randComposePost()
 
@@ -214,7 +215,7 @@ func (g *socialnetworkGenerator) GenWrite() *http.Request {
 	data, err := json.Marshal(val)
 	utils.Check(err)
 	// generate request
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(data))
 	utils.Check(err)
 
 	return req

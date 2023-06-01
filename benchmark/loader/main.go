@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -189,13 +190,14 @@ func prewarm() {
 	wg.Add(*nThread)
 	for t := 0; t < *nThread; t++ {
 		go func(t int) {
-			ctx := context.Background()
 			for {
-				req := gen.GenPrewarm(t)
+				rCtx, cancel := context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
+				req := gen.GenPrewarm(rCtx, t)
 				if req == nil {
 					break
 				}
-				code := sendRequest(ctx, req)
+				code := sendRequest(req)
 				if code != http.StatusOK {
 					log.Fatalf("prewarm failed: %v", code)
 				}
@@ -321,10 +323,12 @@ func load(ctx context.Context) []chan sample {
 			ss := make([]sample, 0)
 			for ctx.Err() == nil {
 				var s sample
+				rCtx, cancel := context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
 				if i < *rThread {
-					s = send(ctx, gen.GenRead(), "read")
+					s = send(gen.GenRead(rCtx), "read")
 				} else {
-					s = send(ctx, gen.GenWrite(), "write")
+					s = send(gen.GenWrite(rCtx), "write")
 				}
 				ss = append(ss, s)
 			}
@@ -373,10 +377,12 @@ func loadWithRate(ctx context.Context, rate int) []chan sample {
 				go func() {
 					p := rand.Float64()
 					var s sample
+					rCtx, cancel := context.WithTimeout(context.Background(), time.Second)
+					defer cancel()
 					if p < *ratio {
-						s = send(ctx, gen.GenRead(), "read")
+						s = send(gen.GenRead(rCtx), "read")
 					} else {
-						s = send(ctx, gen.GenWrite(), "write")
+						s = send(gen.GenWrite(rCtx), "write")
 					}
 					ch <- s
 					wg.Done()
@@ -390,9 +396,9 @@ func loadWithRate(ctx context.Context, rate int) []chan sample {
 	return out
 }
 
-func send(ctx context.Context, req *http.Request, t string) sample {
+func send(req *http.Request, t string) sample {
 	start := time.Now()
-	code := sendRequest(ctx, req)
+	code := sendRequest(req)
 	end := time.Now()
 	return sample{
 		start: start,
@@ -403,9 +409,14 @@ func send(ctx context.Context, req *http.Request, t string) sample {
 }
 
 // send a http request
-func sendRequest(ctx context.Context, req *http.Request) int {
+func sendRequest(req *http.Request) int {
 	// send request
 	resp, err := client.Do(req)
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return 408
+		}
+	}
 	check(err)
 
 	// read respond and close
