@@ -13,6 +13,8 @@ import (
 	"microless/loader/generator/socialnetwork"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -20,7 +22,7 @@ import (
 // required by all modes
 var addr = flag.String("addr", "", "address to the gateway service")
 var service = flag.String("service", "", "kind of service to test: social-network, media, pingpong")
-var mode = flag.String("mode", "", "load test mode: close for close-loop, open for open-loop, prewarm for pre-warming")
+var mode = flag.String("mode", "", "load test mode: close for close-loop, open for open-loop, prewarm for pre-warming, file for file-control")
 
 // required by social-network and media
 var pathUserIds = flag.String("userid", "", "path to json file that contains user ids")
@@ -40,6 +42,9 @@ var wThread = flag.Int("wthread", 0, "number of threads sending write requests")
 // open-loop load test
 var ratio = flag.Float64("ratio", 0, "ratio of read requests")
 var rate = flag.Int("rate", 0, "request rate in QPS, 0 if rate is unlimited")
+
+// file-control mode
+var filePath = flag.String("file", "", "path to file that contains request rate")
 
 var client *http.Client
 var gen generator.Generator
@@ -84,6 +89,8 @@ func main() {
 		openLoop()
 	case "prewarm":
 		prewarm()
+	case "file":
+		file()
 	default:
 		log.Fatal("unknown mode")
 	}
@@ -150,7 +157,7 @@ func openLoop() {
 	gen.InitOpenLoop(*ratio, *rate)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	out := loadWithRate(ctx)
+	out := loadWithRate(ctx, *rate)
 
 	// wait and stop
 	go func() {
@@ -207,6 +214,70 @@ func prewarm() {
 
 	wg.Wait()
 	fmt.Println()
+}
+
+type rateLimit struct {
+	duration int
+	rate     int
+}
+
+func file() {
+	// read the whole file
+	buf, err := os.ReadFile(*filePath)
+	check(err)
+
+	// parse the file
+	lines := strings.Split(string(buf), "\n")
+	lines = lines[1:] // skip header
+	limits := make([]rateLimit, 0)
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+
+		parts := strings.Split(line, ",")
+		t, _ := strconv.Atoi(parts[0])
+		r, _ := strconv.Atoi(parts[1])
+		limits = append(limits, rateLimit{
+			duration: t,
+			rate:     r,
+		})
+	}
+
+	mu := sync.Mutex{}
+	ss := make([]sample, 0)
+	for _, limit := range limits {
+		gen.InitOpenLoop(*ratio, limit.rate)
+
+		ctx, cancel := context.WithCancel(context.Background())
+		out := loadWithRate(ctx, limit.rate)
+
+		// get result
+		go func() {
+			mu.Lock()
+			defer mu.Unlock()
+
+			for _, ch := range out {
+				for s := range ch {
+					ss = append(ss, s)
+				}
+			}
+		}()
+
+		// wait and stop
+		for i := 0; i < limit.duration; i++ {
+			fmt.Printf("\rrate %d: %d/%d", limit.rate, i, limit.duration)
+			time.Sleep(time.Second)
+		}
+		fmt.Println()
+		cancel()
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+	// print metrics and save raw data
+	print(ss)
+	save(ss)
 }
 
 func print(ss []sample) {
@@ -269,16 +340,16 @@ func load(ctx context.Context) []chan sample {
 }
 
 // open-loop load test
-func loadWithRate(ctx context.Context) []chan sample {
+func loadWithRate(ctx context.Context, rate int) []chan sample {
 	out := make([]chan sample, 0)
 
-	for t := 0; t < *rate; t += 400 {
+	for t := 0; t < rate; t += 400 {
 		ch := make(chan sample)
 		out = append(out, ch)
 
 		r := 400
-		if t+r > *rate {
-			r = *rate - t
+		if t+r > rate {
+			r = rate - t
 		}
 
 		go func(r int, out chan sample) {

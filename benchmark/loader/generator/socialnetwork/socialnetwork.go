@@ -13,12 +13,14 @@ import (
 	"sync/atomic"
 )
 
+const NumPostOnce = 1000
+
 type socialnetworkGenerator struct {
 	addr  string
 	users []user
 
 	// prewarm
-	cnt        int32
+	cnt        atomic.Int32
 	nThread    int
 	curUserIdx []int
 	curPostIdx []int
@@ -70,25 +72,46 @@ func (g *socialnetworkGenerator) GenPrewarm(threadId int) *http.Request {
 		return nil
 	}
 
-	if postIdxStart >= g.users[userIdx].NumPost {
+	var postIdxEnd int
+	var function string
+	for {
+		// home timeline
+		function = "hometimeline"
+		if postIdxStart < g.users[userIdx].HomePost {
+			postIdxEnd = postIdxStart + NumPostOnce
+			if postIdxEnd > g.users[userIdx].HomePost {
+				postIdxEnd = g.users[userIdx].HomePost
+			}
+			g.curPostIdx[threadId] = postIdxEnd
+			break
+		}
+
+		// user timeline
+		function = "usertimeline"
+		postIdxStart -= g.users[userIdx].HomePost
+		if postIdxStart < g.users[userIdx].NumPost {
+			postIdxEnd = postIdxStart + NumPostOnce
+			if postIdxEnd > g.users[userIdx].NumPost {
+				postIdxEnd = g.users[userIdx].NumPost
+			}
+			g.curPostIdx[threadId] = postIdxEnd + g.users[userIdx].HomePost
+			break
+		}
+
+		// try next user
 		userIdx += g.nThread
 		g.curUserIdx[threadId] = userIdx
 		postIdxStart = 0
-		atomic.AddInt32(&g.cnt, 1)
-	}
+		g.cnt.Add(1)
 
-	if userIdx >= len(g.users) {
-		return nil
+		// no more user
+		if userIdx >= len(g.users) {
+			return nil
+		}
 	}
-
-	postIdxEnd := postIdxStart + 100
-	if postIdxEnd > g.users[userIdx].NumPost {
-		postIdxEnd = g.users[userIdx].NumPost
-	}
-	g.curPostIdx[threadId] = postIdxEnd
 
 	// generate request
-	url := fmt.Sprintf("http://%s/api/v1/hometimeline/%s?start=%d&stop=%d", g.addr, g.users[userIdx].UserId, postIdxStart, postIdxEnd)
+	url := fmt.Sprintf("http://%s/api/v1/%s/%s?start=%d&stop=%d", g.addr, function, g.users[userIdx].UserId, postIdxStart, postIdxEnd)
 	req, err := http.NewRequest("GET", url, nil)
 	utils.Check(err)
 
@@ -96,14 +119,74 @@ func (g *socialnetworkGenerator) GenPrewarm(threadId int) *http.Request {
 }
 
 func (g *socialnetworkGenerator) GetPrewarmStatus() (int, int) {
-	return int(atomic.LoadInt32(&g.cnt)), len(g.users)
+	return int(g.cnt.Load()), len(g.users)
 }
 
+// home timeline version
+// func (g *socialnetworkGenerator) GenRead() *http.Request {
+// 	// randomly select a user
+// 	user := rand.Intn(len(g.users))
+// 	userid := g.users[user].UserId
+// 	n := g.users[user].HomePost
+
+// 	// randomly select some posts if user have more than 10 posts
+// 	var start, stop int
+// 	if n <= 10 {
+// 		start = 0
+// 		stop = n
+// 	} else {
+// 		start = rand.Intn(n - 10)
+// 		stop = start + 10
+// 	}
+
+// 	// generate request
+// 	url := fmt.Sprintf("http://%s/api/v1/hometimeline/%s?start=%d&stop=%d", g.addr, userid, start, stop)
+// 	req, err := http.NewRequest("GET", url, nil)
+// 	utils.Check(err)
+
+// 	return req
+// }
+
+// user timeline version
+// func (g *socialnetworkGenerator) GenRead() *http.Request {
+// 	// randomly select a user
+// 	user := rand.Intn(len(g.users))
+// 	userid := g.users[user].UserId
+// 	n := g.users[user].NumPost
+
+// 	// randomly select some posts if user have more than 10 posts
+// 	var start, stop int
+// 	if n <= 10 {
+// 		start = 0
+// 		stop = n
+// 	} else {
+// 		start = rand.Intn(n - 10)
+// 		stop = start + 10
+// 	}
+
+// 	// generate request
+// 	url := fmt.Sprintf("http://%s/api/v1/usertimeline/%s?start=%d&stop=%d", g.addr, userid, start, stop)
+// 	req, err := http.NewRequest("GET", url, nil)
+// 	utils.Check(err)
+
+// 	return req
+// }
+
+// mix version
 func (g *socialnetworkGenerator) GenRead() *http.Request {
 	// randomly select a user
 	user := rand.Intn(len(g.users))
 	userid := g.users[user].UserId
-	n := g.users[user].HomePost
+
+	var n int
+	var function string
+	if rand.Intn(2) == 0 {
+		function = "hometimeline"
+		n = g.users[user].HomePost
+	} else {
+		function = "usertimeline"
+		n = g.users[user].NumPost
+	}
 
 	// randomly select some posts if user have more than 10 posts
 	var start, stop int
@@ -116,7 +199,7 @@ func (g *socialnetworkGenerator) GenRead() *http.Request {
 	}
 
 	// generate request
-	url := fmt.Sprintf("http://%s/api/v1/hometimeline/%s?start=%d&stop=%d", g.addr, userid, start, stop)
+	url := fmt.Sprintf("http://%s/api/v1/%s/%s?start=%d&stop=%d", g.addr, function, userid, start, stop)
 	req, err := http.NewRequest("GET", url, nil)
 	utils.Check(err)
 
