@@ -16,4 +16,4 @@ kubectl apply -f service/pong-service.yaml
 kubectl apply -f gateway.yaml
 
 # Install ServiceMonitor
-# kubectl apply -f stats.yaml
+kubectl apply -f stats.yaml
