@@ -12,6 +12,7 @@ spec:
       annotations:
         k8s.aliyun.com/eci-use-specs: "0.25-0.5Gi"
         k8s.aliyun.com/eci-image-cache: "true"
+        k8s.aliyun.com/eci-imc-id: "imc-uf6hohdsbp9kn3hidm3r"
       labels:
         app: test
         alibabacloud.com/eci: "true"
