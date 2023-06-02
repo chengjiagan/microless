@@ -9,13 +9,13 @@ spec:
   template:
     metadata:
       annotations:
-        autoscaling.knative.dev/target: "3"
+        autoscaling.knative.dev/target: "1"
         k8s.aliyun.com/eci-use-specs: "0.25-0.5Gi"
         k8s.aliyun.com/eci-image-cache: "true"
       labels:
         alibabacloud.com/eci: "true"
     spec:
-      containerConcurrency: 100
+      containerConcurrency: 10
       containers:
       - name: server
         image: waterlemongan/microless-socialnetwork-poststorage:0.3.2
