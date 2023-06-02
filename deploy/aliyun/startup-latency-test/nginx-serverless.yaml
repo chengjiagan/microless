@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      annotations:
+        k8s.aliyun.com/eci-use-specs: "0.25-0.5Gi"
+        k8s.aliyun.com/eci-image-cache: "true"
+      labels:
+        app: test
+        alibabacloud.com/eci: "true"
+    spec:
+      containers:
+      - name: test
+        image: nginx:1.25.0
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "1"
