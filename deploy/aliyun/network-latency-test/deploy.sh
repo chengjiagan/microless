@@ -15,7 +15,5 @@ kubectl apply -f knative/ping-service.yaml
 kubectl apply -f knative/pong-service.yaml
 
 # Install gateway
-kubectl apply -f gateway.yaml
-
-# Install ServiceMonitor
-# kubectl apply -f stats.yaml
+# kubectl apply -f gateway.yaml
+kubectl apply -f gateway-serverless.yaml

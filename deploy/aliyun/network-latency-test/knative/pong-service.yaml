@@ -45,7 +45,7 @@ spec:
         configMap:
           name: config
           items:
-          - key: config.json
+          - key: config-serverless.json
             path: config.json
           - key: lb.json
             path: lb.json

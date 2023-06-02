@@ -7,6 +7,13 @@ data:
   config.json: |
     {
       "service": {
+        "ping": "ping:8080",
+        "pong": "pong:8080"
+      }
+    }
+  config-serverless.json: |
+    {
+      "service": {
         "ping": "ping.pingpong.svc.cluster.local:80",
         "pong": "pong.pingpong.svc.cluster.local:80"
       }
