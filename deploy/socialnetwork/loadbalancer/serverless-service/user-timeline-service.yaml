@@ -59,10 +59,38 @@ spec:
           readOnly: true
         resources:
           limits:
-            cpu: 500m
+            cpu: 200m
             memory: 50Mi
           requests:
-            cpu: 500m
+            cpu: 100m
+            memory: 50Mi
+      - name: post-storage
+        image: waterlemongan/microless-socialnetwork-poststorage:0.3.2
+        ports:
+        - name: grpc
+          containerPort: 8081
+        env:
+        - name: SERVICE_CONFIG
+          value: "/config/config.json"
+        - name: LB_CONFIG
+          value: "/lb/config.json"
+        - name: SERVICE_ADDR
+          value: ":8081"
+        - name: STATS_ADDR
+          value: ":9001"
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+        - name: lb-config
+          mountPath: "/lb"
+          readOnly: true
+        resources:
+          limits:
+            cpu: 200m
+            memory: 50Mi
+          requests:
+            cpu: 100m
             memory: 50Mi
       volumes:
       - name: config

@@ -27,7 +27,10 @@ data:
           "text": 100,
           "compose-post": 100
         },
-        "local_services": {},
+        "local_services": {
+          "user-timeline": "8080",
+          "post-storage": "8081"
+        },
         "redis_addr": "redis://redis.redis:6379/7"
       },
       "serverless": {
