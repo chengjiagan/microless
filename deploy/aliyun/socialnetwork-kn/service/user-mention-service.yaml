@@ -1,0 +1,52 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: user-mention
+  labels:
+    networking.knative.dev/visibility: cluster-local
+  namespace: social-network
+spec:
+  template:
+    metadata:
+      annotations:
+        k8s.aliyun.com/eci-use-specs: "0.25-0.5Gi"
+        k8s.aliyun.com/eci-image-cache: "true"
+      labels:
+        alibabacloud.com/eci: "true"
+    spec:
+      containerConcurrency: 1
+      containers:
+      - name: server
+        image: waterlemongan/microless-socialnetwork-usermention:0.3.2
+        ports:
+        - name: h2c
+          containerPort: 8080
+        env:
+        - name: SERVICE_CONFIG
+          value: "/config/config.json"
+        - name: LB_CONFIG
+          value: "/config/lb.json"
+        - name: SERVICE_ADDR
+          value: ":8080"
+        - name: STATS_ADDR
+          value: ":9000"
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+        resources:
+          limits:
+            cpu: 200m
+            memory: 50Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+      volumes:
+      - name: config
+        configMap:
+          name: config
+          items:
+          - key: config.json
+            path: config.json
+          - key: lb.json
+            path: lb.json

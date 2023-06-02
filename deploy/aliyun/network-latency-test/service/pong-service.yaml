@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pong
+  labels:
+    microless: pingpong
+  namespace: pingpong
+spec:
+  selector:
+    app: pong
+  ports:
+  - name: grpc
+    port: 8080
+    targetPort: grpc
+  - name: stats
+    port: 9000
+    targetPort: stats
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pong
+  namespace: pingpong
+spec:
+  selector:
+    matchLabels:
+      app: pong
+  template:
+    metadata:
+      labels:
+        app: pong
+        sidecar.istio.io/inject: "true"
+      name: pong
+      namespace: pingpong
+    spec:
+      nodeSelector:
+        type: vm
+      containers:
+      - name: server
+        image: waterlemongan/microless-pingpong-pong:0.1.1
+        ports:
+        - name: grpc
+          containerPort: 8080
+        - name: stats
+          containerPort: 9000
+        env:
+        - name: SERVICE_CONFIG
+          value: "/config/config.json"
+        - name: LB_CONFIG
+          value: "/config/lb.json"
+        - name: SERVICE_ADDR
+          value: ":8080"
+        - name: STATS_ADDR
+          value: ":9000"
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "50Mi"
+      volumes:
+      - name: config
+        configMap:
+          name: config
+          items:
+          - key: config.json
+            path: config.json
+          - key: lb.json
+            path: lb.json

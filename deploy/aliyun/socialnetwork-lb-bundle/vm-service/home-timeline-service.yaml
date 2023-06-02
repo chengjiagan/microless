@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-timeline-vm
+  namespace: social-network
+spec:
+  selector:
+    app: home-timeline
+    type: vm
+  ports:
+  - name: grpc
+    port: 8080
+    targetPort: grpc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-timeline-vm
+  namespace: social-network
+spec:
+  selector:
+    matchLabels:
+      app: home-timeline
+      type: vm
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/proxyCPU: 500m
+        sidecar.istio.io/proxyCPULimit: 500m
+        sidecar.istio.io/proxyMemory: 150Mi
+        sidecar.istio.io/proxyMemoryLimit: 150Mi
+      labels:
+        app: home-timeline
+        type: vm
+        sidecar.istio.io/inject: "true"
+      name: home-timeline-vm
+      namespace: social-network
+    spec:
+      nodeSelector:
+        type: vm
+      containers:
+      - name: server
+        image: waterlemongan/microless-socialnetwork-hometimeline:0.3.2
+        ports:
+        - name: grpc
+          containerPort: 8080
+        - name: stats
+          containerPort: 9000
+        env:
+        - name: SERVICE_CONFIG
+          value: "/config/config.json"
+        - name: LB_CONFIG
+          value: "/config/lb.json"
+        - name: SERVICE_ADDR
+          value: ":8080"
+        - name: STATS_ADDR
+          value: ":9000"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+        resources:
+          limits:
+            cpu: 500m
+            memory: 50Mi
+          requests:
+            cpu: 500m
+            memory: 50Mi
+      volumes:
+      - name: config
+        configMap:
+          name: config
+          items:
+          - key: config.json
+            path: config.json
+          - key: lb.json
+            path: lb.json

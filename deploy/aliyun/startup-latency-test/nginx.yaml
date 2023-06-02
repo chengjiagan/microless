@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+spec:
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      nodeSelector:
+        type: vm
+      containers:
+      - name: test
+        image: nginx:1.25.0
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "1"

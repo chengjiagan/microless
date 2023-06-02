@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: social-network-stats
+  annotations:
+    arms.prometheus.io/discovery: "true"
+  namespace: social-network
+spec:
+  selector:
+    matchLabels:
+      type: stats
+  endpoints:
+  - port: stats
+    interval: 5s
+  namespaceSelector:
+    matchNames:
+    - social-network

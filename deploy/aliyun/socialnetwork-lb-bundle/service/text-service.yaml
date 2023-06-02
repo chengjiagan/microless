@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: text
+  labels:
+    app: text
+    type: stats
+  namespace: social-network
+spec:
+  clusterIP: None
+  selector:
+    app: text
+  ports:
+  - name: stats
+    port: 9000
+    targetPort: stats

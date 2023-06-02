@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: text-serverless
+  namespace: social-network
+spec:
+  selector:
+    app: text
+    type: serverless
+  ports:
+  - name: grpc
+    port: 8080
+    targetPort: grpc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: text-serverless
+  namespace: social-network
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: text
+      type: serverless
+  template:
+    metadata:
+      annotations:
+        k8s.aliyun.com/eci-use-specs: "0.25-0.5Gi"
+        k8s.aliyun.com/eci-image-cache: "true"
+        sidecar.istio.io/proxyCPU: 100m
+        sidecar.istio.io/proxyCPULimit: 200m
+        sidecar.istio.io/proxyMemory: 150Mi
+        sidecar.istio.io/proxyMemoryLimit: 150Mi
+      labels:
+        app: text
+        type: serverless
+        alibabacloud.com/eci: "true"
+        sidecar.istio.io/inject: "true"
+      name: text-serverless
+      namespace: social-network
+    spec:
+      containers:
+      - name: server
+        image: waterlemongan/microless-socialnetwork-text:0.3.2
+        ports:
+        - name: grpc
+          containerPort: 8080
+        - name: stats
+          containerPort: 9000
+        env:
+        - name: SERVICE_CONFIG
+          value: "/config/config.json"
+        - name: LB_CONFIG
+          value: "/lb/config.json"
+        - name: SERVICE_ADDR
+          value: ":8080"
+        - name: STATS_ADDR
+          value: ":9000"
+        volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+        - name: lb-config
+          mountPath: "/lb"
+          readOnly: true
+        resources:
+          limits:
+            cpu: 200m
+            memory: 50Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+      volumes:
+      - name: config
+        configMap:
+          name: config
+          items:
+          - key: config.json
+            path: config.json
+      - name: lb-config
+        configMap:
+          name: text-lb-config
+          items:
+          - key: lb-serverless.json
+            path: config.json

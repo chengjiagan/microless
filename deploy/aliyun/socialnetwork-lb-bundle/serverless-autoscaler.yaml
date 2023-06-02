@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: serverless-autoscaler-config
+  namespace: social-network
+data:
+  sas.json: |
+    {
+      "interval": 15,
+      "namespace": "social-network",
+      "apps": [
+          "post-storage",
+          "user-timeline",
+          "user",
+          "social-graph",
+          "home-timeline",
+          "media",
+          "url-shorten",
+          "user-mention",
+          "text",
+          "compose-post"
+      ],
+      "redis_addr": "redis://172.17.0.10:6379/7"
+    }
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: serverless-autoscaler-role
+  namespace: social-network
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list"]
+- apiGroups: ["apps"]
+  resources: ["deployments/scale"]
+  verbs: ["get"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["patch", "watch"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: serverless-autoscaler
+  namespace: social-network
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: serverless-autoscaler-role-binding
+  namespace: social-network
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: serverless-autoscaler-role
+subjects:
+- kind: ServiceAccount
+  name: serverless-autoscaler
+  namespace: social-network
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: serverless-autoscaler
+  namespace: social-network
+spec:
+  serviceAccountName: serverless-autoscaler
+  nodeSelector:
+    type: system
+  containers:
+  - name: sas
+    image: waterlemongan/microless-serverless-autoscaler:0.1.1
+    env:
+    - name: SERVERLESS_AUTOSCALER_CONFIG
+      value: "/config/sas.json"
+    volumeMounts:
+    - name: config
+      mountPath: "/config"
+      readOnly: true
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+  volumes:
+  - name: config
+    configMap:
+      name: serverless-autoscaler-config
+      items:
+      - key: sas.json
+        path: sas.json

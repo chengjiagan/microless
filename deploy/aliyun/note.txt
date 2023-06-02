@@ -1,0 +1,8 @@
+prometheus adapter: https://help.aliyun.com/document_detail/184519.html
+
+steps:
+1. add node pool vm with spec ecs.g6.3xlarge and label tyep=vm
+2. install knative - update kourier service type to ClusterIP
+3. install ACK Virtual Node
+4. install ack-arms-cmonitor
+5. install alibaba-cloud-metrics-adapter according to adapter.yaml

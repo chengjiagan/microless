@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pingpong-stats
+  labels:
+    release: prom
+  namespace: pingpong
+spec:
+  selector:
+    matchLabels:
+      microless: pingpong
+  endpoints:
+  - port: stats
+    interval: 5s
+  namespaceSelector:
+    matchNames:
+    - pingpong

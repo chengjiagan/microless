@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: pingpong
+data:
+  config.json: |
+    {
+      "service": {
+        "ping": "ping.pingpong.svc.cluster.local:80",
+        "pong": "pong.pingpong.svc.cluster.local:80"
+      }
+    }
+  lb.json: |
+    {
+      "server": {
+        "enable": false
+      },
+      "client": {
+        "enable": false
+      },
+      "serverless": {
+        "enable": false
+      }
+    }
