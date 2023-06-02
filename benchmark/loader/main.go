@@ -65,9 +65,7 @@ func main() {
 	checkParams()
 
 	// init http client
-	client = &http.Client{
-		Timeout: time.Minute,
-	}
+	client = &http.Client{}
 
 	// init generator
 	gen = newGenerator(
@@ -421,8 +419,18 @@ func sendRequest(req *http.Request) int {
 
 	// read respond and close
 	_, err = io.ReadAll(resp.Body)
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return 408
+		}
+	}
 	check(err)
 	err = resp.Body.Close()
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return 408
+		}
+	}
 	check(err)
 
 	return resp.StatusCode

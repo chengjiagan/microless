@@ -124,7 +124,7 @@ func (g *socialnetworkGenerator) GetPrewarmStatus() (int, int) {
 }
 
 // home timeline version
-// func (g *socialnetworkGenerator) GenRead() *http.Request {
+// func (g *socialnetworkGenerator) GenRead(ctx context.Context) *http.Request {
 // 	// randomly select a user
 // 	user := rand.Intn(len(g.users))
 // 	userid := g.users[user].UserId
@@ -142,14 +142,14 @@ func (g *socialnetworkGenerator) GetPrewarmStatus() (int, int) {
 
 // 	// generate request
 // 	url := fmt.Sprintf("http://%s/api/v1/hometimeline/%s?start=%d&stop=%d", g.addr, userid, start, stop)
-// 	req, err := http.NewRequest("GET", url, nil)
+// 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 // 	utils.Check(err)
 
 // 	return req
 // }
 
 // user timeline version
-// func (g *socialnetworkGenerator) GenRead() *http.Request {
+// func (g *socialnetworkGenerator) GenRead(ctx context.Context) *http.Request {
 // 	// randomly select a user
 // 	user := rand.Intn(len(g.users))
 // 	userid := g.users[user].UserId
@@ -167,7 +167,7 @@ func (g *socialnetworkGenerator) GetPrewarmStatus() (int, int) {
 
 // 	// generate request
 // 	url := fmt.Sprintf("http://%s/api/v1/usertimeline/%s?start=%d&stop=%d", g.addr, userid, start, stop)
-// 	req, err := http.NewRequest("GET", url, nil)
+// 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 // 	utils.Check(err)
 
 // 	return req
