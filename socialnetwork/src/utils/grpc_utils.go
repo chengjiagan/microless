@@ -11,16 +11,21 @@ import (
 )
 
 func NewConn(address string) (*grpc.ClientConn, error) {
-	lb, err := loadbalancer.NewClientLB(address)
+	clientLB, err := loadbalancer.NewClientLB(address)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client load balancer: %v", err)
+	}
+	amoebaLB, err := loadbalancer.NewAmoebaLB(address)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create amoeba load balancer: %v", err)
 	}
 
 	conn, err := grpc.Dial(
 		address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainUnaryInterceptor(
-			lb.UnaryClientInterceptor(),
+			clientLB.UnaryClientInterceptor(),
+			amoebaLB.UnaryClientInterceptor(),
 			otelgrpc.UnaryClientInterceptor(),
 		),
 	)
