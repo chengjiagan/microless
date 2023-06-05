@@ -2,9 +2,12 @@ package loadbalancer
 
 import (
 	"context"
+	"log"
 	"microless/loadbalancer/internal/queue"
 	"microless/loadbalancer/internal/utils"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
@@ -12,16 +15,32 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const avgAcc = 1000
+const resourceUnit = 1000
+
 type ServerlessLB struct {
 	// params from config
-	totalResources     float64
+	totalResources     int
 	maxCapacity        int
-	methodRequirements map[string]float64
+	methodRequirements map[string]int
 
-	mu               sync.Mutex
+	mu   sync.Mutex
+	cond *sync.Cond
+
+	// for concurrency controlling
+	taskId           atomic.Int64
+	q                *queue.TaskQueue
 	concurrency      int
-	currentResources float64
-	tasks            *queue.TaskQueue
+	currentResources int
+
+	// for calculate time average queue length
+	e       []event // protected by mu
+	taskAvg atomic.Int32
+}
+
+type event struct {
+	t time.Time
+	l int
 }
 
 func NewServerlessLB(stats *Stats) *ServerlessLB {
@@ -30,12 +49,26 @@ func NewServerlessLB(stats *Stats) *ServerlessLB {
 		return nil
 	}
 
-	sl := &ServerlessLB{
-		totalResources:     float64(config.MaxConcurrency),
-		maxCapacity:        config.MaxCapacity,
-		methodRequirements: config.MethodReqirements,
-		tasks:              queue.NewTaskQueue(config.MaxCapacity),
+	e := make([]event, 0)
+	e = append(e, event{
+		t: time.Now(),
+		l: 0,
+	})
+
+	req := make(map[string]int)
+	for k, v := range config.MethodReqirements {
+		req[k] = int(v * resourceUnit)
 	}
+
+	sl := &ServerlessLB{
+		totalResources:     config.MaxConcurrency * resourceUnit,
+		maxCapacity:        config.MaxCapacity,
+		methodRequirements: req,
+		q:                  queue.NewTaskQueue(config.MaxCapacity),
+		e:                  e,
+	}
+	sl.cond = sync.NewCond(&sl.mu)
+	go sl.updateLoop()
 
 	stats.reg.MustRegister(
 		prometheus.NewGaugeFunc(
@@ -44,25 +77,53 @@ func NewServerlessLB(stats *Stats) *ServerlessLB {
 				Help: HelpServerlessTaskTotal,
 			},
 			func() float64 {
-				sl.mu.Lock()
-				defer sl.mu.Unlock()
-				return float64(sl.tasks.Len() + sl.concurrency)
-			},
-		),
-		prometheus.NewGaugeFunc(
-			prometheus.GaugeOpts{
-				Name: NameServerlessTaskRunning,
-				Help: HelpServerlessTaskRunning,
-			},
-			func() float64 {
-				sl.mu.Lock()
-				defer sl.mu.Unlock()
-				return float64(sl.concurrency)
+				return float64(sl.taskAvg.Load()) / avgAcc
 			},
 		),
 	)
 
 	return sl
+}
+
+func (lb *ServerlessLB) updateLoop() {
+	ticker := time.NewTicker(time.Second)
+	for range ticker.C {
+		lb.updateConcurrency()
+	}
+}
+
+func (lb *ServerlessLB) updateConcurrency() {
+	newAvg := lb.averageConcurrency() * avgAcc
+	oldAvg := float64(lb.taskAvg.Load())
+	lb.taskAvg.Store(int32(0.5*oldAvg + 0.5*newAvg))
+}
+
+func (lb *ServerlessLB) averageConcurrency() float64 {
+	now := time.Now()
+
+	lb.mu.Lock()
+	l := lb.concurrency + lb.q.Len()
+	e := lb.e
+	// add start event
+	lb.e = make([]event, 0)
+	lb.e = append(lb.e, event{
+		t: now,
+		l: l,
+	})
+	lb.mu.Unlock()
+
+	// add stop event
+	e = append(e, event{
+		t: now,
+		l: l,
+	})
+
+	avg := 0.0
+	for i := 1; i < len(e); i++ {
+		avg += float64(e[i].l) * e[i].t.Sub(e[i-1].t).Seconds()
+	}
+	avg /= e[len(e)-1].t.Sub(e[0].t).Seconds()
+	return avg
 }
 
 func (lb *ServerlessLB) UnaryServerInterceptor() grpc.UnaryServerInterceptor {
@@ -76,9 +137,10 @@ func (lb *ServerlessLB) UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 			return handler(ctx, req)
 		}
 
+		taskid := lb.taskId.Add(1)
 		_, method := utils.GetServiceAndMethod(info)
 		methodRequirement := lb.getMethodRequirement(method)
-		err = lb.requestResource(methodRequirement)
+		err = lb.requestResource(taskid, methodRequirement)
 		if err != nil {
 			return
 		}
@@ -89,50 +151,55 @@ func (lb *ServerlessLB) UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	}
 }
 
-func (lb *ServerlessLB) getMethodRequirement(method string) float64 {
+func (lb *ServerlessLB) getMethodRequirement(method string) int {
 	if v, ok := lb.methodRequirements[method]; ok {
 		return v
 	}
-	return 1.0
+	// default value
+	return resourceUnit
 }
 
-func (lb *ServerlessLB) requestResource(amount float64) error {
+func (lb *ServerlessLB) requestResource(taskid int64, req int) error {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
+	lb.addEvent()
 
 	// check if the request can be processed
-	if lb.currentResources+amount > lb.totalResources {
+	if lb.currentResources+req > lb.totalResources {
 		// check if the queue is full
-		if lb.tasks.Len() >= lb.maxCapacity {
+		if lb.q.Len() >= lb.maxCapacity {
 			return status.Error(codes.ResourceExhausted, "Serverless queue is full")
 		}
 
-		task := make(queue.Task)
-		lb.tasks.Push(task)
-		// wait for the previous task to finish
-		for lb.currentResources+amount > lb.totalResources {
-			lb.mu.Unlock()
-			<-task
-			lb.mu.Lock()
+		// wait in the queue
+		lb.q.Push(taskid)
+		for lb.q.Front() != taskid || lb.currentResources+req > lb.totalResources {
+			if lb.q.Front() == taskid {
+				log.Printf("task %d at front but not enough resources", taskid)
+			}
+			lb.cond.Wait()
 		}
-		// the previous task has finished
-		lb.tasks.Pop()
-		close(task)
+		lb.q.Pop()
 	}
-	lb.currentResources += amount
+	lb.currentResources += req
 	lb.concurrency++
 
 	return nil
 }
 
-func (lb *ServerlessLB) releaseResource(amount float64) {
+func (lb *ServerlessLB) releaseResource(amount int) {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
+	lb.addEvent()
 
 	lb.currentResources -= amount
 	lb.concurrency--
-	if lb.tasks.Len() > 0 {
-		next := lb.tasks.Front()
-		next <- struct{}{}
-	}
+	lb.cond.Broadcast()
+}
+
+func (lb *ServerlessLB) addEvent() {
+	lb.e = append(lb.e, event{
+		t: time.Now(),
+		l: lb.concurrency + lb.q.Len(),
+	})
 }

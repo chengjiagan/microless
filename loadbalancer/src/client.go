@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -16,6 +17,8 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
+
+const ratioMax = 1000
 
 type selectT string
 
@@ -42,10 +45,11 @@ type ClientLB struct {
 	vmConn         *grpc.ClientConn
 	serverlessConn *grpc.ClientConn
 	rdb            *redis.Client
-	// protected by mu
+
+	// for rate estimation
+	serverlessAvailable atomic.Bool
+	vmRatio             atomic.Int32
 	mu                  sync.Mutex
-	serverlessAvailable bool
-	vmRatio             float64
 	upstreamRate        map[string]int
 }
 
@@ -102,9 +106,10 @@ func NewClientLB(addr string) (*ClientLB, error) {
 		rdb:            rdb,
 		vmConn:         vmConn,
 		serverlessConn: serverlessConn,
-		vmRatio:        1.0,
 		upstreamRate:   make(map[string]int),
 	}
+	lb.vmRatio.Store(ratioMax)
+
 	go lb.updateLoop()
 	go lb.watchServerless()
 
@@ -118,10 +123,9 @@ func (lb *ClientLB) watchServerless() {
 
 	ch := pubsub.Channel()
 	for msg := range ch {
-		lb.mu.Lock()
-		lb.serverlessAvailable, _ = strconv.ParseBool(msg.Payload)
-		log.Printf("%s serverless available: %t", lb.service, lb.serverlessAvailable)
-		lb.mu.Unlock()
+		available, _ := strconv.ParseBool(msg.Payload)
+		lb.serverlessAvailable.Store(available)
+		log.Printf("%s serverless available: %t", lb.service, available)
 	}
 }
 
@@ -134,59 +138,64 @@ func (lb *ClientLB) updateLoop() {
 
 func (lb *ClientLB) updateRatio() {
 	lb.mu.Lock()
-	defer lb.mu.Unlock()
+	m := lb.upstreamRate
+	lb.upstreamRate = make(map[string]int)
+	lb.mu.Unlock()
 
-	if len(lb.upstreamRate) == 0 {
-		lb.vmRatio = 1.0
+	if len(m) == 0 {
+		lb.vmRatio.Store(ratioMax)
 		return
 	}
 
 	avg := 0.0
-	for _, rate := range lb.upstreamRate {
+	for _, rate := range m {
 		avg += float64(rate)
 	}
-	avg /= float64(len(lb.upstreamRate))
-	lb.upstreamRate = make(map[string]int)
+	avg /= float64(len(m))
 
+	ratio := float64(lb.vmRatio.Load()) / ratioMax
 	if avg < 0.1 {
 		// prevent divide by zero
-		lb.vmRatio = 1.0
+		ratio = 1.0
 	} else {
-		if lb.serverlessAvailable {
-			lb.vmRatio *= float64(lb.vmRateLimit) / avg
+		if lb.serverlessAvailable.Load() {
+			ratio *= float64(lb.vmRateLimit) / avg
 		} else {
 			// when serverless is not available, the previous ratio is not representative,
 			// therefore, we do not update ratio based on the previous ratio,
 			// but use the current average rate instead
-			lb.vmRatio = float64(lb.vmRateLimit) / avg
+			ratio = float64(lb.vmRateLimit) / avg
 		}
-		if lb.vmRatio > 1.0 {
-			lb.vmRatio = 1.0
+		if ratio > 1.0 {
+			ratio = 1.0
 		}
 	}
+	lb.vmRatio.Store(int32(ratio * ratioMax))
 
-	log.Printf("update ratio for %s: %f", lb.service, lb.vmRatio)
+	log.Printf("update ratio for %s: %f", lb.service, ratio)
 }
 
 func (lb *ClientLB) selectConnection() selectT {
-	lb.mu.Lock()
-	defer lb.mu.Unlock()
-
-	if !lb.serverlessAvailable {
+	if !lb.serverlessAvailable.Load() {
 		return vm
 	}
 
-	r := rand.Float64()
-	if r < lb.vmRatio {
+	r := rand.Int31n(ratioMax)
+	if r < lb.vmRatio.Load() {
 		return vm
 	} else {
 		return serverless
 	}
 }
 
-func (lb *ClientLB) updateUpstream(upstream string, rate int) {
+func (lb *ClientLB) updateUpstream(upstream string, rate int, t time.Time) {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
+	if time.Since(t) > lb.updateInterval {
+		// ignore outdated rate
+		return
+	}
+
 	lb.upstreamRate[upstream] = rate
 }
 
@@ -231,7 +240,7 @@ func (lb *ClientLB) sendVm(ctx context.Context, method string, req, reply interf
 	if ok && len(val) > 0 {
 		upstream := val[0]
 		rate, _ := strconv.Atoi(header[RateHeaderKey][0])
-		lb.updateUpstream(upstream, rate)
+		go lb.updateUpstream(upstream, rate, time.Now())
 	}
 	return
 }

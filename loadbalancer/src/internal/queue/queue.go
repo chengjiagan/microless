@@ -1,10 +1,8 @@
 package queue
 
-type Task chan struct{}
-
 type TaskQueue struct {
 	capacity int
-	array    []Task
+	array    []int64
 
 	head int
 	tail int
@@ -14,11 +12,11 @@ type TaskQueue struct {
 func NewTaskQueue(capacity int) *TaskQueue {
 	return &TaskQueue{
 		capacity: capacity,
-		array:    make([]Task, capacity),
+		array:    make([]int64, capacity),
 	}
 }
 
-func (q *TaskQueue) Push(task Task) {
+func (q *TaskQueue) Push(task int64) {
 	if q.len == q.capacity {
 		return
 	}
@@ -35,9 +33,9 @@ func (q *TaskQueue) Pop() {
 	q.len--
 }
 
-func (q *TaskQueue) Front() Task {
+func (q *TaskQueue) Front() int64 {
 	if q.len == 0 {
-		return nil
+		return -1
 	}
 	return q.array[q.head]
 }

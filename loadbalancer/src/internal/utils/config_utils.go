@@ -11,6 +11,7 @@ type Config struct {
 	Server     ServerConfig     `json:"server"`
 	Client     ClientConfig     `json:"client"`
 	Serverless ServerlessConfig `json:"serverless"`
+	Amoeba     AmoebaConfig     `json:"amoeba"`
 }
 
 type ServerConfig struct {
@@ -35,6 +36,14 @@ type ServerlessConfig struct {
 	MaxConcurrency    int                `json:"max_concurrency"`
 	MaxCapacity       int                `json:"max_capacity"`
 	MethodReqirements map[string]float64 `json:"method_requirements"`
+}
+
+type AmoebaConfig struct {
+	Enable            bool   `json:"enable"`
+	SwitchLatency     int    `json:"switch_latency"`
+	Limit             int    `json:"limit"`
+	VmPostfix         string `json:"vm_postfix"`
+	ServerlessPostfix string `json:"serverless_postfix"`
 }
 
 var configPath = flag.String("lb_config", os.Getenv("LB_CONFIG"), "path to loadbalancer config file")
@@ -73,4 +82,9 @@ func GetClientConfig() *ClientConfig {
 func GetServerlessConfig() *ServerlessConfig {
 	config := GetConfig()
 	return &config.Serverless
+}
+
+func GetAmoebaConfig() *AmoebaConfig {
+	config := GetConfig()
+	return &config.Amoeba
 }
