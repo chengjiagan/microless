@@ -26,10 +26,10 @@ spec:
   template:
     metadata:
       annotations:
-        k8s.aliyun.com/eci-use-specs: "0.25-0.5Gi"
+        k8s.aliyun.com/eci-use-specs: "0.5-1Gi"
         k8s.aliyun.com/eci-image-cache: "true"
         sidecar.istio.io/proxyCPU: 100m
-        sidecar.istio.io/proxyCPULimit: 200m
+        sidecar.istio.io/proxyCPULimit: 400m
         sidecar.istio.io/proxyMemory: 150Mi
         sidecar.istio.io/proxyMemoryLimit: 150Mi
       labels:
@@ -42,7 +42,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-hometimeline:0.3.2
+        image: waterlemongan/microless-socialnetwork-hometimeline:0.3.7
         ports:
         - name: grpc
           containerPort: 8080
@@ -66,8 +66,8 @@ spec:
           readOnly: true
         resources:
           limits:
-            cpu: 200m
-            memory: 50Mi
+            cpu: 400m
+            memory: 200Mi
           requests:
             cpu: 100m
             memory: 50Mi

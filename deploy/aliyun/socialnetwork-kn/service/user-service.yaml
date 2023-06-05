@@ -10,7 +10,7 @@ spec:
     metadata:
       annotations:
         autoscaling.knative.dev/target: "1"
-        k8s.aliyun.com/eci-use-specs: "0.25-0.5Gi"
+        k8s.aliyun.com/eci-use-specs: "0.5-1Gi"
         k8s.aliyun.com/eci-image-cache: "true"
       labels:
         alibabacloud.com/eci: "true"
@@ -37,8 +37,8 @@ spec:
           readOnly: true
         resources:
           limits:
-            cpu: 200m
-            memory: 50Mi
+            cpu: 400m
+            memory: 200Mi
           requests:
             cpu: 100m
             memory: 50Mi

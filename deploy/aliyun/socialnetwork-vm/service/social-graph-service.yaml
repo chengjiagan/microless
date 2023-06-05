@@ -38,6 +38,11 @@ spec:
       name: social-graph
       namespace: social-network
     spec:
+      tolerations:
+      - key: "type"
+        operator: "Equal"
+        value: "vm"
+        effect: "NoSchedule"
       nodeSelector:
         type: vm
       containers:
@@ -64,7 +69,7 @@ spec:
         resources:
           limits:
             cpu: 500m
-            memory: 50Mi
+            memory: 200Mi
           requests:
             cpu: 500m
             memory: 50Mi
