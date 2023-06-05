@@ -14,7 +14,7 @@ data:
         "vm_postfix": "-vm",
         "serverless_postfix": "-serverless",
         "update_interval": 1,
-        "retry": 3,
+        "retry": 1,
         "service_rate_limit": {
           "post-storage": 100,
           "user-timeline": 100,

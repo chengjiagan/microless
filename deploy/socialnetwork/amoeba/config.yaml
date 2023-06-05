@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: social-network
+data:
+  config-vm.json: |
+    {
+      "otel": "jaeger.jaeger:4317",
+      "mongodb": {
+        "url": "mongodb://mongodb.mongodb:27017",
+        "database": "social-network"
+      },
+      "redis": {
+        "usertimeline": "redis://redis.redis:6379/0",
+        "socialgraph": "redis://redis.redis:6379/1",
+        "hometimeline": "redis://redis.redis:6379/2",
+        "poststorage": "redis://redis.redis:6379/3",
+        "user": "redis://redis.redis:6379/4",
+        "urlshorten": "redis://redis.redis:6379/5"
+      },
+      "service": {
+        "poststorage": "post-storage-vm:8080",
+        "usertimeline": "user-timeline-vm:8080",
+        "user": "user-vm:8080",
+        "socialgraph": "social-graph-vm:8080",
+        "hometimeline": "home-timeline-vm:8080",
+        "media": "media-vm:8080",
+        "urlshorten": "url-shorten-vm:8080",
+        "usermention": "user-mention-vm:8080",
+        "text": "text-vm:8080",
+        "composepost": "compose-post-vm:8080"
+      },
+      "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
+    }
+  config-serverless.json: |
+    {
+      "otel": "jaeger.jaeger:4317",
+      "mongodb": {
+        "url": "mongodb://mongodb.mongodb:27017",
+        "database": "social-network"
+      },
+      "redis": {
+        "usertimeline": "redis://redis.redis:6379/0",
+        "socialgraph": "redis://redis.redis:6379/1",
+        "hometimeline": "redis://redis.redis:6379/2",
+        "poststorage": "redis://redis.redis:6379/3",
+        "user": "redis://redis.redis:6379/4",
+        "urlshorten": "redis://redis.redis:6379/5"
+      },
+      "service": {
+        "poststorage": "post-storage-kn.social-network.svc.cluster.local:80",
+        "usertimeline": "user-timeline-kn.social-network.svc.cluster.local:80",
+        "user": "user-kn.social-network.svc.cluster.local:80",
+        "socialgraph": "social-graph-kn.social-network.svc.cluster.local:80",
+        "hometimeline": "home-timeline-kn.social-network.svc.cluster.local:80",
+        "media": "media-kn.social-network.svc.cluster.local:80",
+        "urlshorten": "url-shorten-kn.social-network.svc.cluster.local:80",
+        "usermention": "user-mention-kn.social-network.svc.cluster.local:80",
+        "text": "text-kn.social-network.svc.cluster.local:80",
+        "composepost": "compose-post-kn.social-network.svc.cluster.local:80"
+      },
+      "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
+    }
+  config-gateway.json: |
+    {
+      "otel": "jaeger.jaeger:4317",
+      "mongodb": {
+        "url": "mongodb://mongodb.mongodb:27017",
+        "database": "social-network"
+      },
+      "redis": {
+        "usertimeline": "redis://redis.redis:6379/0",
+        "socialgraph": "redis://redis.redis:6379/1",
+        "hometimeline": "redis://redis.redis:6379/2",
+        "poststorage": "redis://redis.redis:6379/3",
+        "user": "redis://redis.redis:6379/4",
+        "urlshorten": "redis://redis.redis:6379/5"
+      },
+      "service": {
+        "poststorage": "post-storage:8080",
+        "usertimeline": "user-timeline:8080",
+        "user": "user:8080",
+        "socialgraph": "social-graph:8080",
+        "hometimeline": "home-timeline:8080",
+        "media": "media:8080",
+        "urlshorten": "url-shorten:8080",
+        "usermention": "user-mention:8080",
+        "text": "text:8080",
+        "composepost": "compose-post:8080"
+      },
+      "secret": "gSZWnXKBt&2Yr@zaZ76sKzjbTqb4rbzR"
+    }
+  lb.json: |
+    {
+      "server": {
+        "enable": false
+      },
+      "client": {
+        "enable": false
+      },
+      "serverless": {
+        "enable": false
+      }
+    }
+  lb-gateway.json: |
+    {
+      "server": {
+        "enable": false
+      },
+      "client": {
+        "enable": false
+      },
+      "serverless": {
+        "enable": false
+      },
+      "amoeba": {
+        "enable": true,
+        "switch_latency": 30,
+        "limit": 50,
+        "vm_postfix": "-vm:8080",
+        "serverless_postfix": "-kn.social-network.svc.cluster.local:80"
+      }
+    }

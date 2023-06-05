@@ -9,7 +9,7 @@ spec:
     kind: Deployment
     name: user-timeline-serverless
   minReplicas: 1
-  maxReplicas: 10
+  maxReplicas: 100
   metrics:
   - type: Pods
     pods:
