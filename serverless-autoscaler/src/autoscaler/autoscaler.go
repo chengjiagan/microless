@@ -25,6 +25,7 @@ type ServerlessAutoscaler struct {
 	interval  time.Duration
 	namespace string
 	apps      []string
+	latency   time.Duration
 
 	rdb *redis.Client
 	c   *kubernetes.Clientset
@@ -46,6 +47,7 @@ func NewServerlessAutoscaler(config *utils.Config) (*ServerlessAutoscaler, error
 		interval:  time.Duration(config.Interval) * time.Second,
 		namespace: config.Namespace,
 		apps:      config.Apps,
+		latency:   time.Duration(config.Latency) * time.Second,
 		rdb:       rdb,
 		c:         c,
 	}, nil
@@ -193,6 +195,9 @@ func (sa *ServerlessAutoscaler) notifyEnable(ctx context.Context, app string) {
 		}
 
 		if dep.Status.ReadyReplicas > 0 {
+			// latency to wait for the first pod is actually ready
+			time.Sleep(sa.latency)
+
 			err = sa.rdb.Publish(ctx, app, "true").Err()
 			if err != nil {
 				klog.Errorf("failed to publish %s in redis: %v", app, err)

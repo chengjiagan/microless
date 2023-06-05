@@ -13,5 +13,6 @@
         "text",
         "compose-post"
     ],
-    "redis_addr": "redis://redis:6379/0"
+    "redis_addr": "redis://redis:6379/0",
+    "latency": 1
 }

@@ -10,6 +10,7 @@ type Config struct {
 	Namespace string   `json:"namespace"`
 	Apps      []string `json:"apps"`
 	RedisAddr string   `json:"redis_addr"`
+	Latency   int      `json:"latency"`
 }
 
 func ParseConfig(filename string) (*Config, error) {
