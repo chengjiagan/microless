@@ -65,3 +65,7 @@ Temporary Items
 .devcontainer/
 # Ignore golang workspace setting
 go.work*
+
+benchmark/data/
+deploy/test/
+deploy/aliyun/backup

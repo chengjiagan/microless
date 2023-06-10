@@ -3,12 +3,19 @@ package utils
 import (
 	"fmt"
 
+	kuberesolver "github.com/sercand/kuberesolver/v4"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/resolver"
 
 	"microless/loadbalancer"
 )
+
+func init() {
+	kuberesolver.RegisterInCluster()
+	resolver.Register(kuberesolver.NewBuilder(nil /*custom kubernetes client*/, "kube"))
+}
 
 func NewConn(address string) (*grpc.ClientConn, error) {
 	clientLB, err := loadbalancer.NewClientLB(address)
@@ -20,6 +27,10 @@ func NewConn(address string) (*grpc.ClientConn, error) {
 		return nil, fmt.Errorf("failed to create amoeba load balancer: %v", err)
 	}
 
+	if clientLB == nil && amoebaLB == nil {
+		address = "kube://" + address
+	}
+
 	conn, err := grpc.Dial(
 		address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -28,6 +39,7 @@ func NewConn(address string) (*grpc.ClientConn, error) {
 			amoebaLB.UnaryClientInterceptor(),
 			otelgrpc.UnaryClientInterceptor(),
 		),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"round_robin"}`),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to dial: %v", err)

@@ -32,7 +32,7 @@ spec:
       labels:
         app: social-graph
         type: vm
-        sidecar.istio.io/inject: "true"
+#        sidecar.istio.io/inject: "true"
       name: social-graph-vm
       namespace: social-network
     spec:
@@ -45,7 +45,7 @@ spec:
         type: vm
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-socialgraph:0.3.2
+        image: waterlemongan/microless-socialnetwork-socialgraph:0.3.8-kube
         ports:
         - name: grpc
           containerPort: 8080

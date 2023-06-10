@@ -33,7 +33,7 @@ spec:
         sidecar.istio.io/proxyMemoryLimit: 1Gi
       labels:
         app: gateway
-        sidecar.istio.io/inject: "true"
+        #  sidecar.istio.io/inject: "true"
       name: gateway
       namespace: social-network
     spec:
@@ -41,7 +41,7 @@ spec:
         type: system
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-gateway:0.3.5
+        image: waterlemongan/microless-socialnetwork-gateway:0.3.10-kube
         ports:
         - name: http
           containerPort: 8080

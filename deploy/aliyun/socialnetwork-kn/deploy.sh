@@ -2,7 +2,8 @@
 
 # this script is just for reference, please do not run it directly
 
-SERVICES=(post-storage user-timeline user social-graph home-timeline media url-shorten user-mention text compose-post)
+# SERVICES=(post-storage user-timeline user social-graph home-timeline media url-shorten user-mention text compose-post)
+SERVICES=(post-storage user-timeline home-timeline)
 
 # Install namespace
 kubectl apply -f namespace.yaml

@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-timeline-lb-config
+  namespace: social-network
+data:
+  lb-serverless.json: |
+    {
+      "server": {
+        "enable": false
+      },
+      "client": {
+        "enable": true,
+        "vm_postfix": "-vm",
+        "serverless_postfix": "-serverless",
+        "update_interval": 1,
+        "retry": 1,
+        "service_rate_limit": {
+          "post-storage": 800,
+          "user-timeline": 500,
+          "user": 100,
+          "social-graph": 100,
+          "home-timeline": 500,
+          "media": 100,
+          "url-shorten": 100,
+          "user-mention": 100,
+          "text": 100,
+          "compose-post": 100
+        },
+        "local_services": {},
+        "redis_addr": "redis://172.17.0.10:6379/7"
+      },
+      "serverless": {
+        "enable": true,
+        "max_concurrency": 1,
+        "max_capacity": 100,
+        "method_requirements": {}
+      }
+    }

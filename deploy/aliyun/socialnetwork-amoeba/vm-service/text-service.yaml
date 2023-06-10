@@ -32,7 +32,7 @@ spec:
       labels:
         app: text
         type: vm
-        sidecar.istio.io/inject: "true"
+#        sidecar.istio.io/inject: "true"
       name: text-vm
       namespace: social-network
     spec:
@@ -45,7 +45,7 @@ spec:
         type: vm
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-text:0.3.2
+        image: waterlemongan/microless-socialnetwork-text:0.3.8-kube
         ports:
         - name: grpc
           containerPort: 8080

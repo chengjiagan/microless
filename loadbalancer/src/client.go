@@ -80,12 +80,12 @@ func NewClientLB(addr string) (*ClientLB, error) {
 	}
 
 	// create remote connections
-	vm := service + config.VmPostfix + ":" + port
+	vm := "kube://" + service + config.VmPostfix + ":" + port
 	vmConn, err := utils.NewConn(vm)
 	if err != nil {
 		return nil, err
 	}
-	serverless := service + config.ServerlessPostfix + ":" + port
+	serverless := "kube://" + service + config.ServerlessPostfix + ":" + port
 	serverlessConn, err := utils.NewConn(serverless)
 	if err != nil {
 		return nil, err
@@ -118,6 +118,12 @@ func NewClientLB(addr string) (*ClientLB, error) {
 
 func (lb *ClientLB) watchServerless() {
 	ctx := context.Background()
+	available, err := lb.rdb.Get(ctx, lb.service).Bool()
+	if err != nil {
+		log.Printf("failed to get serverless availability of %s: %v", lb.service, err)
+	}
+	lb.serverlessAvailable.Store(available)
+
 	pubsub := lb.rdb.Subscribe(ctx, lb.service)
 	defer pubsub.Close()
 

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: compose-post
+  labels:
+    app: compose-post
+    type: stats
+  namespace: social-network
+spec:
+  clusterIP: None
+  selector:
+    app: compose-post
+  ports:
+  - name: stats
+    port: 9000
+    targetPort: stats

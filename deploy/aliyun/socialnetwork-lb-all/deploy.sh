@@ -2,7 +2,8 @@
 
 # this script is just for reference, please do not run it directly
 
-SERVICES=(post-storage user-timeline user social-graph home-timeline media url-shorten user-mention text compose-post)
+# SERVICES=(post-storage user-timeline user social-graph home-timeline media url-shorten user-mention text compose-post)
+SERVICES=(post-storage user-timeline home-timeline)
 
 # Install socialnetwork namespace
 kubectl apply -f namespace.yaml
@@ -14,6 +15,7 @@ for s in ${SERVICES[@]}; do
 done
 
 # Install vm services
+kubectl apply -f rbac.yaml
 for s in ${SERVICES[@]}; do
     kubectl apply -f vm-service/$s-service.yaml
 done

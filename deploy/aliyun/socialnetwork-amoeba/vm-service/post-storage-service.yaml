@@ -33,7 +33,7 @@ spec:
       labels:
         app: post-storage
         type: vm
-        sidecar.istio.io/inject: "true"
+        # sidecar.istio.io/inject: "true"
       name: post-storage-vm
       namespace: social-network
     spec:
@@ -46,7 +46,7 @@ spec:
         type: vm
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-poststorage:0.3.2
+        image: waterlemongan/microless-socialnetwork-poststorage:0.3.8-kube
         ports:
         - name: grpc
           containerPort: 8080

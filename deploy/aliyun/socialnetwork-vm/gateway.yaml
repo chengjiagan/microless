@@ -41,7 +41,7 @@ spec:
         type: system
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-gateway:0.3.2
+        image: waterlemongan/microless-socialnetwork-gateway:0.3.8-kube
         ports:
         - name: http
           containerPort: 8080

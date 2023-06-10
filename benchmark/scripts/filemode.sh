@@ -3,13 +3,13 @@ set -ex
 
 timestamp=$(date +%m%d%H%M)
 mkdir ../data/$timestamp
-ratefile="rate.csv"
+ratefile="rate-test.csv"
 ratio=1
-service="pingpong"
+service="socialnetwork"
 
 load="../loader/main"
 
-gateway="10.111.64.109:8080"
+gateway="10.105.18.200:8080"
 userid="../dataset/$service/user_ids.json"
 movieid="../dataset/$service/movie_ids.json"
 mode="file"

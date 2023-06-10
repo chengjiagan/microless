@@ -32,17 +32,19 @@ spec:
         sidecar.istio.io/proxyCPULimit: 400m
         sidecar.istio.io/proxyMemory: 150Mi
         sidecar.istio.io/proxyMemoryLimit: 150Mi
+#        traffic.sidecar.istio.io/includeInboundPorts: ""
+        traffic.sidecar.istio.io/includeOutboundPorts: "8080"
       labels:
         app: compose-post
         type: serverless
         alibabacloud.com/eci: "true"
-        sidecar.istio.io/inject: "true"
+#        sidecar.istio.io/inject: "true"
       name: compose-post-serverless
       namespace: social-network
     spec:
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-composepost:0.3.7
+        image: waterlemongan/microless-socialnetwork-composepost:0.3.10
         ports:
         - name: grpc
           containerPort: 8080

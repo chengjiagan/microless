@@ -35,7 +35,7 @@ func NewAmoebaLB(addr string) (*AmoebaLB, error) {
 
 	service, _ := splitAddr(addr)
 	// create connections to vm and serverless
-	vm := service + config.VmPostfix
+	vm := "kube://" + service + config.VmPostfix
 	serverless := service + config.ServerlessPostfix
 	vmConn, err := utils.NewConn(vm)
 	if err != nil {

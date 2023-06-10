@@ -34,7 +34,7 @@ spec:
         sidecar.istio.io/proxyMemoryLimit: 150Mi
       labels:
         app: social-graph
-        sidecar.istio.io/inject: "true"
+#        sidecar.istio.io/inject: "true"
       name: social-graph
       namespace: social-network
     spec:
@@ -47,7 +47,7 @@ spec:
         type: vm
       containers:
       - name: server
-        image: waterlemongan/microless-socialnetwork-socialgraph:0.3.2
+        image: waterlemongan/microless-socialnetwork-socialgraph:0.3.8-kube
         ports:
         - name: grpc
           containerPort: 8080

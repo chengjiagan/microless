@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"microless/serverless-autoscaler/internal/utils"
+	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -54,6 +55,11 @@ func NewServerlessAutoscaler(config *utils.Config) (*ServerlessAutoscaler, error
 }
 
 func (sa *ServerlessAutoscaler) Run() error {
+	err := sa.InitSet()
+	if err != nil {
+		return err
+	}
+
 	for {
 		time.Sleep(sa.interval)
 		err := sa.RunOnce()
@@ -61,6 +67,32 @@ func (sa *ServerlessAutoscaler) Run() error {
 			return err
 		}
 	}
+}
+
+func (sa *ServerlessAutoscaler) InitSet() error {
+	for _, app := range sa.apps {
+		err := sa.initApp(app)
+		if err != nil {
+			return fmt.Errorf("failed to init app %s: %v", app, err)
+		}
+	}
+	return nil
+}
+
+func (sa *ServerlessAutoscaler) initApp(app string) error {
+	ctx := context.Background()
+	// check if serverless HPA is replicas
+	replicas, err := sa.getReplicas(ctx, app)
+	if err != nil {
+		return fmt.Errorf("failed to check if serverless HPA is enabled: %v", err)
+	}
+
+	availabel := replicas >= 1
+	_, err = sa.rdb.Set(ctx, app, strconv.FormatBool(availabel), 0).Result()
+	if err != nil {
+		return fmt.Errorf("failed to set %s: %v", app, err)
+	}
+	return nil
 }
 
 func (sa *ServerlessAutoscaler) RunOnce() error {
@@ -198,6 +230,11 @@ func (sa *ServerlessAutoscaler) notifyEnable(ctx context.Context, app string) {
 			// latency to wait for the first pod is actually ready
 			time.Sleep(sa.latency)
 
+			_, err = sa.rdb.Set(ctx, app, "true", 0).Result()
+			if err != nil {
+				klog.Errorf("failed to set %s in redis: %v", app, err)
+			}
+
 			err = sa.rdb.Publish(ctx, app, "true").Err()
 			if err != nil {
 				klog.Errorf("failed to publish %s in redis: %v", app, err)
@@ -225,6 +262,11 @@ func (sa *ServerlessAutoscaler) disableHPA(ctx context.Context, app string) erro
 	)
 	if err != nil {
 		return fmt.Errorf("failed to patch scale of %s: %v", name, err)
+	}
+
+	_, err = sa.rdb.Set(ctx, app, "false", 0).Result()
+	if err != nil {
+		return fmt.Errorf("failed to set redis key: %v", err)
 	}
 
 	err = sa.rdb.Publish(ctx, app, "false").Err()

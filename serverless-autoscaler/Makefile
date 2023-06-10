@@ -1,7 +1,7 @@
 # prefix of image name
 DOCKER_NAME = waterlemongan/microless-serverless-autoscaler
 # tag for image
-VERSION = 0.1.4
+VERSION = 0.1.5
 
 docker-build: docker/Dockerfile
 	docker build \
