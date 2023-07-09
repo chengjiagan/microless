@@ -6,19 +6,16 @@ import (
 )
 
 type Config struct {
-	Grpc      string      `json:"grpc"`
-	Otel      string      `json:"otel"`
-	MongoDB   MongoConfig `json:"mongodb"`
-	Memcached struct {
+	Otel    string      `json:"otel"`
+	MongoDB MongoConfig `json:"mongodb"`
+	Redis   struct {
+		MovieReview   string `json:"moviereview"`
+		UserReview    string `json:"userreview"`
 		CastInfo      string `json:"castinfo"`
 		MovieInfo     string `json:"movieinfo"`
 		Plot          string `json:"plot"`
 		ReviewStorage string `json:"reviewstorage"`
 		User          string `json:"user"`
-	} `json:"memcached"`
-	Redis struct {
-		MovieReview string `json:"moviereview"`
-		UserReview  string `json:"userreview"`
 	} `json:"redis"`
 	Service struct {
 		CastInfo      string `json:"castinfo"`

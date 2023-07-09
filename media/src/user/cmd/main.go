@@ -8,8 +8,6 @@ import (
 	"net"
 	"os"
 
-	"github.com/bradfitz/gomemcache/memcache"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/bradfitz/gomemcache/memcache/otelmemcache"
 	"go.uber.org/zap"
 
 	pb "microless/media/proto/user"
@@ -17,10 +15,11 @@ import (
 )
 
 var configPath = flag.String("config", os.Getenv("SERVICE_CONFIG"), "path to config file")
+var addr = flag.String("addr", os.Getenv("SERVICE_ADDR"), "address for grpc server to listen")
 
 func main() {
 	// setup logger
-	logger, err := zap.NewDevelopment()
+	logger, err := zap.NewProduction()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,10 +51,17 @@ func main() {
 		}
 	}()
 
-	// setup memcached
-	logger.Info("connect to memcached")
-	mc := otelmemcache.NewClientWithTracing(
-		memcache.New(config.Memcached.User))
+	// setup redis
+	logger.Info("connect to redis")
+	rdb, err := utils.NewRedisClient(config.Redis.User)
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+	defer func() {
+		if err := rdb.Close(); err != nil {
+			logger.Fatal(err.Error())
+		}
+	}()
 
 	// setup mongodb
 	logger.Info("connect to mongodb")
@@ -71,13 +77,13 @@ func main() {
 	col := mongodb.Database(config.MongoDB.Database).Collection("user")
 
 	// connection
-	lis, err := net.Listen("tcp", config.Grpc)
+	lis, err := net.Listen("tcp", *addr)
 	if err != nil {
 		logger.Sugar().Fatalw("failed to listen", "err", err)
 	}
 
 	// setup grpc
-	server, err := server.NewServer(logger.Sugar(), col, mc, config)
+	server, err := server.NewServer(logger.Sugar(), col, rdb, config)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}

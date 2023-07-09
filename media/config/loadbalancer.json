@@ -1,0 +1,11 @@
+{
+  "server": {
+    "enable": false
+  },
+  "client": {
+    "enable": false
+  },
+  "serverless": {
+    "enable": false
+  }
+}

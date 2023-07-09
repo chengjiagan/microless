@@ -6,7 +6,6 @@ import (
 	"microless/media/proto"
 	pb "microless/media/proto/reviewstorage"
 
-	"github.com/bradfitz/gomemcache/memcache"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
@@ -21,20 +20,22 @@ func (s *ReviewStorageService) ReadReviews(ctx context.Context, req *pb.ReadRevi
 
 	reviews := make(map[string]*Review, len(req.ReviewIds))
 
-	// get reviews from memcached
-	s.logger.Info("Get reviews from Memcached")
-	reviewsMc, err := s.memcached.WithContext(ctx).GetMulti(req.ReviewIds)
+	// get reviews from redis
+	s.logger.Info("Get reviews from Redis")
+	reviewsCache, err := s.rdb.MGet(ctx, req.ReviewIds...).Result()
 	if err != nil {
-		s.logger.Warnw("Failed to get reviews from Memcached", "review_ids", req.ReviewIds, "err", err)
+		s.logger.Warnw("Failed to get reviews from Redis", "review_ids", req.ReviewIds, "err", err)
 	} else {
-		for _, item := range reviewsMc {
-			review := new(Review)
-			json.Unmarshal(item.Value, review)
-			reviews[item.Key] = review
+		for i, v := range reviewsCache {
+			if v != nil {
+				review := new(Review)
+				json.Unmarshal(v.([]byte), review)
+				reviews[req.ReviewIds[i]] = review
+			}
 		}
 	}
 
-	// get all reviews from memcached
+	// get all reviews from redis
 	if len(reviews) == len(req.ReviewIds) {
 		pbReviews := make([]*proto.Review, len(req.ReviewIds))
 		for i, id := range req.ReviewIds {
@@ -65,22 +66,20 @@ func (s *ReviewStorageService) ReadReviews(ctx context.Context, req *pb.ReadRevi
 		s.logger.Warnw("Failed to find reviews from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
+	// update redis
+	reviewsMiss := make([]interface{}, 0, len(reviewsMongo))
 	for _, review := range reviewsMongo {
 		id := review.ReviewOid.Hex()
 		reviews[id] = review
-
-		// upload infos to memcached
 		reviewJson, _ := json.Marshal(review)
-		err = s.memcached.WithContext(ctx).Set(&memcache.Item{
-			Key:   id,
-			Value: reviewJson,
-		})
-		if err != nil {
-			s.logger.Warnw("Failed to update Memcached", "review_id", id, "err", err)
-		}
+		reviewsMiss = append(reviewsMiss, id, reviewJson)
+	}
+	_, err = s.rdb.MSet(ctx, reviewsMiss...).Result()
+	if err != nil {
+		s.logger.Warnw("Failed to set reviews to Redis", "err", err)
 	}
 
-	// still unknown cast_info_id exists
+	// still unknown review_id exists
 	if len(reviews) != len(req.ReviewIds) {
 		s.logger.Warn("Unknown review_id")
 		return nil, status.Error(codes.NotFound, "Unknown review_id")

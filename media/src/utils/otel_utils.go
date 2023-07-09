@@ -15,6 +15,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+const sampleRate = 0.1
+
 // Cleanly shutdown and flush telemetry when the application exits.
 func Shutdown(tp *tracesdk.TracerProvider, ctx context.Context) error {
 	// Do not make the application hang when it is shutdown.
@@ -54,8 +56,9 @@ func NewTracerProvider(ctx context.Context, name, addr string) (*tracesdk.Tracer
 	// Register the trace exporter with a TracerProvider, using a batch
 	// span processor to aggregate spans before export.
 	bsp := tracesdk.NewBatchSpanProcessor(traceExporter)
+	sampler := tracesdk.ParentBased(tracesdk.TraceIDRatioBased(sampleRate))
 	tracerProvider := tracesdk.NewTracerProvider(
-		tracesdk.WithSampler(tracesdk.AlwaysSample()),
+		tracesdk.WithSampler(sampler),
 		tracesdk.WithResource(res),
 		tracesdk.WithSpanProcessor(bsp),
 	)

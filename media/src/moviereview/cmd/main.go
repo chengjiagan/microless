@@ -17,10 +17,11 @@ import (
 )
 
 var configPath = flag.String("config", os.Getenv("SERVICE_CONFIG"), "path to config file")
+var addr = flag.String("addr", os.Getenv("SERVICE_ADDR"), "address for grpc server to listen")
 
 func main() {
 	// setup logger
-	logger, err := zap.NewDevelopment()
+	logger, err := zap.NewProduction()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,7 +82,7 @@ func main() {
 	}
 
 	// connection
-	lis, err := net.Listen("tcp", config.Grpc)
+	lis, err := net.Listen("tcp", *addr)
 	if err != nil {
 		logger.Sugar().Fatalw("failed to listen", "err", err)
 	}

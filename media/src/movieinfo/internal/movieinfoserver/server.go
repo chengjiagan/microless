@@ -5,20 +5,20 @@ import (
 	"microless/media/proto/moviereview"
 	"microless/media/utils"
 
+	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/bradfitz/gomemcache/memcache/otelmemcache"
 	"go.uber.org/zap"
 )
 
 type MovieInfoServer struct {
 	pb.UnimplementedMovieInfoServiceServer
 	logger            *zap.SugaredLogger
-	memcached         *otelmemcache.Client
+	rdb               *redis.Client
 	mongodb           *mongo.Collection
 	moviereviewClient moviereview.MovieReviewServiceClient
 }
 
-func NewServer(logger *zap.SugaredLogger, memcached *otelmemcache.Client, mongodb *mongo.Collection, config *utils.Config) (*MovieInfoServer, error) {
+func NewServer(logger *zap.SugaredLogger, rdb *redis.Client, mongodb *mongo.Collection, config *utils.Config) (*MovieInfoServer, error) {
 	conn, err := utils.NewConn(config.Service.MovieReview)
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func NewServer(logger *zap.SugaredLogger, memcached *otelmemcache.Client, mongod
 
 	return &MovieInfoServer{
 		logger:            logger,
-		memcached:         memcached,
+		rdb:               rdb,
 		mongodb:           mongodb,
 		moviereviewClient: moviereviewClient,
 	}, nil

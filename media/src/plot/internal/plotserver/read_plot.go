@@ -6,7 +6,6 @@ import (
 
 	pb "microless/media/proto/plot"
 
-	"github.com/bradfitz/gomemcache/memcache"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,11 +18,12 @@ func (s *PlotService) ReadPlot(ctx context.Context, req *pb.ReadPlotRequest) (*p
 
 	// get plot from memcached
 	s.logger.Info("Read plot from Memcached")
-	result, err := s.memcached.WithContext(ctx).Get(req.PlotId)
+	plotCache, err := s.rdb.Get(ctx, req.PlotId).Result()
 	if err != nil {
-		s.logger.Warnw("Failed to get plot from memcached", "plot_id", req.PlotId, "err", err)
+		s.logger.Warnw("Failed to get plot from Redis", "plot_id", req.PlotId, "err", err)
 	} else {
-		json.Unmarshal(result.Value, plot)
+		// cache hit
+		json.Unmarshal([]byte(plotCache), plot)
 		return &pb.ReadPlotRespond{Plot: plot.Plot}, nil
 	}
 
@@ -43,14 +43,11 @@ func (s *PlotService) ReadPlot(ctx context.Context, req *pb.ReadPlotRequest) (*p
 	}
 
 	// update memcached
-	s.logger.Info("Update plot in Memcached")
+	s.logger.Info("Update plot in Redis")
 	plotJson, _ := json.Marshal(plot)
-	err = s.memcached.Set(&memcache.Item{
-		Key:   req.PlotId,
-		Value: plotJson,
-	})
+	err = s.rdb.Set(ctx, req.PlotId, plotJson, 0).Err()
 	if err != nil {
-		s.logger.Warnw("Failed to update plot in Memcached", "plot_id", req.PlotId, "err", err)
+		s.logger.Warnw("Failed to update plot in Redis", "plot_id", req.PlotId, "err", err)
 	}
 
 	return &pb.ReadPlotRespond{Plot: plot.Plot}, nil

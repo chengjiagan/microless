@@ -14,7 +14,7 @@ import (
 
 func (s *MovieInfoServer) UpdateRating(ctx context.Context, req *pb.UpdateRatingRequest) (*emptypb.Empty, error) {
 	// find the movie info
-	movie, err := s.getMovieInfo(ctx, req.MovieId)
+	movie, err := s.getMovieInfo(ctx, req.MovieId, false)
 	if err != nil {
 		return nil, err
 	}
@@ -36,11 +36,11 @@ func (s *MovieInfoServer) UpdateRating(ctx context.Context, req *pb.UpdateRating
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
 
-	// invalidate cache in memcached
-	s.logger.Info("Delete cache in Memcached")
-	err = s.memcached.WithContext(ctx).Delete(req.MovieId)
+	// invalidate cache in redis
+	s.logger.Info("Delete cache in Redis")
+	err = s.rdb.Del(ctx, req.MovieId).Err()
 	if err != nil {
-		s.logger.Warnw("Failed to delete in Memcached", "movie_id", req.MovieId, "err", err)
+		s.logger.Warnw("Failed to delete cache in Redis", "movie_id", req.MovieId, "err", err)
 	}
 
 	return &emptypb.Empty{}, nil

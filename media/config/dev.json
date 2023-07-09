@@ -1,21 +1,17 @@
 {
-    "grpc": ":8080",
-    "rest": ":8081",
     "otel": "jaeger:4317",
     "mongodb": {
         "url": "mongodb://mongodb:27017",
         "database": "media-dev"
     },
-    "memcached": {
-        "castinfo": "cast-info-memcached:11211",
-        "movieinfo": "movie-info-memcached:11211",
-        "plot": "plot-memcached:11211",
-        "reviewstorage": "review-storage-memcached:11211",
-        "user": "user-memcached:11211"
-    },
     "redis": {
         "moviereview": "redis://redis:6379/0",
-        "userreview": "redis://redis:6379/1"
+        "userreview": "redis://redis:6379/1",
+        "castinfo": "redis://redis:6379/2",
+        "movieinfo": "redis://redis:6379/3",
+        "plot": "redis://redis:6379/4",
+        "reviewstorage": "redis://redis:6379/5",
+        "user": "redis://redis:6379/6"
     },
     "service": {
         "castinfo": "cast-info:8080",
@@ -29,6 +25,6 @@
         "user": "user:8080",
         "page": "page:8080"
     },
-    "gateway": "gateway:8081",
+    "gateway": "gateway:8080",
     "secret": "secret"
 }

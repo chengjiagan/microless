@@ -6,7 +6,6 @@ import (
 	"microless/media/proto"
 	pb "microless/media/proto/movieinfo"
 
-	"github.com/bradfitz/gomemcache/memcache"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,36 +14,24 @@ import (
 )
 
 func (s *MovieInfoServer) ReadMovieInfo(ctx context.Context, req *pb.ReadMovieInfoRequest) (*proto.MovieInfo, error) {
-	movie, err := s.getMovieInfo(ctx, req.MovieId)
+	movie, err := s.getMovieInfo(ctx, req.MovieId, true)
 	if err != nil {
 		return nil, err
 	}
-
-	// update memcached
-	s.logger.Info("Update movie info in memcached")
-	infoJson, _ := json.Marshal(movie)
-	err = s.memcached.WithContext(ctx).Set(&memcache.Item{
-		Key:   req.MovieId,
-		Value: infoJson,
-	})
-	if err != nil {
-		s.logger.Warnw("Failed to update Memcached", "movie_id", req.MovieId, "err", err)
-	}
-
 	return movie.toProto(), nil
 }
 
-func (s *MovieInfoServer) getMovieInfo(ctx context.Context, movieId string) (*MovieInfo, error) {
+func (s *MovieInfoServer) getMovieInfo(ctx context.Context, movieId string, update bool) (*MovieInfo, error) {
 	movie := new(MovieInfo)
 
-	// get movie info from memcached
-	s.logger.Info("Read movie info from Memcached")
-	resMc, err := s.memcached.WithContext(ctx).Get(movieId)
+	// get movie info from redis
+	s.logger.Info("Read movie info from Redis")
+	movieCache, err := s.rdb.Get(ctx, movieId).Result()
 	if err != nil {
-		s.logger.Warnw("Failed to get movie info from Memcached", "movie_id", movieId, "err", err)
+		s.logger.Warnw("Failed to get movie info from Redis", "movie_id", movieId, "err", err)
 	} else {
 		// cache hit
-		json.Unmarshal(resMc.Value, movie)
+		json.Unmarshal([]byte(movieCache), movie)
 		return movie, nil
 	}
 
@@ -62,5 +49,16 @@ func (s *MovieInfoServer) getMovieInfo(ctx context.Context, movieId string) (*Mo
 			return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 		}
 	}
+
+	// update redis if needed
+	if update {
+		s.logger.Info("Update movie info in Redis")
+		infoJson, _ := json.Marshal(movie)
+		err = s.rdb.Set(ctx, movieId, infoJson, 0).Err()
+		if err != nil {
+			s.logger.Warnw("Failed to update movie info in Redis", "movie_id", movieId, "err", err)
+		}
+	}
+
 	return movie, nil
 }

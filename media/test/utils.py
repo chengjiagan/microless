@@ -46,9 +46,6 @@ class TestMedia(unittest.TestCase):
         # clean mongodb
         for name in DB_NAME:
             self.db[name].delete_many({})
-        # clean memcached
-        for addr in config['memcached'].values():
-            memcached_clean(addr)
         # clean redis
         for addr in config['redis'].values():
             redis_clean(addr)
@@ -62,12 +59,6 @@ def mongo_connect(config: Mapping[str, str], collection: str) -> Collection:
     client = pymongo.MongoClient(config['url'])
     col = client[config['database']][collection]
     return col
-
-
-def memcached_clean(addr: str) -> None:
-    client = Client(addr)
-    client.flush_all()
-    client.close()
 
 
 def redis_clean(url: str) -> None:

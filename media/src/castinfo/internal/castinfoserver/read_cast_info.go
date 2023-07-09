@@ -6,7 +6,6 @@ import (
 	"microless/media/proto"
 	pb "microless/media/proto/castinfo"
 
-	"github.com/bradfitz/gomemcache/memcache"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
@@ -22,14 +21,16 @@ func (s *CastInfoService) ReadCastInfo(ctx context.Context, req *pb.ReadCastInfo
 	// get cast infos from memcached
 	s.logger.Info("Read CastInfos from Memcached")
 	infos := make(map[string]*CastInfo, len(req.CastIds))
-	infosMc, err := s.memcached.WithContext(ctx).GetMulti(req.CastIds)
+	infosCache, err := s.rdb.MGet(ctx, req.CastIds...).Result()
 	if err != nil {
-		s.logger.Warnw("Failed to get cast infos from Memcached", "cast_info_ids", req.CastIds, "err", err)
+		s.logger.Warnw("Failed to get cast infos from Redis", "cast_info_ids", req.CastIds, "err", err)
 	} else {
-		for k, v := range infosMc {
-			info := new(CastInfo)
-			json.Unmarshal(v.Value, info)
-			infos[k] = info
+		for i, v := range infosCache {
+			if v != nil {
+				info := new(CastInfo)
+				json.Unmarshal(v.([]byte), info)
+				infos[req.CastIds[i]] = info
+			}
 		}
 	}
 
@@ -64,19 +65,17 @@ func (s *CastInfoService) ReadCastInfo(ctx context.Context, req *pb.ReadCastInfo
 		s.logger.Warnw("Failed to find CastInfo from MongoDB", "err", err)
 		return nil, status.Errorf(codes.Internal, "MongoDB Err: %v", err)
 	}
+	// update redis
+	infosMiss := make([]interface{}, 0, len(infosMongo))
 	for _, info := range infosMongo {
 		id := info.CastInfoOid.Hex()
 		infos[id] = info
-
-		// upload infos to memcached
 		infoJson, _ := json.Marshal(info)
-		err = s.memcached.WithContext(ctx).Set(&memcache.Item{
-			Key:   id,
-			Value: infoJson,
-		})
-		if err != nil {
-			s.logger.Warnw("Failed to update Memcached", "cast_info_id", id, "err", err)
-		}
+		infosMiss = append(infosMiss, id, infoJson)
+	}
+	_, err = s.rdb.MSet(ctx, infosMiss...).Result()
+	if err != nil {
+		s.logger.Warnw("Failed to set CastInfo to Redis", "err", err)
 	}
 
 	// still unknown cast_info_id exists
