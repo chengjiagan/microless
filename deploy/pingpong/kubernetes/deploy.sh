@@ -4,6 +4,7 @@
 
 # apply socialnetwork namespace
 kubectl apply -f namespace.yaml
+kubectl apply -f rbac.yaml
 
 # Install service config
 kubectl apply -f config.yaml

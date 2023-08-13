@@ -8,7 +8,9 @@ ARG GOPROXY="https://goproxy.cn"
 
 WORKDIR /go/src/pingpong
 COPY . .
-RUN go mod edit -replace microless/loadbalancer=../loadbalancer && go mod download
+RUN go mod edit -replace microless/loadbalancer=../loadbalancer \
+    && go mod edit -replace github.com/sercand/kuberesolver/v5=../kuberesolver \
+    && go mod download
 # build services, disable cgo
 RUN for s in ${SERVICES}; do \
         CGO_ENABLED=0 go build -o /go/bin/$s $s/cmd/main.go; \

@@ -27,11 +27,11 @@ proto: $(foreach s, $(SERVICES), proto-$(s)) $(foreach s, $(REST_SERVICES), prot
 # prefix of image name
 DOCKER_PREFIX = waterlemongan/microless-pingpong-
 # name for base build image
-BASE_IMAGE = waterlemongan/microless-loadbalancer-base
+BASE_IMAGE = waterlemongan/microless-base
 # name for build image
 BUILD_IMAGE = $(DOCKER_PREFIX)build
 # tag for image
-VERSION = 0.1.1
+VERSION = 0.1.2
 
 docker-build: docker-build-gateway $(foreach s, $(SERVICES), docker-build-$(s))
 
