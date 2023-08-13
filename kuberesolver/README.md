@@ -1,5 +1,8 @@
 # kuberesolver
 
+Note from Microless:
+We modify kuberesolver to achieve some features specifically for Microless. FYI, check the original kuberesolver repository [here](https://github.com/sercand/kuberesolver).
+
 A Grpc name resolver by using kubernetes API.
 It comes with a small ~250 LOC kubernetes client to find service endpoints. Therefore it won't bloat your binaries.
 

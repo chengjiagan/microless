@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/sercand/kuberesolver/v5"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -44,13 +44,12 @@ type ClientLB struct {
 	// used for load balancing
 	vmConn         *grpc.ClientConn
 	serverlessConn *grpc.ClientConn
-	rdb            *redis.Client
+	key            string // used for getting serverless availability
 
 	// for rate estimation
-	serverlessAvailable atomic.Bool
-	vmRatio             atomic.Int32
-	mu                  sync.Mutex
-	upstreamRate        map[string]int
+	vmRatio      atomic.Int32
+	mu           sync.Mutex
+	upstreamRate map[string]int
 }
 
 func splitAddr(addr string) (string, string) {
@@ -90,49 +89,27 @@ func NewClientLB(addr string) (*ClientLB, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// create redis client
-	opt, err := redis.ParseURL(config.RedisAddr)
-	if err != nil {
-		return nil, err
-	}
-	rdb := redis.NewClient(opt)
+	key := kuberesolver.GetTargetOfConn(serverlessConn)
 
 	lb := &ClientLB{
 		updateInterval: time.Duration(config.UpdateInterval) * time.Second,
 		retry:          config.Retry,
 		vmRateLimit:    config.ServiceRateLimit[service],
 		service:        service,
-		rdb:            rdb,
 		vmConn:         vmConn,
+		key:            key,
 		serverlessConn: serverlessConn,
 		upstreamRate:   make(map[string]int),
 	}
 	lb.vmRatio.Store(ratioMax)
 
 	go lb.updateLoop()
-	go lb.watchServerless()
 
 	return lb, nil
 }
 
-func (lb *ClientLB) watchServerless() {
-	ctx := context.Background()
-	available, err := lb.rdb.Get(ctx, lb.service).Bool()
-	if err != nil {
-		log.Printf("failed to get serverless availability of %s: %v", lb.service, err)
-	}
-	lb.serverlessAvailable.Store(available)
-
-	pubsub := lb.rdb.Subscribe(ctx, lb.service)
-	defer pubsub.Close()
-
-	ch := pubsub.Channel()
-	for msg := range ch {
-		available, _ := strconv.ParseBool(msg.Payload)
-		lb.serverlessAvailable.Store(available)
-		log.Printf("%s serverless available: %t", lb.service, available)
-	}
+func (lb *ClientLB) serverlessAvailable() bool {
+	return kuberesolver.GetAddressesForTarget(lb.key) != 0
 }
 
 func (lb *ClientLB) updateLoop() {
@@ -164,7 +141,7 @@ func (lb *ClientLB) updateRatio() {
 		// prevent divide by zero
 		ratio = 1.0
 	} else {
-		if lb.serverlessAvailable.Load() {
+		if lb.serverlessAvailable() {
 			ratio *= float64(lb.vmRateLimit) / avg
 		} else {
 			// when serverless is not available, the previous ratio is not representative,
@@ -182,7 +159,7 @@ func (lb *ClientLB) updateRatio() {
 }
 
 func (lb *ClientLB) selectConnection() selectT {
-	if !lb.serverlessAvailable.Load() {
+	if !lb.serverlessAvailable() {
 		return vm
 	}
 

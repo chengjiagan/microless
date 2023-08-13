@@ -8,10 +8,9 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/resolver"
 )
@@ -19,23 +18,6 @@ import (
 const (
 	kubernetesSchema = "kubernetes"
 	defaultFreq      = time.Minute * 30
-)
-
-var (
-	endpointsForTarget = promauto.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "kuberesolver_endpoints_total",
-			Help: "The number of endpoints for a given target",
-		},
-		[]string{"target"},
-	)
-	addressesForTarget = promauto.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "kuberesolver_addresses_total",
-			Help: "The number of addresses for a given target",
-		},
-		[]string{"target"},
-	)
 )
 
 type targetInfo struct {
@@ -157,9 +139,6 @@ func (b *kubeBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts
 		k8sClient: b.k8sClient,
 		t:         time.NewTimer(defaultFreq),
 		freq:      defaultFreq,
-
-		endpoints: endpointsForTarget.WithLabelValues(ti.String()),
-		addresses: addressesForTarget.WithLabelValues(ti.String()),
 	}
 	go until(func() {
 		r.wg.Add(1)
@@ -168,6 +147,7 @@ func (b *kubeBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts
 			grpclog.Errorf("kuberesolver: watching ended with error='%v', will reconnect again", err)
 		}
 	}, time.Second, time.Second*30, ctx.Done())
+	addressesForTarget[ti.String()] = new(atomic.Int32)
 	return r, nil
 }
 
@@ -189,9 +169,6 @@ type kResolver struct {
 	wg   sync.WaitGroup
 	t    *time.Timer
 	freq time.Duration
-
-	endpoints prometheus.Gauge
-	addresses prometheus.Gauge
 }
 
 // ResolveNow will be called by gRPC to try to resolve the target name again.
@@ -232,10 +209,8 @@ func (k *kResolver) makeAddresses(e Endpoints) ([]resolver.Address, string) {
 
 		for _, address := range subset.Addresses {
 			newAddrs = append(newAddrs, resolver.Address{
-				Type:       resolver.Backend,
 				Addr:       net.JoinHostPort(address.IP, port),
 				ServerName: fmt.Sprintf("%s.%s", k.target.serviceName, k.target.serviceNamespace),
-				Metadata:   nil,
 			})
 		}
 	}
@@ -244,13 +219,11 @@ func (k *kResolver) makeAddresses(e Endpoints) ([]resolver.Address, string) {
 
 func (k *kResolver) handle(e Endpoints) {
 	result, _ := k.makeAddresses(e)
-	//	k.cc.NewServiceConfig(sc)
 	if len(result) > 0 {
-		k.cc.NewAddress(result)
+		k.cc.UpdateState(resolver.State{Addresses: result})
 	}
 
-	k.endpoints.Set(float64(len(e.Subsets)))
-	k.addresses.Set(float64(len(result)))
+	addressesForTarget[k.target.String()].Store(int32(len(result)))
 }
 
 func (k *kResolver) resolve() {
