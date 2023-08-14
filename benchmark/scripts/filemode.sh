@@ -6,6 +6,7 @@ mkdir ../data/$timestamp
 ratefile="rate-test.csv"
 ratio=1
 service="socialnetwork"
+api="mix"
 
 load="../loader/main"
 
@@ -17,5 +18,5 @@ prewarn_duration=30
 duration=180
 
 output="../data/${timestamp}/load_ratefile.csv"
-$load -service $service -addr $gateway -userid $userid -movieid $movieid -mode $mode -time $duration -file $ratefile -ratio $ratio -output $output
+$load -service $service -api $api -addr $gateway -userid $userid -movieid $movieid -mode $mode -time $duration -file $ratefile -ratio $ratio -output $output
 cp $ratefile "../data/${timestamp}/rate.csv"
