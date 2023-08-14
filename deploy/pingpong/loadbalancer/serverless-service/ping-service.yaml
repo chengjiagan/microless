@@ -35,7 +35,7 @@ spec:
         type: serverless
       containers:
       - name: server
-        image: waterlemongan/microless-pingpong-ping:0.1.1
+        image: waterlemongan/microless-pingpong-ping:0.1.2
         ports:
         - name: grpc
           containerPort: 8080

@@ -62,7 +62,7 @@ spec:
     type: system
   containers:
   - name: sas
-    image: waterlemongan/microless-serverless-autoscaler:0.1.1
+    image: waterlemongan/microless-serverless-autoscaler:0.2.0
     env:
     - name: SERVERLESS_AUTOSCALER_CONFIG
       value: "/config/sas.json"

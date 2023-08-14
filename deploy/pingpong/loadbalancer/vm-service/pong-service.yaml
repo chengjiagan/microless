@@ -34,7 +34,7 @@ spec:
         type: vm
       containers:
       - name: server
-        image: waterlemongan/microless-pingpong-pong:0.1.1
+        image: waterlemongan/microless-pingpong-pong:0.1.2
         ports:
         - name: grpc
           containerPort: 8080
