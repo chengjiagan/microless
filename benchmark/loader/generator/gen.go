@@ -17,6 +17,7 @@ type Generator interface {
 }
 
 type Config struct {
+	Api         string
 	Address     string
 	UserIdPath  string
 	MovieIdPath string

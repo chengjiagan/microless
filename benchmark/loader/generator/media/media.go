@@ -13,6 +13,7 @@ import (
 )
 
 type mediaGenerator struct {
+	api    string // user, page, or mix
 	addr   string
 	users  []user
 	movies []movie
@@ -43,6 +44,7 @@ func NewMediaGenerator(config *generator.Config) generator.Generator {
 	utils.Check(err)
 
 	return &mediaGenerator{
+		api:    config.Api,
 		addr:   config.Address,
 		users:  users,
 		movies: movies,
@@ -70,45 +72,62 @@ func (g *mediaGenerator) GetPrewarmStatus() (int, int) {
 }
 
 func (g *mediaGenerator) GenRead(ctx context.Context) *http.Request {
-	var url string
-	p := rand.Float64()
-	if p < 0.5 {
-		// randomly select a user
-		user := rand.Intn(len(g.users))
-		userId := g.users[user].UserId
-		n := g.users[user].NumReview
-		// randomly select some reviews if user have more than 10 reviews
-		var start, stop int
-		if n <= 10 {
-			start = 0
-			stop = n
-		} else {
-			start = rand.Intn(n - 10)
-			stop = start + 10
-		}
-		url = fmt.Sprintf("http://%s/api/v1/userreview/%v?start=%d&stop=%d", g.addr, userId, start, stop)
-	} else {
-		// randomly select a movie
-		movie := rand.Intn(len(g.movies))
-		movieId := g.movies[movie].MovieId
-		n := g.movies[movie].NumReview
-		// randomly select some reviews if movie have more than 10 reviews
-		var start, stop int
-		if n <= 10 {
-			start = 0
-			stop = n
-		} else {
-			start = rand.Intn(n - 10)
-			stop = start + 10
-		}
-		url = fmt.Sprintf("http://%s/api/v1/page/%v?review_start=%d&review_stop=%d", g.addr, movieId, start, stop)
-	}
+	url := g.getReadUrl()
 
 	// generate request
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	utils.Check(err)
 
 	return req
+}
+
+func (g *mediaGenerator) getReadUrl() string {
+	// select a function
+	var function string
+	switch g.api {
+	case "user":
+		function = "userreview"
+	case "page":
+		function = "page"
+	case "mix":
+		// select ramdonly
+		if rand.Intn(2) == 0 {
+			function = "userreview"
+		} else {
+			function = "page"
+		}
+	}
+
+	// select a user or movie
+	var id int
+	var n int
+	switch function {
+	case "userreview":
+		id = rand.Intn(len(g.users))
+		n = g.users[id].NumReview
+	case "page":
+		id = rand.Intn(len(g.movies))
+		n = g.movies[id].NumReview
+	}
+
+	// randomly select an interval at most 10 length
+	var start, stop int
+	if n <= 10 {
+		start = 0
+		stop = n
+	} else {
+		start = rand.Intn(n - 10)
+		stop = start + 10
+	}
+
+	var url string
+	switch function {
+	case "userreview":
+		url = fmt.Sprintf("http://%s/api/v1/userreview/%v?start=%d&stop=%d", g.addr, g.users[id].UserId, start, stop)
+	case "page":
+		url = fmt.Sprintf("http://%s/api/v1/page/%v?review_start=%d&review_stop=%d", g.addr, g.movies[id].MovieId, start, stop)
+	}
+	return url
 }
 
 func (g *mediaGenerator) GenWrite(ctx context.Context) *http.Request {

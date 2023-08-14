@@ -18,11 +18,14 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"k8s.io/client-go/kubernetes"
 )
 
 // required by all modes
 var addr = flag.String("addr", "", "address to the gateway service")
 var service = flag.String("service", "", "kind of service to test: social-network, media, pingpong")
+var api = flag.String("api", "", "the api to test")
 var mode = flag.String("mode", "", "load test mode: close for close-loop, open for open-loop, prewarm for pre-warming, file for file-control")
 
 // required by social-network and media
@@ -35,6 +38,7 @@ var nThread = flag.Int("nthread", 1, "number of threads sending requests")
 // required by close-loop and open-loop
 var seconds = flag.Int("time", 0, "load duration in seconds")
 var output = flag.String("output", "", "path to output file")
+var metrics = flag.String("metrics", "", "path to metrics file")
 
 // close-loop load test
 var rThread = flag.Int("rthread", 0, "number of threads sending read requests")
@@ -49,6 +53,7 @@ var filePath = flag.String("file", "", "path to file that contains request rate"
 
 var client *http.Client
 var gen generator.Generator
+var kube *kubernetes.Clientset
 
 // record a test sample
 type sample struct {
@@ -66,11 +71,15 @@ func main() {
 
 	// init http client
 	client = &http.Client{}
+	k, err := getKubeClient()
+	check(err)
+	kube = k
 
 	// init generator
 	gen = newGenerator(
 		*service,
 		&generator.Config{
+			Api:         *api,
 			Address:     *addr,
 			UserIdPath:  *pathUserIds,
 			MovieIdPath: *pathMovieIds,
@@ -103,6 +112,12 @@ func checkParams() {
 		os.Exit(1)
 	}
 
+	// check service
+	if *service != "socialnetwork" && *service != "media" && *service != "pingpong" {
+		flag.Usage()
+		os.Exit(1)
+	}
+
 	// exit if nothing to do
 	if (*mode != "prewarm" && *seconds == 0) ||
 		(*mode == "close" && (*rThread == 0 && *wThread == 0)) ||
@@ -129,6 +144,7 @@ func closeLoop() {
 
 	// start load test
 	ctx, cancel := context.WithCancel(context.Background())
+	m := collectMetrics(ctx, kube)
 	out := load(ctx)
 
 	// wait and stop
@@ -147,15 +163,17 @@ func closeLoop() {
 		}
 	}
 
-	// print metrics and save raw data
+	// print metrics and save data
 	print(ss)
 	save(ss)
+	saveMetrics(*metrics, getMetrics(m))
 }
 
 func openLoop() {
 	gen.InitOpenLoop(*ratio, *rate)
 
 	ctx, cancel := context.WithCancel(context.Background())
+	m := collectMetrics(ctx, kube)
 	out := loadWithRate(ctx, *rate)
 
 	// wait and stop
@@ -179,6 +197,7 @@ func openLoop() {
 	// print metrics and save raw data
 	print(ss)
 	save(ss)
+	saveMetrics(*metrics, getMetrics(m))
 }
 
 func prewarm() {
@@ -244,6 +263,10 @@ func file() {
 		})
 	}
 
+	// collect metrics
+	mCtx, mCancel := context.WithCancel(context.Background())
+	m := collectMetrics(mCtx, kube)
+
 	mu := sync.Mutex{}
 	ss := make([]sample, 0)
 	for _, limit := range limits {
@@ -272,12 +295,14 @@ func file() {
 		fmt.Println()
 		cancel()
 	}
+	mCancel()
 
 	mu.Lock()
 	defer mu.Unlock()
 	// print metrics and save raw data
 	print(ss)
 	save(ss)
+	saveMetrics(*metrics, getMetrics(m))
 }
 
 func print(ss []sample) {
@@ -294,8 +319,8 @@ func print(ss []sample) {
 	fmt.Printf("throughput: %v qps\naverage latency: %v ms\n", tp, avg)
 }
 
+// save samples to file
 func save(ss []sample) {
-	// save samples to file
 	// open file
 	fp, err := os.Create(*output)
 	check(err)

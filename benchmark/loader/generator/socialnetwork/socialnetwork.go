@@ -17,6 +17,7 @@ import (
 const NumPostOnce = 1000
 
 type socialnetworkGenerator struct {
+	api   string // home, user, or mix
 	addr  string
 	users []user
 
@@ -42,6 +43,7 @@ func NewSocialnetworkGenerator(config *generator.Config) generator.Generator {
 	utils.Check(err)
 
 	return &socialnetworkGenerator{
+		api:   config.Api,
 		addr:  config.Address,
 		users: users,
 	}
@@ -123,71 +125,12 @@ func (g *socialnetworkGenerator) GetPrewarmStatus() (int, int) {
 	return int(g.cnt.Load()), len(g.users)
 }
 
-// home timeline version
-// func (g *socialnetworkGenerator) GenRead(ctx context.Context) *http.Request {
-// 	// randomly select a user
-// 	user := rand.Intn(len(g.users))
-// 	userid := g.users[user].UserId
-// 	n := g.users[user].HomePost
-
-// 	// randomly select some posts if user have more than 10 posts
-// 	var start, stop int
-// 	if n <= 10 {
-// 		start = 0
-// 		stop = n
-// 	} else {
-// 		start = rand.Intn(n - 10)
-// 		stop = start + 10
-// 	}
-
-// 	// generate request
-// 	url := fmt.Sprintf("http://%s/api/v1/hometimeline/%s?start=%d&stop=%d", g.addr, userid, start, stop)
-// 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-// 	utils.Check(err)
-
-// 	return req
-// }
-
-// user timeline version
-// func (g *socialnetworkGenerator) GenRead(ctx context.Context) *http.Request {
-// 	// randomly select a user
-// 	user := rand.Intn(len(g.users))
-// 	userid := g.users[user].UserId
-// 	n := g.users[user].NumPost
-
-// 	// randomly select some posts if user have more than 10 posts
-// 	var start, stop int
-// 	if n <= 10 {
-// 		start = 0
-// 		stop = n
-// 	} else {
-// 		start = rand.Intn(n - 10)
-// 		stop = start + 10
-// 	}
-
-// 	// generate request
-// 	url := fmt.Sprintf("http://%s/api/v1/usertimeline/%s?start=%d&stop=%d", g.addr, userid, start, stop)
-// 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-// 	utils.Check(err)
-
-// 	return req
-// }
-
-// mix version
 func (g *socialnetworkGenerator) GenRead(ctx context.Context) *http.Request {
 	// randomly select a user
 	user := rand.Intn(len(g.users))
 	userid := g.users[user].UserId
 
-	var n int
-	var function string
-	if rand.Intn(2) == 0 {
-		function = "hometimeline"
-		n = g.users[user].HomePost
-	} else {
-		function = "usertimeline"
-		n = g.users[user].NumPost
-	}
+	function, n := g.getReadFunctionAndNum(user)
 
 	// randomly select some posts if user have more than 10 posts
 	var start, stop int
@@ -205,6 +148,35 @@ func (g *socialnetworkGenerator) GenRead(ctx context.Context) *http.Request {
 	utils.Check(err)
 
 	return req
+}
+
+func (g *socialnetworkGenerator) getReadFunctionAndNum(user int) (string, int) {
+	var n int
+	var function string
+
+	// get function based on api mode
+	switch g.api {
+	case "home":
+		function = "hometimeline"
+	case "user":
+		function = "usertimeline"
+	case "mix":
+		// select ramdonly
+		if rand.Intn(2) == 0 {
+			function = "hometimeline"
+		} else {
+			function = "usertimeline"
+		}
+	}
+
+	switch function {
+	case "hometimeline":
+		n = g.users[user].HomePost
+	case "usertimeline":
+		n = g.users[user].NumPost
+	}
+
+	return function, n
 }
 
 func (g *socialnetworkGenerator) GenWrite(ctx context.Context) *http.Request {
