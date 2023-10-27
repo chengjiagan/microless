@@ -11,23 +11,19 @@ metadata:
 data:
   config.json: |
     {
-      "grpc": ":8080",
-      "rest": ":8081",
       "otel": "jaeger.jaeger:4317",
       "mongodb": {
         "url": "mongodb://mongodb.mongodb:27017",
         "database": "media"
       },
-      "memcached": {
-        "castinfo": "cast-info-memcached.media-backend:11211",
-        "movieinfo": "movie-info-memcached.media-backend:11211",
-        "plot": "plot-memcached.media-backend:11211",
-        "reviewstorage": "review-storage-memcached.media-backend:11211",
-        "user": "user-memcached.media-backend:11211"
-      },
       "redis": {
-        "moviereview": "redis://redis.media-backend:6379/0",
-        "userreview": "redis://redis.media-backend:6379/1"
+        "moviereview": "redis://redis.redis:6379/0",
+        "userreview": "redis://redis.redis:6379/1",
+        "castinfo": "redis://redis.redis:6379/2",
+        "movieinfo": "redis://redis.redis:6379/3",
+        "plot": "redis://redis.redis:6379/4",
+        "reviewstorage": "redis://redis.redis:6379/5",
+        "user": "redis://redis.redis:6379/6"
       },
       "service": {
         "castinfo": "cast-info.media:8080",
@@ -41,7 +37,7 @@ data:
         "user": "user.media:8080",
         "page": "page.media:8080"
       },
-      "gateway": "gateway.media:8081",
+      "gateway": "gateway.media:8080",
       "secret": "GT%j8S4GzJuha%oTM624rFPMSTfL@m&Q"
     }
 ---
@@ -55,7 +51,7 @@ spec:
     spec:
       containers:
       - name: test
-        image: waterlemongan/microless-media-test:0.1.1
+        image: waterlemongan/microless-media-test:0.3.0
         env:
         - name: TEST_CONFIG
           value: "/config/config.json"

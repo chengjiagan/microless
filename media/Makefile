@@ -69,11 +69,11 @@ proto-test: proto-test-data $(foreach s, $(SERVICES), proto-test-$(s))
 # prefix of image name
 DOCKER_PREFIX = waterlemongan/microless-media-
 # name for base build image
-BASE_IMAGE = waterlemongan/microless-loadbalancer-base
+BASE_IMAGE = waterlemongan/microless-base
 # name for build image
 BUILD_IMAGE = $(DOCKER_PREFIX)build
 # tag for image
-VERSION = 0.2.0
+VERSION = 0.3.0
 
 docker-build: docker-build-gateway docker-build-test $(foreach s, $(SERVICES), docker-build-$(s))
 
@@ -102,3 +102,8 @@ docker-push: docker-push-gateway docker-push-test $(foreach s, $(SERVICES), dock
 
 docker-push-%:
 	docker push $(DOCKER_PREFIX)$*:$(VERSION)
+
+docker-minikube: docker-minikube-gateway $(foreach s, $(SERVICES), docker-minikube-$(s))
+
+docker-minikube-%:
+	minikube image load $(DOCKER_PREFIX)$*:$(VERSION)

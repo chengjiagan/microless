@@ -1,0 +1,27 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: rating-hpa
+  namespace: media
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: rating
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Object
+    object:
+      describedObject:
+        apiVersion: v1
+        kind: Service
+        name: rating
+      metric:
+        name: grpc_server_request_per_second
+      target:
+        type: AverageValue
+        averageValue: "90"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 60

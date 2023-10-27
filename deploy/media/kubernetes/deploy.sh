@@ -2,29 +2,30 @@
 
 # this script is just for reference, please do not run it directly
 
+SERVICES=(cast-info compose-review movie-info movie-review page plot rating review-storage user-review user)
+
 # Create namespace
-kubectl create -f namespace.yaml
+kubectl apply -f namespace.yaml
 
 # Install service config
-kubectl create -f config.yaml
+kubectl apply -f config.yaml
 
 # Install services
-kubectl create -f service/cast-info-service.yaml
-kubectl create -f service/movie-info-service.yaml
-kubectl create -f service/plot-service.yaml
-kubectl create -f service/review-storage-service.yaml
-kubectl create -f service/movie-review-service.yaml
-kubectl create -f service/user-review-service.yaml
-kubectl create -f service/rating-service.yaml
-kubectl create -f service/compose-review-service.yaml
-kubectl create -f service/user-service.yaml
-kubectl create -f service/page-service.yaml
+for s in ${SERVICES[@]}; do
+    kubectl apply -f service/$s-service.yaml
+done
+for s in ${SERVICES[@]}; do
+    kubectl apply -f hpa/$s-hpa.yaml
+done
 
-# Install restful gateway
-kubectl create -f restful-gateway.yaml
+# Install gateway
+kubectl apply -f gateway.yaml
 
-# Wait for services
-sleep 30
+# Install ServiceMonitor
+kubectl apply -f stats.yaml
 
-# Run test
-kubectl create -f test.yaml
+# # Wait for services
+# sleep 30
+
+# # Run test
+# kubectl apply -f test.yaml
