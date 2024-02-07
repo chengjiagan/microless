@@ -1,1 +1,0 @@
-mongorestore --nsFrom='media-dev.*' --nsTo='media.*' --gzip --archive='media.mongo.gz' --drop

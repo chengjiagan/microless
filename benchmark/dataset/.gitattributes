@@ -1,2 +1,0 @@
-socialnetwork/socialnetwork.mongo.gz filter=lfs diff=lfs merge=lfs -text
-media/media.mongo.gz filter=lfs diff=lfs merge=lfs -text
